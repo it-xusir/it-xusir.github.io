@@ -46,6 +46,138 @@
       </tags>
   </entry>
   <entry>
+    <title>Centos更新Openssh10.1p1</title>
+    <url>/2025/10/10/Centos%E6%9B%B4%E6%96%B0Openssh10.1p1/</url>
+    <content><![CDATA[<h2 id="如何完成一键更新OPENSSH"><a href="#如何完成一键更新OPENSSH" class="headerlink" title="如何完成一键更新OPENSSH"></a>如何完成一键更新OPENSSH</h2><p>我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8</p>
+<div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115344299528429&bvid=BV1mHxCz7EYK&cid=32946720040;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
+
+<p>想要获取一键安装包可以关注我的公众号联系我获取</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
+<h2 id="openssh更新了啥？"><a href="#openssh更新了啥？" class="headerlink" title="openssh更新了啥？"></a>openssh更新了啥？</h2><p>OpenSSH 10.1 版本核心变更对照表</p>
+<table>
+<thead>
+<tr>
+<th>变更类型</th>
+<th>涉及组件</th>
+<th>关键影响与核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>未来弃用警告</strong></td>
+<td>全组件</td>
+<td>弃用SHA1格式SSHFP记录，仅保留SHA256格式；SHA256自2012年OpenSSH 6.1起已支持。</td>
+</tr>
+<tr>
+<td><strong>潜在不兼容变更</strong></td>
+<td>ssh(1)</td>
+<td>非后量子密钥协商算法触发警告，可通过<code>WarnWeakCrypto</code>配置控制（默认开启）。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)、sshd(8)</td>
+<td>DSCP&#x2F;IPQoS逻辑重构：交互式流量默认用EF类别，非交互式用系统默认，支持动态切换。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)、sshd(8)</td>
+<td>弃用IPQoS中的ToS关键字（lowdelay&#x2F;reliability&#x2F;throughput），改用DSCP。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh-add(1)</td>
+<td>证书过期时间+5分钟宽限期，代理自动清理过期证书；<code>ssh-add -N</code>可禁用此功能。</td>
+</tr>
+<tr>
+<td></td>
+<td>全组件</td>
+<td>移除XMSS密钥实验性支持，计划后续实现新后量子签名方案。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh-agent(1)、sshd(8)</td>
+<td>代理套接字从<code>/tmp</code>迁移至<code>~/.ssh/agent</code>，新增自动清理功能与多个控制选项（-U&#x2F;-u等）。</td>
+</tr>
+<tr>
+<td><strong>安全修复</strong></td>
+<td>ssh(1)</td>
+<td>禁止用户名含控制字符、URI含<code>\0</code>字符，防范shell注入；可信配置文件用户名无此限制。</td>
+</tr>
+<tr>
+<td><strong>新增功能</strong></td>
+<td>ssh(1)、sshd(8)</td>
+<td>新增SIGINFO处理器，记录活跃通道与会话信息。</td>
+</tr>
+<tr>
+<td></td>
+<td>sshd(8)</td>
+<td>拒绝证书认证时，额外记录证书标识信息，便于调试。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)、ssh-agent(1)</td>
+<td>支持PKCS#11令牌上的ed25519密钥。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)</td>
+<td>新增<code>RefuseConnection</code>配置项，可在配置中添加连接阻断提醒（如弃用主机提示）。</td>
+</tr>
+<tr>
+<td></td>
+<td>sshd(8)</td>
+<td>X11显示号检查适配<code>X11DisplayOffset</code>，支持更高端口范围配置。</td>
+</tr>
+<tr>
+<td></td>
+<td>测试框架</td>
+<td>新增基准测试功能，OpenBSD用<code>make UNITTEST_BENCHMARK=yes</code>，Portable版用<code>make unit-bench</code>。</td>
+</tr>
+<tr>
+<td><strong>漏洞修复</strong></td>
+<td>sshd(8)</td>
+<td>修复<code>MaxStartups</code>进程跟踪异常，避免插槽占满导致拒绝新连接。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)</td>
+<td>修复启用<code>ObscureKeystrokeTiming</code>时X客户端启动延迟问题（bz#3820）。</td>
+</tr>
+<tr>
+<td></td>
+<td>sshd(8)</td>
+<td>配置文件最大限制从256KB提升至4MB，超限时提前报错。</td>
+</tr>
+<tr>
+<td></td>
+<td>全组件</td>
+<td>修复多处内存泄漏，优化日志显示（如密钥加载失败详情、<code>PermitRootLogin</code>别名修正）。</td>
+</tr>
+<tr>
+<td><strong>可移植性优化</strong></td>
+<td>sshd(8)</td>
+<td>检查PAM事务用户名变更，避免配置错误导致的授权异常；FreeBSD适配<code>SSH_TUN_COMPAT_AF</code>。</td>
+</tr>
+<tr>
+<td></td>
+<td>全组件</td>
+<td>补充缺失系统头文件，减少跨平台编译差异；macOS适配<code>nlist</code>函数检查逻辑。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh-agent(1)</td>
+<td>systemd套接字激活模式下，<code>SIGTERM</code>退出返回0，避免服务错误标记为“失败”。</td>
+</tr>
+</tbody></table>
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+      <tags>
+        <tag>linux,openssh</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>自我介绍</title>
     <url>/2025/10/10/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/</url>
     <content><![CDATA[<h2 id="Welcome-to-my-blogs"><a href="#Welcome-to-my-blogs" class="headerlink" title="Welcome to my blogs"></a>Welcome to my blogs</h2><p>我来自中国-吉林</p>
