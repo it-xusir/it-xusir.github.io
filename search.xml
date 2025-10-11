@@ -133,6 +133,35 @@
       </tags>
   </entry>
   <entry>
+    <title>自我介绍</title>
+    <url>/2025/10/08/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/</url>
+    <content><![CDATA[<h2 id="Welcome-to-my-blogs"><a href="#Welcome-to-my-blogs" class="headerlink" title="Welcome to my blogs"></a>Welcome to my blogs</h2><p>我来自中国-吉林</p>
+<p>是一名IT技术从业者，从事IT基础设施工作10余年，主要负责服务器、存储、虚拟化、数据库等系统的搭建。</p>
+<h2 id="拥有如下荣誉"><a href="#拥有如下荣誉" class="headerlink" title="拥有如下荣誉"></a>拥有如下荣誉</h2><p>Oracle ACE</p>
+<h2 id="拥有如下认证"><a href="#拥有如下认证" class="headerlink" title="拥有如下认证"></a>拥有如下认证</h2><p>数据库Oracle 11g OCM认证</p>
+<p>数据库MySQL OCP认证</p>
+<p>数据库电科金仓KCM认证</p>
+<p>数据库PGCM 认证（PostgreSQL 14）</p>
+<p>Microsoft 微软认证技术专家（AD方向）</p>
+<p>H3C 网络工程师认证</p>
+<h2 id="如果有需要付费技术支持"><a href="#如果有需要付费技术支持" class="headerlink" title="如果有需要付费技术支持"></a>如果有需要付费技术支持</h2><p>数据库迁移、容灾、安装调试、优化、故障处理</p>
+<p>服务器安装、存储调试、方案咨询、故障处理</p>
+<p>你都可以联系我来帮你解决！</p>
+<p>微信：<strong>Eric_xu_2023</strong></p>
+<p>也欢迎你关注我的公众号</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
+
+
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+      <tags>
+        <tag>杂文</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>处理一则Oracle未能完全引用大页问题</title>
     <url>/2025/10/09/%E5%A4%84%E7%90%86%E4%B8%80%E5%88%99Oracle%E6%9C%AA%E8%83%BD%E5%AE%8C%E5%85%A8%E5%BC%95%E7%94%A8%E5%A4%A7%E9%A1%B5%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<h2 id="1、关于配置大页"><a href="#1、关于配置大页" class="headerlink" title="1、关于配置大页"></a>1、关于配置大页</h2><p>大页是啥我就不具体介绍了，网上介绍的文章很多，大多安装数据库的文章都有这么一步告诉大家配置大页，我只想说说错误的使用情况：</p>
@@ -175,35 +204,6 @@
       </categories>
       <tags>
         <tag>oracle</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>自我介绍</title>
-    <url>/2025/10/08/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/</url>
-    <content><![CDATA[<h2 id="Welcome-to-my-blogs"><a href="#Welcome-to-my-blogs" class="headerlink" title="Welcome to my blogs"></a>Welcome to my blogs</h2><p>我来自中国-吉林</p>
-<p>是一名IT技术从业者，从事IT基础设施工作10余年，主要负责服务器、存储、虚拟化、数据库等系统的搭建。</p>
-<h2 id="拥有如下荣誉"><a href="#拥有如下荣誉" class="headerlink" title="拥有如下荣誉"></a>拥有如下荣誉</h2><p>Oracle ACE</p>
-<h2 id="拥有如下认证"><a href="#拥有如下认证" class="headerlink" title="拥有如下认证"></a>拥有如下认证</h2><p>数据库Oracle 11g OCM认证</p>
-<p>数据库MySQL OCP认证</p>
-<p>数据库电科金仓KCM认证</p>
-<p>数据库PGCM 认证（PostgreSQL 14）</p>
-<p>Microsoft 微软认证技术专家（AD方向）</p>
-<p>H3C 网络工程师认证</p>
-<h2 id="如果有需要付费技术支持"><a href="#如果有需要付费技术支持" class="headerlink" title="如果有需要付费技术支持"></a>如果有需要付费技术支持</h2><p>数据库迁移、容灾、安装调试、优化、故障处理</p>
-<p>服务器安装、存储调试、方案咨询、故障处理</p>
-<p>你都可以联系我来帮你解决！</p>
-<p>微信：<strong>Eric_xu_2023</strong></p>
-<p>也欢迎你关注我的公众号</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-
-
-
-]]></content>
-      <categories>
-        <category>linux</category>
-      </categories>
-      <tags>
-        <tag>杂文</tag>
       </tags>
   </entry>
 </search>
