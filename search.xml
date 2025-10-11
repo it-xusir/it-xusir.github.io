@@ -1,107 +1,258 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search> 
-  
-  
-    
-    <entry>
-      <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
-      <link href="/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/"/>
-      <url>/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</url>
-      
-        <content type="html"><![CDATA[<p>昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。</p><div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115350238665617&bvid=BV1dV4HzTEaq&cid=32972934127;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div><p>想要获取一键安装包可以关注我的公众号联系我获取。</p><img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/><p>今天主要说2个问题：</p><p>1.这么快更新了openssh 10.2解决了啥问题？</p><p>2.顺便说一下这次编译遇到的问题。具体如何编译RPM包，可以看我之前的文章介绍了。<a href="https://mp.weixin.qq.com/s/Uz5dDzvP7mSXNjuD1fxpMQ">手搓OPENSSH安装RPM包</a></p><h2 id="1、更新openssh-10-2解决问题"><a href="#1、更新openssh-10-2解决问题" class="headerlink" title="1、更新openssh 10.2解决问题"></a>1、更新openssh 10.2解决问题</h2><p>本版本为漏洞修复版本，主要修复了 “启用 ControlPersist 后导致 <code>ssh(1)</code> 无法使用” 的问题。</p><h3 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h3><ol><li><strong><code>ssh(1)</code></strong>：修复了 “ControlPersist 处于活跃状态时，终端连接处理异常导致会话无法使用” 的问题（漏洞编号：bz3872）。</li><li><strong><code>ssh-keygen(1)</code></strong>：修复了 “从 PKCS#11 令牌下载密钥” 的功能异常。</li><li><strong><code>ssh-keygen(1)</code></strong>：修复了 “CA 密钥存储在 <code>ssh-agent(1)</code> 中时，CA 签名操作失败” 的问题（漏洞编号：bz3877）。</li></ol><h3 id="可移植性优化"><a href="#可移植性优化" class="headerlink" title="可移植性优化"></a>可移植性优化</h3><ul><li><p><strong>全组件</strong>：支持无 <code>mmap(2)</code> 函数的平台，例如 WASM 构建版本（示例：<a href="https://hterm.org/">https://hterm.org</a>）。</p></li><li><p><strong>全组件</strong>：修复了 FreeBSD 系统上因缺少 <code>fnctl.h</code> 头文件导致的构建失败问题。</p></li><li><p><strong>全组件</strong>：修复了 MacOS 10.12（Sierra）以下版本因缺少 <code>clock_gettime(3)</code> 函数导致的构建失败问题。</p></li><li><p><strong><code>sshd(8)</code></strong>：若远程主机名为 “UNKNOWN” 占位符，将不执行 <code>PAM_RHOST</code> 操作。此优化可避免部分 PAM 模块尝试解析该主机名时可能出现的挂起问题。需注意，仅当连接不通过 IPv4 或 IPv6 套接字建立时，<code>sshd(8)</code> 才会使用 “UNKNOWN” 作为主机名。</p></li></ul><h2 id="2、编译遇到的错误及解决办法"><a href="#2、编译遇到的错误及解决办法" class="headerlink" title="2、编译遇到的错误及解决办法"></a>2、编译遇到的错误及解决办法</h2><p>还是用脚本编译最新的安装包，遇到个错误</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">~/openssh-rpms-main/el7 ~/openssh-rpms-main</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssh-10.2p1.tar.gz’ -&gt; ‘./SOURCES/openssh-10.2p1.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssl-3.0.18.tar.gz’ -&gt; ‘./SOURCES/openssl-3.0.18.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/x11-ssh-askpass-1.2.4.1.tar.gz’ -&gt; ‘./SOURCES/x11-ssh-askpass-1.2.4.1.tar.gz’</span><br><span class="line">Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.CUAJLh</span><br><span class="line">+ umask 022</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ rm -rf openssh-10.2p1</span><br><span class="line">+ /usr/bin/gzip -dc /root/openssh-rpms-main/el7/SOURCES/openssh-10.2p1.tar.gz</span><br><span class="line">+ /usr/bin/tar -xf -</span><br><span class="line">+ STATUS=0</span><br><span class="line">+ &#x27;[&#x27; 0 -ne 0 &#x27;]&#x27;</span><br><span class="line">+ cd openssh-10.2p1</span><br><span class="line">+ /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .</span><br><span class="line">+ mkdir -p openssl</span><br><span class="line">+ tar xfz /root/openssh-rpms-main/el7/SOURCES/openssl-3.0.18.tar.gz --strip-components=1 -C openssl</span><br><span class="line">+ pushd openssl</span><br><span class="line">~/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl ~/openssh-rpms-main/el7/BUILD/openssh-10.2p1</span><br><span class="line">+ ./config shared zlib -fPIC</span><br><span class="line">Configuring OpenSSL version 3.0.18 for target linux-x86_64</span><br><span class="line">Using os-specific seed configuration</span><br><span class="line">Created configdata.pm</span><br><span class="line">Running configdata.pm</span><br><span class="line">Created Makefile.in</span><br><span class="line">Can&#x27;t locate Time/Piece.pm in @INC (@INC contains: . /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/Configurations /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/util/perl /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/external/perl/Text-Template-1.56/lib) at Makefile.in line 37.</span><br><span class="line">BEGIN failed--compilation aborted at Makefile.in line 37.</span><br><span class="line">error: Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RPM build errors:</span><br><span class="line">    Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br></pre></td></tr></table></figure><p>错误的原因可能是当你在运行 Perl 脚本时遇到 <em>Can’t locate time&#x2F;piece.pm in @INC</em> 错误，这意味着 Perl 无法找到所需的模块 <em>Time::Piece</em>。这通常是因为该模块尚未安装。</p><p>示例</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Can&amp;#39;t locate Time/Piece.pm in @INC (@INC contains: /etc/perl /usr/local/lib/perl5 /usr/local/share/perl5 /usr/lib/perl5 /usr/share/perl5 .) at script.pl line 1</span><br></pre></td></tr></table></figure><p>解决的办法就是安装该模块</p><p><strong>错误处理过程</strong></p><p>确保你的机器连网，执行以下命令</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perl -MCPAN -e &#x27;install Time::Piece&#x27;</span><br></pre></td></tr></table></figure><p>然后一路回车，开始安装，遇到提示就是回车，之后重新编译openssh安装包</p>]]></content>
-      
-      
+<search>
+  <entry>
+    <title>Centos更新openssh10.1p1</title>
+    <url>/2025/10/10/Centos%E6%9B%B4%E6%96%B0openssh10.1p1/</url>
+    <content><![CDATA[<h2 id="如何完成一键更新OPENSSH"><a href="#如何完成一键更新OPENSSH" class="headerlink" title="如何完成一键更新OPENSSH"></a>如何完成一键更新OPENSSH</h2><p>我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8</p>
+<div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115344299528429&bvid=BV1mHxCz7EYK&cid=32946720040;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
+
+<p>想要获取一键安装包可以关注我的公众号联系我获取</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
+<h2 id="openssh更新了啥？"><a href="#openssh更新了啥？" class="headerlink" title="openssh更新了啥？"></a>openssh更新了啥？</h2><p>OpenSSH 10.1 版本核心变更对照表</p>
+<table>
+<thead>
+<tr>
+<th>变更类型</th>
+<th>涉及组件</th>
+<th>关键影响与核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>未来弃用警告</strong></td>
+<td>全组件</td>
+<td>弃用SHA1格式SSHFP记录，仅保留SHA256格式；SHA256自2012年OpenSSH 6.1起已支持。</td>
+</tr>
+<tr>
+<td><strong>潜在不兼容变更</strong></td>
+<td>ssh(1)</td>
+<td>非后量子密钥协商算法触发警告，可通过<code>WarnWeakCrypto</code>配置控制（默认开启）。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)、sshd(8)</td>
+<td>DSCP&#x2F;IPQoS逻辑重构：交互式流量默认用EF类别，非交互式用系统默认，支持动态切换。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)、sshd(8)</td>
+<td>弃用IPQoS中的ToS关键字（lowdelay&#x2F;reliability&#x2F;throughput），改用DSCP。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh-add(1)</td>
+<td>证书过期时间+5分钟宽限期，代理自动清理过期证书；<code>ssh-add -N</code>可禁用此功能。</td>
+</tr>
+<tr>
+<td></td>
+<td>全组件</td>
+<td>移除XMSS密钥实验性支持，计划后续实现新后量子签名方案。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh-agent(1)、sshd(8)</td>
+<td>代理套接字从<code>/tmp</code>迁移至<code>~/.ssh/agent</code>，新增自动清理功能与多个控制选项（-U&#x2F;-u等）。</td>
+</tr>
+<tr>
+<td><strong>安全修复</strong></td>
+<td>ssh(1)</td>
+<td>禁止用户名含控制字符、URI含<code>\0</code>字符，防范shell注入；可信配置文件用户名无此限制。</td>
+</tr>
+<tr>
+<td><strong>新增功能</strong></td>
+<td>ssh(1)、sshd(8)</td>
+<td>新增SIGINFO处理器，记录活跃通道与会话信息。</td>
+</tr>
+<tr>
+<td></td>
+<td>sshd(8)</td>
+<td>拒绝证书认证时，额外记录证书标识信息，便于调试。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)、ssh-agent(1)</td>
+<td>支持PKCS#11令牌上的ed25519密钥。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)</td>
+<td>新增<code>RefuseConnection</code>配置项，可在配置中添加连接阻断提醒（如弃用主机提示）。</td>
+</tr>
+<tr>
+<td></td>
+<td>sshd(8)</td>
+<td>X11显示号检查适配<code>X11DisplayOffset</code>，支持更高端口范围配置。</td>
+</tr>
+<tr>
+<td></td>
+<td>测试框架</td>
+<td>新增基准测试功能，OpenBSD用<code>make UNITTEST_BENCHMARK=yes</code>，Portable版用<code>make unit-bench</code>。</td>
+</tr>
+<tr>
+<td><strong>漏洞修复</strong></td>
+<td>sshd(8)</td>
+<td>修复<code>MaxStartups</code>进程跟踪异常，避免插槽占满导致拒绝新连接。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)</td>
+<td>修复启用<code>ObscureKeystrokeTiming</code>时X客户端启动延迟问题（bz#3820）。</td>
+</tr>
+<tr>
+<td></td>
+<td>sshd(8)</td>
+<td>配置文件最大限制从256KB提升至4MB，超限时提前报错。</td>
+</tr>
+<tr>
+<td></td>
+<td>全组件</td>
+<td>修复多处内存泄漏，优化日志显示（如密钥加载失败详情、<code>PermitRootLogin</code>别名修正）。</td>
+</tr>
+<tr>
+<td><strong>可移植性优化</strong></td>
+<td>sshd(8)</td>
+<td>检查PAM事务用户名变更，避免配置错误导致的授权异常；FreeBSD适配<code>SSH_TUN_COMPAT_AF</code>。</td>
+</tr>
+<tr>
+<td></td>
+<td>全组件</td>
+<td>补充缺失系统头文件，减少跨平台编译差异；macOS适配<code>nlist</code>函数检查逻辑。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh-agent(1)</td>
+<td>systemd套接字激活模式下，<code>SIGTERM</code>退出返回0，避免服务错误标记为“失败”。</td>
+</tr>
+</tbody></table>
+]]></content>
       <categories>
-          
-          <category> linux </category>
-          
+        <category>linux</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> linux,openssh </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>Centos更新openssh10.1p1</title>
-      <link href="/2025/10/10/Centos%E6%9B%B4%E6%96%B0openssh10.1p1/"/>
-      <url>/2025/10/10/Centos%E6%9B%B4%E6%96%B0openssh10.1p1/</url>
-      
-        <content type="html"><![CDATA[<h2 id="如何完成一键更新OPENSSH"><a href="#如何完成一键更新OPENSSH" class="headerlink" title="如何完成一键更新OPENSSH"></a>如何完成一键更新OPENSSH</h2><p>我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8</p><div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115344299528429&bvid=BV1mHxCz7EYK&cid=32946720040;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div><p>想要获取一键安装包可以关注我的公众号联系我获取</p><img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/><h2 id="openssh更新了啥？"><a href="#openssh更新了啥？" class="headerlink" title="openssh更新了啥？"></a>openssh更新了啥？</h2><p>OpenSSH 10.1 版本核心变更对照表</p><table><thead><tr><th>变更类型</th><th>涉及组件</th><th>关键影响与核心内容</th></tr></thead><tbody><tr><td><strong>未来弃用警告</strong></td><td>全组件</td><td>弃用SHA1格式SSHFP记录，仅保留SHA256格式；SHA256自2012年OpenSSH 6.1起已支持。</td></tr><tr><td><strong>潜在不兼容变更</strong></td><td>ssh(1)</td><td>非后量子密钥协商算法触发警告，可通过<code>WarnWeakCrypto</code>配置控制（默认开启）。</td></tr><tr><td></td><td>ssh(1)、sshd(8)</td><td>DSCP&#x2F;IPQoS逻辑重构：交互式流量默认用EF类别，非交互式用系统默认，支持动态切换。</td></tr><tr><td></td><td>ssh(1)、sshd(8)</td><td>弃用IPQoS中的ToS关键字（lowdelay&#x2F;reliability&#x2F;throughput），改用DSCP。</td></tr><tr><td></td><td>ssh-add(1)</td><td>证书过期时间+5分钟宽限期，代理自动清理过期证书；<code>ssh-add -N</code>可禁用此功能。</td></tr><tr><td></td><td>全组件</td><td>移除XMSS密钥实验性支持，计划后续实现新后量子签名方案。</td></tr><tr><td></td><td>ssh-agent(1)、sshd(8)</td><td>代理套接字从<code>/tmp</code>迁移至<code>~/.ssh/agent</code>，新增自动清理功能与多个控制选项（-U&#x2F;-u等）。</td></tr><tr><td><strong>安全修复</strong></td><td>ssh(1)</td><td>禁止用户名含控制字符、URI含<code>\0</code>字符，防范shell注入；可信配置文件用户名无此限制。</td></tr><tr><td><strong>新增功能</strong></td><td>ssh(1)、sshd(8)</td><td>新增SIGINFO处理器，记录活跃通道与会话信息。</td></tr><tr><td></td><td>sshd(8)</td><td>拒绝证书认证时，额外记录证书标识信息，便于调试。</td></tr><tr><td></td><td>ssh(1)、ssh-agent(1)</td><td>支持PKCS#11令牌上的ed25519密钥。</td></tr><tr><td></td><td>ssh(1)</td><td>新增<code>RefuseConnection</code>配置项，可在配置中添加连接阻断提醒（如弃用主机提示）。</td></tr><tr><td></td><td>sshd(8)</td><td>X11显示号检查适配<code>X11DisplayOffset</code>，支持更高端口范围配置。</td></tr><tr><td></td><td>测试框架</td><td>新增基准测试功能，OpenBSD用<code>make UNITTEST_BENCHMARK=yes</code>，Portable版用<code>make unit-bench</code>。</td></tr><tr><td><strong>漏洞修复</strong></td><td>sshd(8)</td><td>修复<code>MaxStartups</code>进程跟踪异常，避免插槽占满导致拒绝新连接。</td></tr><tr><td></td><td>ssh(1)</td><td>修复启用<code>ObscureKeystrokeTiming</code>时X客户端启动延迟问题（bz#3820）。</td></tr><tr><td></td><td>sshd(8)</td><td>配置文件最大限制从256KB提升至4MB，超限时提前报错。</td></tr><tr><td></td><td>全组件</td><td>修复多处内存泄漏，优化日志显示（如密钥加载失败详情、<code>PermitRootLogin</code>别名修正）。</td></tr><tr><td><strong>可移植性优化</strong></td><td>sshd(8)</td><td>检查PAM事务用户名变更，避免配置错误导致的授权异常；FreeBSD适配<code>SSH_TUN_COMPAT_AF</code>。</td></tr><tr><td></td><td>全组件</td><td>补充缺失系统头文件，减少跨平台编译差异；macOS适配<code>nlist</code>函数检查逻辑。</td></tr><tr><td></td><td>ssh-agent(1)</td><td>systemd套接字激活模式下，<code>SIGTERM</code>退出返回0，避免服务错误标记为“失败”。</td></tr></tbody></table>]]></content>
-      
-      
+      <tags>
+        <tag>linux,openssh</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>处理一则Oracle未能完全引用大页问题</title>
+    <url>/2025/10/09/%E5%A4%84%E7%90%86%E4%B8%80%E5%88%99Oracle%E6%9C%AA%E8%83%BD%E5%AE%8C%E5%85%A8%E5%BC%95%E7%94%A8%E5%A4%A7%E9%A1%B5%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="1、关于配置大页"><a href="#1、关于配置大页" class="headerlink" title="1、关于配置大页"></a>1、关于配置大页</h2><p>大页是啥我就不具体介绍了，网上介绍的文章很多，大多安装数据库的文章都有这么一步告诉大家配置大页，我只想说说错误的使用情况：</p>
+<p>那就是大页内存配置成功了，但是数据库却有正确使用大页，等数据库启动后就只能用少得可怜的普通内存，导致内存不足影响性能，如果数据库服务器上再跑个ETL进程或者其它应用，那么可能会导致数据库性能严重下降。</p>
+<p>在数据库交流群里也遇到过好几次这类的问题，非常的典型，配置完大页记得检查下有没有使用，避免此类问题。</p>
+<p>我之前也写过一篇关于如何在aix 系统上开启大页内存的文章，测试效果还不错。</p>
+<p><strong>然而，大多数环境即使你不配置大页也没啥问题</strong>，因为大多数系统虽然用了oracle，但并不是说满负荷运行且硬件没有上升空间了。</p>
+<p>以前刚入行的时候也犯过这个错误，比如最近在给同事检查7年前我安装的数据库服务器，我就发现了我配置了大页却没有使用。。。虽说是个不太繁忙的业务系统，但还是经验不足当时，只是照着别人写的文档来装就完了，啥也不懂。</p>
+<p><strong>下面说个最近遇到的场景，大页没有完全使用</strong>：操作系统是oracle linux 9.6  数据库是11.2.0.4 rac </p>
+<p>当然这个问题仅限于11G，因为之后的版本己经没有这个参数了。</p>
+<p>多说一句：在11gR2版本的数据库，use_large_pages的默认值是TRUE。通常不用再修改</p>
+<h2 id="2、问题场景"><a href="#2、问题场景" class="headerlink" title="2、问题场景"></a>2、问题场景</h2><p>给oracle 11g配置了大页，但是查看告警日志启动时有个报错说是有个参数被disable了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Starting ORACLE instance (normal)</span><br><span class="line">************************ Large Pages Information *******************</span><br><span class="line">Per process system memlock (soft) limit = UNLIMITED</span><br><span class="line"></span><br><span class="line">Large page usage restricted to processor group &quot;user.slice&quot;</span><br><span class="line"></span><br><span class="line">Total Shared Global Region in Large Pages = 100 GB (100%)</span><br><span class="line"></span><br><span class="line">WARNING:</span><br><span class="line">  The parameter _linux_prepage_large_pages is explicitly disabled.</span><br><span class="line">  Oracle strongly recommends setting the _linux_prepage_large_pages</span><br><span class="line">  parameter since the instance  is running in a Processor Group. If there is</span><br><span class="line">  insufficient large page memory, instance may encounter SIGBUS error</span><br><span class="line">  and may terminate abnormally.</span><br><span class="line"></span><br><span class="line">Large Pages used by this instance: 51201 (100 GB)</span><br><span class="line">Large Pages unused in Processor Group user.slice = 82444 (161 GB)</span><br><span class="line">Large Pages configured in Processor Group user.slice = 82445 (161 GB)</span><br><span class="line">Large Page size = 2048 KB</span><br><span class="line"></span><br><span class="line">********************************************************************</span><br></pre></td></tr></table></figure>
+
+<p>于是检查了一下大页的使用情况，发现大页确实没有被完全使用，只是用了一部分，使用的部分：</p>
+<p>82445-74789&#x3D;7656*2MB&#x3D;15312MB，一共才不到15G</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbnode2 ~]# cat /proc/meminfo |grep Hug</span><br><span class="line">AnonHugePages:         0 kB</span><br><span class="line">ShmemHugePages:        0 kB</span><br><span class="line">FileHugePages:         0 kB</span><br><span class="line">HugePages_Total:   82445</span><br><span class="line">HugePages_Free:    74789</span><br><span class="line">HugePages_Rsvd:    43545</span><br><span class="line">HugePages_Surp:        0</span><br><span class="line">Hugepagesize:       2048 kB</span><br><span class="line">Hugetlb:        168847360 kB</span><br></pre></td></tr></table></figure>
+
+<p>检查下配置文件，我这里大页配置的有点大161G，实际内存SGA只配置了100G。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[oracle@dbnode2:/u01/app/oracle/diag/rdbms/dbm/dbm2/trace]$ grep -v &#x27;^#&#x27; /etc/sysctl.conf</span><br><span class="line">kernel.shmmni = 4096</span><br><span class="line">fs.aio-max-nr = 1048576</span><br><span class="line">fs.file-max = 6815744</span><br><span class="line">kernel.sem = 250 32000 100 128</span><br><span class="line">net.ipv4.ip_local_port_range = 9000 65500</span><br><span class="line">net.core.rmem_default = 262144</span><br><span class="line">net.core.rmem_max = 4194304</span><br><span class="line">net.core.wmem_default = 262144</span><br><span class="line">net.core.wmem_max = 1048586</span><br><span class="line">vm.swappiness = 10</span><br><span class="line">kernel.shmmax= 229633380966</span><br><span class="line">kernel.shmall = 56062837</span><br><span class="line">vm.nr_hugepages = 82445</span><br><span class="line"></span><br><span class="line">[oracle@dbnode2:/u01/app/oracle/diag/rdbms/dbm/dbm2/trace]$  grep -v &#x27;^#&#x27; /etc/security/limits.conf</span><br><span class="line">oracle soft nofile 1024</span><br><span class="line">oracle hard nofile 65536</span><br><span class="line">oracle soft stack 10240</span><br><span class="line">oracle hard stack 32768</span><br><span class="line">oracle soft nproc 2047</span><br><span class="line">oracle hard nproc 16384</span><br><span class="line">oracle hard memlock 134217728</span><br><span class="line">oracle soft memlock 134217728</span><br><span class="line">grid soft nofile 1024</span><br><span class="line">grid hard nofile 65536</span><br><span class="line">grid soft stack 10240</span><br><span class="line">grid hard stack 32768</span><br><span class="line">grid soft nproc 2047</span><br><span class="line">grid hard nproc 16384</span><br></pre></td></tr></table></figure>
+
+<h2 id="3、问题修复"><a href="#3、问题修复" class="headerlink" title="3、问题修复"></a>3、问题修复</h2><p>接下来尝试修改数据库参数并重新调整大页大小。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">alter system set &quot;_linux_prepage_large_pages&quot;=TRUE scope=spfile;</span><br></pre></td></tr></table></figure>
+
+<p>修改sysctl.conf，配置大页100G</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vm.nr_hugepages = 51210</span><br></pre></td></tr></table></figure>
+
+<p><strong>配置完后为确保内存释放最好是重启下服务器</strong>。之后再次启动数据库查看报警没有了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Starting ORACLE instance (normal)</span><br><span class="line">Tue Sep 16 23:51:33 2025</span><br><span class="line">************************ Large Pages Information *******************</span><br><span class="line">Per process system memlock (soft) limit = UNLIMITED</span><br><span class="line">Large page usage restricted to processor group &quot;user.slice&quot;</span><br><span class="line">Total Shared Global Region in Large Pages = 100 GB (100%)</span><br><span class="line">Large Pages in Shared Memory Region are prepaged</span><br><span class="line">Large Pages used by this instance: 51201 (100 GB)</span><br><span class="line">Large Pages unused in Processor Group user.slice = 31244 (61 GB)</span><br><span class="line">Large Pages configured in Processor Group user.slice = 82445 (161 GB)</span><br><span class="line">Large Page size = 2048 KB</span><br><span class="line"></span><br><span class="line">********************************************************************</span><br></pre></td></tr></table></figure>
+
+<p>再确认下大页使用情况，这次全部使用了（配置的时候我多写了9个，这里显示剩余正常）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbnode2 ~]# cat /proc/meminfo |grep Hug</span><br><span class="line">AnonHugePages:         0 kB</span><br><span class="line">ShmemHugePages:        0 kB</span><br><span class="line">FileHugePages:         0 kB</span><br><span class="line">HugePages_Total:   51210</span><br><span class="line">HugePages_Free:        9</span><br><span class="line">HugePages_Rsvd:        0</span><br><span class="line">HugePages_Surp:        0</span><br><span class="line">Hugepagesize:       2048 kB</span><br><span class="line">Hugetlb:        104878080 kB</span><br></pre></td></tr></table></figure>
+
+<h2 id="4、附录"><a href="#4、附录" class="headerlink" title="4、附录"></a>4、附录</h2><p>大页计算官方脚本，记得chmod+x后使用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">!/bin/bash</span><br><span class="line">#</span><br><span class="line"># hugepages_settings.sh</span><br><span class="line">#</span><br><span class="line"># Linux bash script to compute values for the</span><br><span class="line"># recommended HugePages/HugeTLB configuration</span><br><span class="line"># on Oracle Linux</span><br><span class="line">#</span><br><span class="line"># Note: This script does calculation for all shared memory</span><br><span class="line"># segments available when the script is run, no matter it</span><br><span class="line"># is an Oracle RDBMS shared memory segment or not.</span><br><span class="line">#</span><br><span class="line"># This script is provided by Doc ID 401749.1 from My Oracle Support</span><br><span class="line"># http://support.oracle.com</span><br><span class="line"></span><br><span class="line"># Welcome text</span><br><span class="line">echo &quot;</span><br><span class="line">This script is provided by Doc ID 401749.1 from My Oracle Support</span><br><span class="line">(http://support.oracle.com) where it is intended to compute values for</span><br><span class="line">the recommended HugePages/HugeTLB configuration for the current shared</span><br><span class="line">memory segments on Oracle Linux. Before proceeding with the execution please note following:</span><br><span class="line"> * For ASM instance, it needs to configure ASMM instead of AMM.</span><br><span class="line"> * The &#x27;pga_aggregate_target&#x27; is outside the SGA and</span><br><span class="line">   you should accommodate this while calculating the overall size.</span><br><span class="line"> * In case you changes the DB SGA size,</span><br><span class="line">   as the new SGA will not fit in the previous HugePages configuration,</span><br><span class="line">   it had better disable the whole HugePages,</span><br><span class="line">   start the DB with new SGA size and run the script again.</span><br><span class="line">And make sure that:</span><br><span class="line"> * Oracle Database instance(s) are up and running</span><br><span class="line"> * Oracle Database Automatic Memory Management (AMM) is not setup</span><br><span class="line">   (See Doc ID 749851.1)</span><br><span class="line"> * The shared memory segments can be listed by command:</span><br><span class="line">     # ipcs -m</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Press Enter to proceed...&quot;</span><br><span class="line"></span><br><span class="line">read</span><br><span class="line"></span><br><span class="line"># Check for the kernel version</span><br><span class="line">KERN=`uname -r | awk -F. &#x27;&#123; printf(&quot;%d.%d\n&quot;,$1,$2); &#125;&#x27;`</span><br><span class="line"></span><br><span class="line"># Find out the HugePage size</span><br><span class="line">HPG_SZ=`grep Hugepagesize /proc/meminfo | awk &#x27;&#123;print $2&#125;&#x27;`</span><br><span class="line">if [ -z &quot;$HPG_SZ&quot; ];then</span><br><span class="line">    echo &quot;The hugepages may not be supported in the system where the script is being executed.&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># Initialize the counter</span><br><span class="line">NUM_PG=0</span><br><span class="line"></span><br><span class="line"># Cumulative number of pages required to handle the running shared memory segments</span><br><span class="line">for SEG_BYTES in `ipcs -m | cut -c44-300 | awk &#x27;&#123;print $1&#125;&#x27; | grep &quot;[0-9][0-9]*&quot;`</span><br><span class="line">do</span><br><span class="line">    MIN_PG=`echo &quot;$SEG_BYTES/($HPG_SZ*1024)&quot; | bc -q`</span><br><span class="line">    if [ $MIN_PG -gt 0 ]; then</span><br><span class="line">        NUM_PG=`echo &quot;$NUM_PG+$MIN_PG+1&quot; | bc -q`</span><br><span class="line">    fi</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">RES_BYTES=`echo &quot;$NUM_PG * $HPG_SZ * 1024&quot; | bc -q`</span><br><span class="line"></span><br><span class="line"># An SGA less than 100MB does not make sense</span><br><span class="line"># Bail out if that is the case</span><br><span class="line">if [ $RES_BYTES -lt 100000000 ]; then</span><br><span class="line">    echo &quot;***********&quot;</span><br><span class="line">    echo &quot;** ERROR **&quot;</span><br><span class="line">    echo &quot;***********&quot;</span><br><span class="line">    echo &quot;Sorry! There are not enough total of shared memory segments allocated for</span><br><span class="line">HugePages configuration. HugePages can only be used for shared memory segments</span><br><span class="line">that you can list by command:</span><br><span class="line"></span><br><span class="line">    # ipcs -m</span><br><span class="line"></span><br><span class="line">of a size that can match an Oracle Database SGA. Please make sure that:</span><br><span class="line"> * Oracle Database instance is up and running</span><br><span class="line"> * Oracle Database Automatic Memory Management (AMM) is not configured&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># Finish with results</span><br><span class="line">    echo &quot;Recommended setting: vm.nr_hugepages = $NUM_PG&quot;;</span><br><span class="line"></span><br><span class="line"># End</span><br></pre></td></tr></table></figure>
+
+]]></content>
       <categories>
-          
-          <category> linux </category>
-          
+        <category>oracle优化</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> linux,openssh </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>处理一则Oracle未能完全引用大页问题</title>
-      <link href="/2025/10/09/%E5%A4%84%E7%90%86%E4%B8%80%E5%88%99Oracle%E6%9C%AA%E8%83%BD%E5%AE%8C%E5%85%A8%E5%BC%95%E7%94%A8%E5%A4%A7%E9%A1%B5%E9%97%AE%E9%A2%98/"/>
-      <url>/2025/10/09/%E5%A4%84%E7%90%86%E4%B8%80%E5%88%99Oracle%E6%9C%AA%E8%83%BD%E5%AE%8C%E5%85%A8%E5%BC%95%E7%94%A8%E5%A4%A7%E9%A1%B5%E9%97%AE%E9%A2%98/</url>
-      
-        <content type="html"><![CDATA[<h2 id="1、关于配置大页"><a href="#1、关于配置大页" class="headerlink" title="1、关于配置大页"></a>1、关于配置大页</h2><p>大页是啥我就不具体介绍了，网上介绍的文章很多，大多安装数据库的文章都有这么一步告诉大家配置大页，我只想说说错误的使用情况：</p><p>那就是大页内存配置成功了，但是数据库却有正确使用大页，等数据库启动后就只能用少得可怜的普通内存，导致内存不足影响性能，如果数据库服务器上再跑个ETL进程或者其它应用，那么可能会导致数据库性能严重下降。</p><p>在数据库交流群里也遇到过好几次这类的问题，非常的典型，配置完大页记得检查下有没有使用，避免此类问题。</p><p>我之前也写过一篇关于如何在aix 系统上开启大页内存的文章，测试效果还不错。</p><p><strong>然而，大多数环境即使你不配置大页也没啥问题</strong>，因为大多数系统虽然用了oracle，但并不是说满负荷运行且硬件没有上升空间了。</p><p>以前刚入行的时候也犯过这个错误，比如最近在给同事检查7年前我安装的数据库服务器，我就发现了我配置了大页却没有使用。。。虽说是个不太繁忙的业务系统，但还是经验不足当时，只是照着别人写的文档来装就完了，啥也不懂。</p><p><strong>下面说个最近遇到的场景，大页没有完全使用</strong>：操作系统是oracle linux 9.6  数据库是11.2.0.4 rac </p><p>当然这个问题仅限于11G，因为之后的版本己经没有这个参数了。</p><p>多说一句：在11gR2版本的数据库，use_large_pages的默认值是TRUE。通常不用再修改</p><h2 id="2、问题场景"><a href="#2、问题场景" class="headerlink" title="2、问题场景"></a>2、问题场景</h2><p>给oracle 11g配置了大页，但是查看告警日志启动时有个报错说是有个参数被disable了</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Starting ORACLE instance (normal)</span><br><span class="line">************************ Large Pages Information *******************</span><br><span class="line">Per process system memlock (soft) limit = UNLIMITED</span><br><span class="line"></span><br><span class="line">Large page usage restricted to processor group &quot;user.slice&quot;</span><br><span class="line"></span><br><span class="line">Total Shared Global Region in Large Pages = 100 GB (100%)</span><br><span class="line"></span><br><span class="line">WARNING:</span><br><span class="line">  The parameter _linux_prepage_large_pages is explicitly disabled.</span><br><span class="line">  Oracle strongly recommends setting the _linux_prepage_large_pages</span><br><span class="line">  parameter since the instance  is running in a Processor Group. If there is</span><br><span class="line">  insufficient large page memory, instance may encounter SIGBUS error</span><br><span class="line">  and may terminate abnormally.</span><br><span class="line"></span><br><span class="line">Large Pages used by this instance: 51201 (100 GB)</span><br><span class="line">Large Pages unused in Processor Group user.slice = 82444 (161 GB)</span><br><span class="line">Large Pages configured in Processor Group user.slice = 82445 (161 GB)</span><br><span class="line">Large Page size = 2048 KB</span><br><span class="line"></span><br><span class="line">********************************************************************</span><br></pre></td></tr></table></figure><p>于是检查了一下大页的使用情况，发现大页确实没有被完全使用，只是用了一部分，使用的部分：</p><p>82445-74789&#x3D;7656*2MB&#x3D;15312MB，一共才不到15G</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@dbnode2 ~]# cat /proc/meminfo |grep Hug</span><br><span class="line">AnonHugePages:         0 kB</span><br><span class="line">ShmemHugePages:        0 kB</span><br><span class="line">FileHugePages:         0 kB</span><br><span class="line">HugePages_Total:   82445</span><br><span class="line">HugePages_Free:    74789</span><br><span class="line">HugePages_Rsvd:    43545</span><br><span class="line">HugePages_Surp:        0</span><br><span class="line">Hugepagesize:       2048 kB</span><br><span class="line">Hugetlb:        168847360 kB</span><br></pre></td></tr></table></figure><p>检查下配置文件，我这里大页配置的有点大161G，实际内存SGA只配置了100G。</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[oracle@dbnode2:/u01/app/oracle/diag/rdbms/dbm/dbm2/trace]$ grep -v &#x27;^#&#x27; /etc/sysctl.conf</span><br><span class="line">kernel.shmmni = 4096</span><br><span class="line">fs.aio-max-nr = 1048576</span><br><span class="line">fs.file-max = 6815744</span><br><span class="line">kernel.sem = 250 32000 100 128</span><br><span class="line">net.ipv4.ip_local_port_range = 9000 65500</span><br><span class="line">net.core.rmem_default = 262144</span><br><span class="line">net.core.rmem_max = 4194304</span><br><span class="line">net.core.wmem_default = 262144</span><br><span class="line">net.core.wmem_max = 1048586</span><br><span class="line">vm.swappiness = 10</span><br><span class="line">kernel.shmmax= 229633380966</span><br><span class="line">kernel.shmall = 56062837</span><br><span class="line">vm.nr_hugepages = 82445</span><br><span class="line"></span><br><span class="line">[oracle@dbnode2:/u01/app/oracle/diag/rdbms/dbm/dbm2/trace]$  grep -v &#x27;^#&#x27; /etc/security/limits.conf</span><br><span class="line">oracle soft nofile 1024</span><br><span class="line">oracle hard nofile 65536</span><br><span class="line">oracle soft stack 10240</span><br><span class="line">oracle hard stack 32768</span><br><span class="line">oracle soft nproc 2047</span><br><span class="line">oracle hard nproc 16384</span><br><span class="line">oracle hard memlock 134217728</span><br><span class="line">oracle soft memlock 134217728</span><br><span class="line">grid soft nofile 1024</span><br><span class="line">grid hard nofile 65536</span><br><span class="line">grid soft stack 10240</span><br><span class="line">grid hard stack 32768</span><br><span class="line">grid soft nproc 2047</span><br><span class="line">grid hard nproc 16384</span><br></pre></td></tr></table></figure><h2 id="3、问题修复"><a href="#3、问题修复" class="headerlink" title="3、问题修复"></a>3、问题修复</h2><p>接下来尝试修改数据库参数并重新调整大页大小。</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">alter system set &quot;_linux_prepage_large_pages&quot;=TRUE scope=spfile;</span><br></pre></td></tr></table></figure><p>修改sysctl.conf，配置大页100G</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vm.nr_hugepages = 51210</span><br></pre></td></tr></table></figure><p><strong>配置完后为确保内存释放最好是重启下服务器</strong>。之后再次启动数据库查看报警没有了</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Starting ORACLE instance (normal)</span><br><span class="line">Tue Sep 16 23:51:33 2025</span><br><span class="line">************************ Large Pages Information *******************</span><br><span class="line">Per process system memlock (soft) limit = UNLIMITED</span><br><span class="line">Large page usage restricted to processor group &quot;user.slice&quot;</span><br><span class="line">Total Shared Global Region in Large Pages = 100 GB (100%)</span><br><span class="line">Large Pages in Shared Memory Region are prepaged</span><br><span class="line">Large Pages used by this instance: 51201 (100 GB)</span><br><span class="line">Large Pages unused in Processor Group user.slice = 31244 (61 GB)</span><br><span class="line">Large Pages configured in Processor Group user.slice = 82445 (161 GB)</span><br><span class="line">Large Page size = 2048 KB</span><br><span class="line"></span><br><span class="line">********************************************************************</span><br></pre></td></tr></table></figure><p>再确认下大页使用情况，这次全部使用了（配置的时候我多写了9个，这里显示剩余正常）</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@dbnode2 ~]# cat /proc/meminfo |grep Hug</span><br><span class="line">AnonHugePages:         0 kB</span><br><span class="line">ShmemHugePages:        0 kB</span><br><span class="line">FileHugePages:         0 kB</span><br><span class="line">HugePages_Total:   51210</span><br><span class="line">HugePages_Free:        9</span><br><span class="line">HugePages_Rsvd:        0</span><br><span class="line">HugePages_Surp:        0</span><br><span class="line">Hugepagesize:       2048 kB</span><br><span class="line">Hugetlb:        104878080 kB</span><br></pre></td></tr></table></figure><h2 id="4、附录"><a href="#4、附录" class="headerlink" title="4、附录"></a>4、附录</h2><p>大页计算官方脚本，记得chmod+x后使用</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line">!/bin/bash</span><br><span class="line">#</span><br><span class="line"># hugepages_settings.sh</span><br><span class="line">#</span><br><span class="line"># Linux bash script to compute values for the</span><br><span class="line"># recommended HugePages/HugeTLB configuration</span><br><span class="line"># on Oracle Linux</span><br><span class="line">#</span><br><span class="line"># Note: This script does calculation for all shared memory</span><br><span class="line"># segments available when the script is run, no matter it</span><br><span class="line"># is an Oracle RDBMS shared memory segment or not.</span><br><span class="line">#</span><br><span class="line"># This script is provided by Doc ID 401749.1 from My Oracle Support</span><br><span class="line"># http://support.oracle.com</span><br><span class="line"></span><br><span class="line"># Welcome text</span><br><span class="line">echo &quot;</span><br><span class="line">This script is provided by Doc ID 401749.1 from My Oracle Support</span><br><span class="line">(http://support.oracle.com) where it is intended to compute values for</span><br><span class="line">the recommended HugePages/HugeTLB configuration for the current shared</span><br><span class="line">memory segments on Oracle Linux. Before proceeding with the execution please note following:</span><br><span class="line"> * For ASM instance, it needs to configure ASMM instead of AMM.</span><br><span class="line"> * The &#x27;pga_aggregate_target&#x27; is outside the SGA and</span><br><span class="line">   you should accommodate this while calculating the overall size.</span><br><span class="line"> * In case you changes the DB SGA size,</span><br><span class="line">   as the new SGA will not fit in the previous HugePages configuration,</span><br><span class="line">   it had better disable the whole HugePages,</span><br><span class="line">   start the DB with new SGA size and run the script again.</span><br><span class="line">And make sure that:</span><br><span class="line"> * Oracle Database instance(s) are up and running</span><br><span class="line"> * Oracle Database Automatic Memory Management (AMM) is not setup</span><br><span class="line">   (See Doc ID 749851.1)</span><br><span class="line"> * The shared memory segments can be listed by command:</span><br><span class="line">     # ipcs -m</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Press Enter to proceed...&quot;</span><br><span class="line"></span><br><span class="line">read</span><br><span class="line"></span><br><span class="line"># Check for the kernel version</span><br><span class="line">KERN=`uname -r | awk -F. &#x27;&#123; printf(&quot;%d.%d\n&quot;,$1,$2); &#125;&#x27;`</span><br><span class="line"></span><br><span class="line"># Find out the HugePage size</span><br><span class="line">HPG_SZ=`grep Hugepagesize /proc/meminfo | awk &#x27;&#123;print $2&#125;&#x27;`</span><br><span class="line">if [ -z &quot;$HPG_SZ&quot; ];then</span><br><span class="line">    echo &quot;The hugepages may not be supported in the system where the script is being executed.&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># Initialize the counter</span><br><span class="line">NUM_PG=0</span><br><span class="line"></span><br><span class="line"># Cumulative number of pages required to handle the running shared memory segments</span><br><span class="line">for SEG_BYTES in `ipcs -m | cut -c44-300 | awk &#x27;&#123;print $1&#125;&#x27; | grep &quot;[0-9][0-9]*&quot;`</span><br><span class="line">do</span><br><span class="line">    MIN_PG=`echo &quot;$SEG_BYTES/($HPG_SZ*1024)&quot; | bc -q`</span><br><span class="line">    if [ $MIN_PG -gt 0 ]; then</span><br><span class="line">        NUM_PG=`echo &quot;$NUM_PG+$MIN_PG+1&quot; | bc -q`</span><br><span class="line">    fi</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">RES_BYTES=`echo &quot;$NUM_PG * $HPG_SZ * 1024&quot; | bc -q`</span><br><span class="line"></span><br><span class="line"># An SGA less than 100MB does not make sense</span><br><span class="line"># Bail out if that is the case</span><br><span class="line">if [ $RES_BYTES -lt 100000000 ]; then</span><br><span class="line">    echo &quot;***********&quot;</span><br><span class="line">    echo &quot;** ERROR **&quot;</span><br><span class="line">    echo &quot;***********&quot;</span><br><span class="line">    echo &quot;Sorry! There are not enough total of shared memory segments allocated for</span><br><span class="line">HugePages configuration. HugePages can only be used for shared memory segments</span><br><span class="line">that you can list by command:</span><br><span class="line"></span><br><span class="line">    # ipcs -m</span><br><span class="line"></span><br><span class="line">of a size that can match an Oracle Database SGA. Please make sure that:</span><br><span class="line"> * Oracle Database instance is up and running</span><br><span class="line"> * Oracle Database Automatic Memory Management (AMM) is not configured&quot;</span><br><span class="line">    exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># Finish with results</span><br><span class="line">    echo &quot;Recommended setting: vm.nr_hugepages = $NUM_PG&quot;;</span><br><span class="line"></span><br><span class="line"># End</span><br></pre></td></tr></table></figure>]]></content>
-      
-      
+      <tags>
+        <tag>oracle</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自我介绍</title>
+    <url>/2025/10/08/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/</url>
+    <content><![CDATA[<h2 id="Welcome-to-my-blogs"><a href="#Welcome-to-my-blogs" class="headerlink" title="Welcome to my blogs"></a>Welcome to my blogs</h2><p>我来自中国-吉林</p>
+<p>是一名IT技术从业者，从事IT基础设施工作10余年，主要负责服务器、存储、虚拟化、数据库等系统的搭建。</p>
+<h2 id="拥有如下荣誉"><a href="#拥有如下荣誉" class="headerlink" title="拥有如下荣誉"></a>拥有如下荣誉</h2><p>Oracle ACE</p>
+<h2 id="拥有如下认证"><a href="#拥有如下认证" class="headerlink" title="拥有如下认证"></a>拥有如下认证</h2><p>数据库Oracle 11g OCM认证</p>
+<p>数据库MySQL OCP认证</p>
+<p>数据库电科金仓KCM认证</p>
+<p>数据库PGCM 认证（PostgreSQL 14）</p>
+<p>Microsoft 微软认证技术专家（AD方向）</p>
+<p>H3C 网络工程师认证</p>
+<h2 id="如果有需要技术支持"><a href="#如果有需要技术支持" class="headerlink" title="如果有需要技术支持"></a>如果有需要技术支持</h2><p>数据库迁移、容灾、安装调试、优化、故障处理</p>
+<p>服务器安装、存储调试、方案咨询、故障处理</p>
+<p>你都可以联系我来帮你解决！</p>
+<p>微信：<strong>Eric_xu_2023</strong></p>
+<p>也欢迎你关注我的公众号</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
+
+
+]]></content>
       <categories>
-          
-          <category> oracle优化 </category>
-          
+        <category>linux</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> oracle </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>自我介绍</title>
-      <link href="/2025/10/08/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/"/>
-      <url>/2025/10/08/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/</url>
-      
-        <content type="html"><![CDATA[<h2 id="Welcome-to-my-blogs"><a href="#Welcome-to-my-blogs" class="headerlink" title="Welcome to my blogs"></a>Welcome to my blogs</h2><p>我来自中国-吉林</p><p>是一名IT技术从业者，从事IT基础设施工作10余年，主要负责服务器、存储、虚拟化、数据库等系统的搭建。</p><h2 id="拥有如下荣誉"><a href="#拥有如下荣誉" class="headerlink" title="拥有如下荣誉"></a>拥有如下荣誉</h2><p>Oracle ACE</p><h2 id="拥有如下认证"><a href="#拥有如下认证" class="headerlink" title="拥有如下认证"></a>拥有如下认证</h2><p>数据库Oracle 11g OCM认证</p><p>数据库MySQL OCP认证</p><p>数据库电科金仓KCM认证</p><p>数据库PGCM 认证（PostgreSQL 14）</p><p>Microsoft 微软认证技术专家（AD方向）</p><p>H3C 网络工程师认证</p><h2 id="如果有需要技术支持"><a href="#如果有需要技术支持" class="headerlink" title="如果有需要技术支持"></a>如果有需要技术支持</h2><p>数据库迁移、容灾、安装调试、优化、故障处理</p><p>服务器安装、存储调试、方案咨询、故障处理</p><p>你都可以联系我来帮你解决！</p><p>微信：<strong>Eric_xu_2023</strong></p><p>也欢迎你关注我的公众号</p><img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
-      
-      
+      <tags>
+        <tag>杂文</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
+    <url>/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</url>
+    <content><![CDATA[<p>昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。</p>
+<div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115350238665617&bvid=BV1dV4HzTEaq&cid=32972934127;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
+
+<p>想要获取一键安装包可以关注我的公众号联系我获取。</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
+<p>今天主要说2个问题：</p>
+<p>1.这么快更新了openssh 10.2解决了啥问题？</p>
+<p>2.顺便说一下这次编译遇到的问题。具体如何编译RPM包，可以看我之前的文章介绍了。<a href="https://mp.weixin.qq.com/s/Uz5dDzvP7mSXNjuD1fxpMQ">手搓OPENSSH安装RPM包</a></p>
+<h2 id="1、更新openssh-10-2解决问题"><a href="#1、更新openssh-10-2解决问题" class="headerlink" title="1、更新openssh 10.2解决问题"></a>1、更新openssh 10.2解决问题</h2><p>本版本为漏洞修复版本，主要修复了 “启用 ControlPersist 后导致 <code>ssh(1)</code> 无法使用” 的问题。</p>
+<h3 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h3><ol>
+<li><strong><code>ssh(1)</code></strong>：修复了 “ControlPersist 处于活跃状态时，终端连接处理异常导致会话无法使用” 的问题（漏洞编号：bz3872）。</li>
+<li><strong><code>ssh-keygen(1)</code></strong>：修复了 “从 PKCS#11 令牌下载密钥” 的功能异常。</li>
+<li><strong><code>ssh-keygen(1)</code></strong>：修复了 “CA 密钥存储在 <code>ssh-agent(1)</code> 中时，CA 签名操作失败” 的问题（漏洞编号：bz3877）。</li>
+</ol>
+<h3 id="可移植性优化"><a href="#可移植性优化" class="headerlink" title="可移植性优化"></a>可移植性优化</h3><ul>
+<li><p><strong>全组件</strong>：支持无 <code>mmap(2)</code> 函数的平台，例如 WASM 构建版本（示例：<a href="https://hterm.org/">https://hterm.org</a>）。</p>
+</li>
+<li><p><strong>全组件</strong>：修复了 FreeBSD 系统上因缺少 <code>fnctl.h</code> 头文件导致的构建失败问题。</p>
+</li>
+<li><p><strong>全组件</strong>：修复了 MacOS 10.12（Sierra）以下版本因缺少 <code>clock_gettime(3)</code> 函数导致的构建失败问题。</p>
+</li>
+<li><p><strong><code>sshd(8)</code></strong>：若远程主机名为 “UNKNOWN” 占位符，将不执行 <code>PAM_RHOST</code> 操作。此优化可避免部分 PAM 模块尝试解析该主机名时可能出现的挂起问题。需注意，仅当连接不通过 IPv4 或 IPv6 套接字建立时，<code>sshd(8)</code> 才会使用 “UNKNOWN” 作为主机名。</p>
+</li>
+</ul>
+<h2 id="2、编译遇到的错误及解决办法"><a href="#2、编译遇到的错误及解决办法" class="headerlink" title="2、编译遇到的错误及解决办法"></a>2、编译遇到的错误及解决办法</h2><p>还是用脚本编译最新的安装包，遇到个错误</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">~/openssh-rpms-main/el7 ~/openssh-rpms-main</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssh-10.2p1.tar.gz’ -&gt; ‘./SOURCES/openssh-10.2p1.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssl-3.0.18.tar.gz’ -&gt; ‘./SOURCES/openssl-3.0.18.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/x11-ssh-askpass-1.2.4.1.tar.gz’ -&gt; ‘./SOURCES/x11-ssh-askpass-1.2.4.1.tar.gz’</span><br><span class="line">Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.CUAJLh</span><br><span class="line">+ umask 022</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ rm -rf openssh-10.2p1</span><br><span class="line">+ /usr/bin/gzip -dc /root/openssh-rpms-main/el7/SOURCES/openssh-10.2p1.tar.gz</span><br><span class="line">+ /usr/bin/tar -xf -</span><br><span class="line">+ STATUS=0</span><br><span class="line">+ &#x27;[&#x27; 0 -ne 0 &#x27;]&#x27;</span><br><span class="line">+ cd openssh-10.2p1</span><br><span class="line">+ /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .</span><br><span class="line">+ mkdir -p openssl</span><br><span class="line">+ tar xfz /root/openssh-rpms-main/el7/SOURCES/openssl-3.0.18.tar.gz --strip-components=1 -C openssl</span><br><span class="line">+ pushd openssl</span><br><span class="line">~/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl ~/openssh-rpms-main/el7/BUILD/openssh-10.2p1</span><br><span class="line">+ ./config shared zlib -fPIC</span><br><span class="line">Configuring OpenSSL version 3.0.18 for target linux-x86_64</span><br><span class="line">Using os-specific seed configuration</span><br><span class="line">Created configdata.pm</span><br><span class="line">Running configdata.pm</span><br><span class="line">Created Makefile.in</span><br><span class="line">Can&#x27;t locate Time/Piece.pm in @INC (@INC contains: . /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/Configurations /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/util/perl /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/external/perl/Text-Template-1.56/lib) at Makefile.in line 37.</span><br><span class="line">BEGIN failed--compilation aborted at Makefile.in line 37.</span><br><span class="line">error: Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RPM build errors:</span><br><span class="line">    Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br></pre></td></tr></table></figure>
+
+<p>错误的原因可能是当你在运行 Perl 脚本时遇到 <em>Can’t locate time&#x2F;piece.pm in @INC</em> 错误，这意味着 Perl 无法找到所需的模块 <em>Time::Piece</em>。这通常是因为该模块尚未安装。</p>
+<p>示例</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Can&amp;#39;t locate Time/Piece.pm in @INC (@INC contains: /etc/perl /usr/local/lib/perl5 /usr/local/share/perl5 /usr/lib/perl5 /usr/share/perl5 .) at script.pl line 1</span><br></pre></td></tr></table></figure>
+
+<p>解决的办法就是安装该模块</p>
+<p><strong>错误处理过程</strong></p>
+<p>确保你的机器连网，执行以下命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">perl -MCPAN -e &#x27;install Time::Piece&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>然后一路回车，开始安装，遇到提示就是回车，之后重新编译openssh安装包</p>
+]]></content>
       <categories>
-          
-          <category> linux </category>
-          
+        <category>linux</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> 杂文 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-  
-  
+      <tags>
+        <tag>linux,openssh</tag>
+      </tags>
+  </entry>
 </search>
