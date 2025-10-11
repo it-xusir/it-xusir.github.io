@@ -179,6 +179,56 @@ Starting ORACLE instance (normal)Tue Sep 16 23:51:33 2025***********************
       </tags>
   </entry>
   <entry>
+    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
+    <url>/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</url>
+    <content><![CDATA[昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。
+     
+
+想要获取一键安装包可以关注我的公众号联系我获取。
+
+
+今天主要说2个问题：
+1.这么快更新了openssh 10.2解决了啥问题？
+2.顺便说一下这次编译遇到的问题。具体如何编译RPM包，可以看我之前的文章介绍了。手搓OPENSSH安装RPM包
+1、更新openssh 10.2解决问题本版本为漏洞修复版本，主要修复了 “启用 ControlPersist 后导致 ssh(1) 无法使用” 的问题。
+漏洞修复
+ssh(1)：修复了 “ControlPersist 处于活跃状态时，终端连接处理异常导致会话无法使用” 的问题（漏洞编号：bz3872）。
+ssh-keygen(1)：修复了 “从 PKCS#11 令牌下载密钥” 的功能异常。
+ssh-keygen(1)：修复了 “CA 密钥存储在 ssh-agent(1) 中时，CA 签名操作失败” 的问题（漏洞编号：bz3877）。
+
+可移植性优化
+全组件：支持无 mmap(2) 函数的平台，例如 WASM 构建版本（示例：https://hterm.org）。
+
+全组件：修复了 FreeBSD 系统上因缺少 fnctl.h 头文件导致的构建失败问题。
+
+全组件：修复了 MacOS 10.12（Sierra）以下版本因缺少 clock_gettime(3) 函数导致的构建失败问题。
+
+sshd(8)：若远程主机名为 “UNKNOWN” 占位符，将不执行 PAM_RHOST 操作。此优化可避免部分 PAM 模块尝试解析该主机名时可能出现的挂起问题。需注意，仅当连接不通过 IPv4 或 IPv6 套接字建立时，sshd(8) 才会使用 “UNKNOWN” 作为主机名。
+
+
+2、编译遇到的错误及解决办法还是用脚本编译最新的安装包，遇到个错误
+~/openssh-rpms-main/el7 ~/openssh-rpms-main‘/root/openssh-rpms-main/downloads/openssh-10.2p1.tar.gz’ -&gt; ‘./SOURCES/openssh-10.2p1.tar.gz’‘/root/openssh-rpms-main/downloads/openssl-3.0.18.tar.gz’ -&gt; ‘./SOURCES/openssl-3.0.18.tar.gz’‘/root/openssh-rpms-main/downloads/x11-ssh-askpass-1.2.4.1.tar.gz’ -&gt; ‘./SOURCES/x11-ssh-askpass-1.2.4.1.tar.gz’Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.CUAJLh+ umask 022+ cd /root/openssh-rpms-main/el7/BUILD+ cd /root/openssh-rpms-main/el7/BUILD+ rm -rf openssh-10.2p1+ /usr/bin/gzip -dc /root/openssh-rpms-main/el7/SOURCES/openssh-10.2p1.tar.gz+ /usr/bin/tar -xf -+ STATUS=0+ &#x27;[&#x27; 0 -ne 0 &#x27;]&#x27;+ cd openssh-10.2p1+ /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .+ mkdir -p openssl+ tar xfz /root/openssh-rpms-main/el7/SOURCES/openssl-3.0.18.tar.gz --strip-components=1 -C openssl+ pushd openssl~/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl ~/openssh-rpms-main/el7/BUILD/openssh-10.2p1+ ./config shared zlib -fPICConfiguring OpenSSL version 3.0.18 for target linux-x86_64Using os-specific seed configurationCreated configdata.pmRunning configdata.pmCreated Makefile.inCan&#x27;t locate Time/Piece.pm in @INC (@INC contains: . /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/Configurations /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/util/perl /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/external/perl/Text-Template-1.56/lib) at Makefile.in line 37.BEGIN failed--compilation aborted at Makefile.in line 37.error: Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)RPM build errors:    Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)
+
+错误的原因可能是当你在运行 Perl 脚本时遇到 Can’t locate time&#x2F;piece.pm in @INC 错误，这意味着 Perl 无法找到所需的模块 Time::Piece。这通常是因为该模块尚未安装。
+示例
+Can&amp;#39;t locate Time/Piece.pm in @INC (@INC contains: /etc/perl /usr/local/lib/perl5 /usr/local/share/perl5 /usr/lib/perl5 /usr/share/perl5 .) at script.pl line 1
+
+解决的办法就是安装该模块
+错误处理过程
+确保你的机器连网，执行以下命令
+perl -MCPAN -e &#x27;install Time::Piece&#x27;
+
+然后一路回车，开始安装，遇到提示就是回车，之后重新编译openssh安装包
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+        <tag>openssh</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>记一次NetApp FAS2554更换故障硬盘</title>
     <url>/2025/10/11/%E8%AE%B0%E4%B8%80%E6%AC%A1NetApp%20FAS2554%E6%9B%B4%E6%8D%A2%E6%95%85%E9%9A%9C%E7%A1%AC%E7%9B%98/</url>
     <content><![CDATA[1、案例背景记一次某医院PACS存储NetApp FAS2554更换故障硬盘的过程。
@@ -233,56 +283,6 @@ FAS2240-A*&gt; vol status -s   Pool1 spare disks (empty)Pool0 spare disksRAID Di
         <tag>存储</tag>
         <tag>storage</tag>
         <tag>replace</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
-    <url>/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</url>
-    <content><![CDATA[昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。
-     
-
-想要获取一键安装包可以关注我的公众号联系我获取。
-
-
-今天主要说2个问题：
-1.这么快更新了openssh 10.2解决了啥问题？
-2.顺便说一下这次编译遇到的问题。具体如何编译RPM包，可以看我之前的文章介绍了。手搓OPENSSH安装RPM包
-1、更新openssh 10.2解决问题本版本为漏洞修复版本，主要修复了 “启用 ControlPersist 后导致 ssh(1) 无法使用” 的问题。
-漏洞修复
-ssh(1)：修复了 “ControlPersist 处于活跃状态时，终端连接处理异常导致会话无法使用” 的问题（漏洞编号：bz3872）。
-ssh-keygen(1)：修复了 “从 PKCS#11 令牌下载密钥” 的功能异常。
-ssh-keygen(1)：修复了 “CA 密钥存储在 ssh-agent(1) 中时，CA 签名操作失败” 的问题（漏洞编号：bz3877）。
-
-可移植性优化
-全组件：支持无 mmap(2) 函数的平台，例如 WASM 构建版本（示例：https://hterm.org）。
-
-全组件：修复了 FreeBSD 系统上因缺少 fnctl.h 头文件导致的构建失败问题。
-
-全组件：修复了 MacOS 10.12（Sierra）以下版本因缺少 clock_gettime(3) 函数导致的构建失败问题。
-
-sshd(8)：若远程主机名为 “UNKNOWN” 占位符，将不执行 PAM_RHOST 操作。此优化可避免部分 PAM 模块尝试解析该主机名时可能出现的挂起问题。需注意，仅当连接不通过 IPv4 或 IPv6 套接字建立时，sshd(8) 才会使用 “UNKNOWN” 作为主机名。
-
-
-2、编译遇到的错误及解决办法还是用脚本编译最新的安装包，遇到个错误
-~/openssh-rpms-main/el7 ~/openssh-rpms-main‘/root/openssh-rpms-main/downloads/openssh-10.2p1.tar.gz’ -&gt; ‘./SOURCES/openssh-10.2p1.tar.gz’‘/root/openssh-rpms-main/downloads/openssl-3.0.18.tar.gz’ -&gt; ‘./SOURCES/openssl-3.0.18.tar.gz’‘/root/openssh-rpms-main/downloads/x11-ssh-askpass-1.2.4.1.tar.gz’ -&gt; ‘./SOURCES/x11-ssh-askpass-1.2.4.1.tar.gz’Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.CUAJLh+ umask 022+ cd /root/openssh-rpms-main/el7/BUILD+ cd /root/openssh-rpms-main/el7/BUILD+ rm -rf openssh-10.2p1+ /usr/bin/gzip -dc /root/openssh-rpms-main/el7/SOURCES/openssh-10.2p1.tar.gz+ /usr/bin/tar -xf -+ STATUS=0+ &#x27;[&#x27; 0 -ne 0 &#x27;]&#x27;+ cd openssh-10.2p1+ /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .+ mkdir -p openssl+ tar xfz /root/openssh-rpms-main/el7/SOURCES/openssl-3.0.18.tar.gz --strip-components=1 -C openssl+ pushd openssl~/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl ~/openssh-rpms-main/el7/BUILD/openssh-10.2p1+ ./config shared zlib -fPICConfiguring OpenSSL version 3.0.18 for target linux-x86_64Using os-specific seed configurationCreated configdata.pmRunning configdata.pmCreated Makefile.inCan&#x27;t locate Time/Piece.pm in @INC (@INC contains: . /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/Configurations /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/util/perl /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/external/perl/Text-Template-1.56/lib) at Makefile.in line 37.BEGIN failed--compilation aborted at Makefile.in line 37.error: Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)RPM build errors:    Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)
-
-错误的原因可能是当你在运行 Perl 脚本时遇到 Can’t locate time&#x2F;piece.pm in @INC 错误，这意味着 Perl 无法找到所需的模块 Time::Piece。这通常是因为该模块尚未安装。
-示例
-Can&amp;#39;t locate Time/Piece.pm in @INC (@INC contains: /etc/perl /usr/local/lib/perl5 /usr/local/share/perl5 /usr/lib/perl5 /usr/share/perl5 .) at script.pl line 1
-
-解决的办法就是安装该模块
-错误处理过程
-确保你的机器连网，执行以下命令
-perl -MCPAN -e &#x27;install Time::Piece&#x27;
-
-然后一路回车，开始安装，遇到提示就是回车，之后重新编译openssh安装包
-]]></content>
-      <categories>
-        <category>linux</category>
-      </categories>
-      <tags>
-        <tag>linux</tag>
-        <tag>openssh</tag>
       </tags>
   </entry>
 </search>
