@@ -1,24 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>自我介绍</title>
-    <url>/2025/10/08/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/</url>
-    <content><![CDATA[Welcome to my blogs我来自中国-吉林
-是一名IT技术从业者，从事IT基础设施工作10余年，主要负责服务器、存储、虚拟化、数据库等系统的搭建。
-拥有如下荣誉Oracle ACE
-拥有如下认证数据库Oracle 11g OCM认证
-数据库MySQL OCP认证
-数据库电科金仓KCM认证
-数据库PGCM 认证（PostgreSQL 14）
-Microsoft 微软认证技术专家（AD方向）
-H3C 网络工程师认证
-如果有需要技术支持数据库迁移、容灾、安装调试、优化、故障处理
-服务器安装、存储调试、方案咨询、故障处理
-你都可以联系我来帮你解决！
-微信：Eric_xu_2023
-也欢迎你关注我的公众号
+    <title>Centos7_x86一键更新openssh10.1p1</title>
+    <url>/2025/10/10/Centos7_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.1p1/</url>
+    <content><![CDATA[如何完成一键更新OPENSSH我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8
+     
+
+想要获取一键安装包可以关注我的公众号联系我获取
 
 
+openssh更新了啥？OpenSSH 10.1 版本核心变更对照表
+
+
+
+变更类型
+涉及组件
+关键影响与核心内容
+
+
+
+未来弃用警告
+全组件
+弃用SHA1格式SSHFP记录，仅保留SHA256格式；SHA256自2012年OpenSSH 6.1起已支持。
+
+
+潜在不兼容变更
+ssh(1)
+非后量子密钥协商算法触发警告，可通过WarnWeakCrypto配置控制（默认开启）。
+
+
+
+ssh(1)、sshd(8)
+DSCP&#x2F;IPQoS逻辑重构：交互式流量默认用EF类别，非交互式用系统默认，支持动态切换。
+
+
+
+ssh(1)、sshd(8)
+弃用IPQoS中的ToS关键字（lowdelay&#x2F;reliability&#x2F;throughput），改用DSCP。
+
+
+
+ssh-add(1)
+证书过期时间+5分钟宽限期，代理自动清理过期证书；ssh-add -N可禁用此功能。
+
+
+
+全组件
+移除XMSS密钥实验性支持，计划后续实现新后量子签名方案。
+
+
+
+ssh-agent(1)、sshd(8)
+代理套接字从/tmp迁移至~/.ssh/agent，新增自动清理功能与多个控制选项（-U&#x2F;-u等）。
+
+
+安全修复
+ssh(1)
+禁止用户名含控制字符、URI含\0字符，防范shell注入；可信配置文件用户名无此限制。
+
+
+新增功能
+ssh(1)、sshd(8)
+新增SIGINFO处理器，记录活跃通道与会话信息。
+
+
+
+sshd(8)
+拒绝证书认证时，额外记录证书标识信息，便于调试。
+
+
+
+ssh(1)、ssh-agent(1)
+支持PKCS#11令牌上的ed25519密钥。
+
+
+
+ssh(1)
+新增RefuseConnection配置项，可在配置中添加连接阻断提醒（如弃用主机提示）。
+
+
+
+sshd(8)
+X11显示号检查适配X11DisplayOffset，支持更高端口范围配置。
+
+
+
+测试框架
+新增基准测试功能，OpenBSD用make UNITTEST_BENCHMARK=yes，Portable版用make unit-bench。
+
+
+漏洞修复
+sshd(8)
+修复MaxStartups进程跟踪异常，避免插槽占满导致拒绝新连接。
+
+
+
+ssh(1)
+修复启用ObscureKeystrokeTiming时X客户端启动延迟问题（bz#3820）。
+
+
+
+sshd(8)
+配置文件最大限制从256KB提升至4MB，超限时提前报错。
+
+
+
+全组件
+修复多处内存泄漏，优化日志显示（如密钥加载失败详情、PermitRootLogin别名修正）。
+
+
+可移植性优化
+sshd(8)
+检查PAM事务用户名变更，避免配置错误导致的授权异常；FreeBSD适配SSH_TUN_COMPAT_AF。
+
+
+
+全组件
+补充缺失系统头文件，减少跨平台编译差异；macOS适配nlist函数检查逻辑。
+
+
+
+ssh-agent(1)
+systemd套接字激活模式下，SIGTERM退出返回0，避免服务错误标记为“失败”。
 
 
 ]]></content>
@@ -26,7 +129,7 @@ H3C 网络工程师认证
         <category>linux</category>
       </categories>
       <tags>
-        <tag>杂文</tag>
+        <tag>linux,openssh</tag>
       </tags>
   </entry>
   <entry>
@@ -72,6 +175,35 @@ Starting ORACLE instance (normal)Tue Sep 16 23:51:33 2025***********************
       </categories>
       <tags>
         <tag>oracle</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>自我介绍</title>
+    <url>/2025/10/08/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/</url>
+    <content><![CDATA[Welcome to my blogs我来自中国-吉林
+是一名IT技术从业者，从事IT基础设施工作10余年，主要负责服务器、存储、虚拟化、数据库等系统的搭建。
+拥有如下荣誉Oracle ACE
+拥有如下认证数据库Oracle 11g OCM认证
+数据库MySQL OCP认证
+数据库电科金仓KCM认证
+数据库PGCM 认证（PostgreSQL 14）
+Microsoft 微软认证技术专家（AD方向）
+H3C 网络工程师认证
+如果有需要技术支持数据库迁移、容灾、安装调试、优化、故障处理
+服务器安装、存储调试、方案咨询、故障处理
+你都可以联系我来帮你解决！
+微信：Eric_xu_2023
+也欢迎你关注我的公众号
+
+
+
+
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+      <tags>
+        <tag>杂文</tag>
       </tags>
   </entry>
   <entry>
