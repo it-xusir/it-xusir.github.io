@@ -6,7 +6,7 @@
   <link href="https://itxusir.com/atom.xml" rel="self"/>
   
   <link href="https://itxusir.com/"/>
-  <updated>2025-10-13T03:38:06.377Z</updated>
+  <updated>2025-10-13T09:36:19.650Z</updated>
   <id>https://itxusir.com/</id>
   
   <author>
@@ -15,6 +15,37 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>AIX平台下Oracle 11g RAC修改PUBLIC/VIP/SCAN</title>
+    <link href="https://itxusir.com/2025/10/13/AIX%E5%B9%B3%E5%8F%B0%E4%B8%8BOracle%2011g%20RAC%E4%BF%AE%E6%94%B9PUBLIC+VIP+SCAN/"/>
+    <id>https://itxusir.com/2025/10/13/AIX%E5%B9%B3%E5%8F%B0%E4%B8%8BOracle%2011g%20RAC%E4%BF%AE%E6%94%B9PUBLIC+VIP+SCAN/</id>
+    <published>2025-10-13T09:30:00.000Z</published>
+    <updated>2025-10-13T09:36:19.650Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;当前环境&quot;&gt;&lt;a href=&quot;#当前环境&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="oracle_rac_安装调试" scheme="https://itxusir.com/categories/oracle-rac-%E5%AE%89%E8%A3%85%E8%B0%83%E8%AF%95/"/>
+    
+    
+    <category term="aix" scheme="https://itxusir.com/tags/aix/"/>
+    
+    <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="https://itxusir.com/tags/database/"/>
+    
+    <category term="rac" scheme="https://itxusir.com/tags/rac/"/>
+    
+  </entry>
   
   <entry>
     <title>推荐一些学习数据库的BLOG</title>
@@ -39,11 +70,11 @@
     <category term="学习推荐" scheme="https://itxusir.com/categories/%E5%AD%A6%E4%B9%A0%E6%8E%A8%E8%8D%90/"/>
     
     
-    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
-    
     <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
     
     <category term="database" scheme="https://itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
     
   </entry>
   
@@ -69,11 +100,11 @@
     <category term="oracle_backup" scheme="https://itxusir.com/categories/oracle-backup/"/>
     
     
-    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
-    
     <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
     
     <category term="database" scheme="https://itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
     
     <category term="逻辑备份" scheme="https://itxusir.com/tags/%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/"/>
     
@@ -100,11 +131,11 @@
     <category term="oracle_backup" scheme="https://itxusir.com/categories/oracle-backup/"/>
     
     
-    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
-    
     <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
     
     <category term="database" scheme="https://itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
     
     <category term="rman备份" scheme="https://itxusir.com/tags/rman%E5%A4%87%E4%BB%BD/"/>
     
@@ -131,9 +162,9 @@
     <category term="linux" scheme="https://itxusir.com/categories/linux/"/>
     
     
-    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
-    
     <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
     
     <category term="dba" scheme="https://itxusir.com/tags/dba/"/>
     
@@ -160,9 +191,9 @@
     <category term="linux" scheme="https://itxusir.com/categories/linux/"/>
     
     
-    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
-    
     <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
     
     <category term="dba" scheme="https://itxusir.com/tags/dba/"/>
     
@@ -273,11 +304,11 @@
     <category term="oracle_tuning" scheme="https://itxusir.com/categories/oracle-tuning/"/>
     
     
-    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
-    
     <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
     
     <category term="database" scheme="https://itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
     
   </entry>
   
