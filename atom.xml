@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>徐sir的it小栈</title>
+  <icon>https://itxusir.com/icon.png</icon>
+  <subtitle>一起来学习</subtitle>
+  <link href="https://itxusir.com/atom.xml" rel="self"/>
+  
+  <link href="https://itxusir.com/"/>
+  <updated>2025-10-13T03:38:06.377Z</updated>
+  <id>https://itxusir.com/</id>
+  
+  <author>
+    <name>徐sir</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>推荐一些学习数据库的BLOG</title>
+    <link href="https://itxusir.com/2025/10/13/%E6%8E%A8%E8%8D%90%E4%B8%80%E4%BA%9B%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84BLOG/"/>
+    <id>https://itxusir.com/2025/10/13/%E6%8E%A8%E8%8D%90%E4%B8%80%E4%BA%9B%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84BLOG/</id>
+    <published>2025-10-13T03:38:00.000Z</published>
+    <updated>2025-10-13T03:38:06.377Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Oracle top 100-blog排名&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="学习推荐" scheme="https://itxusir.com/categories/%E5%AD%A6%E4%B9%A0%E6%8E%A8%E8%8D%90/"/>
+    
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
+    
+    <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="https://itxusir.com/tags/database/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>使用expdp按条件导出oracle逻辑备份</title>
+    <link href="https://itxusir.com/2025/10/13/%E4%BD%BF%E7%94%A8expdp%E6%8C%89%E6%9D%A1%E4%BB%B6%E5%AF%BC%E5%87%BAoracle%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/"/>
+    <id>https://itxusir.com/2025/10/13/%E4%BD%BF%E7%94%A8expdp%E6%8C%89%E6%9D%A1%E4%BB%B6%E5%AF%BC%E5%87%BAoracle%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/</id>
+    <published>2025-10-13T03:32:00.000Z</published>
+    <updated>2025-10-13T03:37:35.918Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;今天遇到一个客户找我处理一个小问题，主要是按条件导出数据表报错，这里记录一下如何处理的。&lt;/p&gt;
+&lt;h2 id=&quot;expdp-直接带查询条件语句可能出现的情况&quot;&gt;&lt;a href=&quot;#expdp-直接带查询条件语句可能出现的情况&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="oracle_backup" scheme="https://itxusir.com/categories/oracle-backup/"/>
+    
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
+    
+    <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="https://itxusir.com/tags/database/"/>
+    
+    <category term="逻辑备份" scheme="https://itxusir.com/tags/%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>简易异地保留RMAN备份的方案</title>
+    <link href="https://itxusir.com/2025/10/13/%E7%AE%80%E6%98%93%E5%BC%82%E5%9C%B0%E4%BF%9D%E7%95%99RMAN%E5%A4%87%E4%BB%BD%E7%9A%84%E6%96%B9%E6%A1%88/"/>
+    <id>https://itxusir.com/2025/10/13/%E7%AE%80%E6%98%93%E5%BC%82%E5%9C%B0%E4%BF%9D%E7%95%99RMAN%E5%A4%87%E4%BB%BD%E7%9A%84%E6%96%B9%E6%A1%88/</id>
+    <published>2025-10-13T01:30:00.000Z</published>
+    <updated>2025-10-13T03:32:56.380Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;需求&quot;&gt;&lt;a href=&quot;#需求&quot; class=&quot;headerlink&quot; title=&quot;需求&quot;&gt;&lt;/a&gt;需求&lt;/h2&gt;&lt;p&gt;客户原有个中心机房A，里面有台windows 服务器运行oracle</summary>
+        
+      
+    
+    
+    
+    <category term="oracle_backup" scheme="https://itxusir.com/categories/oracle-backup/"/>
+    
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
+    
+    <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="https://itxusir.com/tags/database/"/>
+    
+    <category term="rman备份" scheme="https://itxusir.com/tags/rman%E5%A4%87%E4%BB%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>DBA必掌握的小技巧-分区满了如何处理2-迁移到新存储</title>
+    <link href="https://itxusir.com/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%862-%E8%BF%81%E7%A7%BB%E5%88%B0%E6%96%B0%E5%AD%98%E5%82%A8/"/>
+    <id>https://itxusir.com/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%862-%E8%BF%81%E7%A7%BB%E5%88%B0%E6%96%B0%E5%AD%98%E5%82%A8/</id>
+    <published>2025-10-11T13:00:10.000Z</published>
+    <updated>2025-10-13T03:40:48.842Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;前情提要&quot;&gt;&lt;a href=&quot;#前情提要&quot; class=&quot;headerlink&quot; title=&quot;前情提要&quot;&gt;&lt;/a&gt;前情提要&lt;/h2&gt;&lt;p&gt;话说上次DBA小倩通过删除home</summary>
+        
+      
+    
+    
+    
+    <category term="linux" scheme="https://itxusir.com/categories/linux/"/>
+    
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
+    
+    <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
+    
+    <category term="dba" scheme="https://itxusir.com/tags/dba/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>DBA必掌握的小技巧-分区满了如何处理1-删除home扩容根分区</title>
+    <link href="https://itxusir.com/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%861-%E5%88%A0%E9%99%A4home%E6%89%A9%E5%AE%B9%E6%A0%B9%E5%88%86%E5%8C%BA/"/>
+    <id>https://itxusir.com/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%861-%E5%88%A0%E9%99%A4home%E6%89%A9%E5%AE%B9%E6%A0%B9%E5%88%86%E5%8C%BA/</id>
+    <published>2025-10-11T13:00:00.000Z</published>
+    <updated>2025-10-13T03:40:55.138Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;故障发生了！&quot;&gt;&lt;a href=&quot;#故障发生了！&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="linux" scheme="https://itxusir.com/categories/linux/"/>
+    
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
+    
+    <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
+    
+    <category term="dba" scheme="https://itxusir.com/tags/dba/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>记一次NetApp FAS2554更换故障硬盘</title>
+    <link href="https://itxusir.com/2025/10/11/%E8%AE%B0%E4%B8%80%E6%AC%A1NetApp%20FAS2554%E6%9B%B4%E6%8D%A2%E6%95%85%E9%9A%9C%E7%A1%AC%E7%9B%98/"/>
+    <id>https://itxusir.com/2025/10/11/%E8%AE%B0%E4%B8%80%E6%AC%A1NetApp%20FAS2554%E6%9B%B4%E6%8D%A2%E6%95%85%E9%9A%9C%E7%A1%AC%E7%9B%98/</id>
+    <published>2025-10-11T09:00:00.000Z</published>
+    <updated>2025-10-13T03:39:56.401Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;案例背景&quot;&gt;&lt;a href=&quot;#案例背景&quot; class=&quot;headerlink&quot; title=&quot;案例背景&quot;&gt;&lt;/a&gt;案例背景&lt;/h2&gt;&lt;p&gt;记一次某医院PACS存储NetApp</summary>
+        
+      
+    
+    
+    
+    <category term="IT基础设施-存储" scheme="https://itxusir.com/categories/IT%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD-%E5%AD%98%E5%82%A8/"/>
+    
+    
+    <category term="netapp" scheme="https://itxusir.com/tags/netapp/"/>
+    
+    <category term="存储" scheme="https://itxusir.com/tags/%E5%AD%98%E5%82%A8/"/>
+    
+    <category term="硬件维护" scheme="https://itxusir.com/tags/%E7%A1%AC%E4%BB%B6%E7%BB%B4%E6%8A%A4/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
+    <link href="https://itxusir.com/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/"/>
+    <id>https://itxusir.com/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</id>
+    <published>2025-10-11T05:50:00.000Z</published>
+    <updated>2025-10-13T03:40:23.771Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。&lt;/p&gt;
+&lt;div</summary>
+        
+      
+    
+    
+    
+    <category term="linux" scheme="https://itxusir.com/categories/linux/"/>
+    
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
+    
+    <category term="openssh" scheme="https://itxusir.com/tags/openssh/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Centos7_x86一键更新openssh10.1p1</title>
+    <link href="https://itxusir.com/2025/10/10/Centos7_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.1p1/"/>
+    <id>https://itxusir.com/2025/10/10/Centos7_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.1p1/</id>
+    <published>2025-10-10T12:00:08.000Z</published>
+    <updated>2025-10-11T14:11:55.481Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;如何完成一键更新OPENSSH&quot;&gt;&lt;a href=&quot;#如何完成一键更新OPENSSH&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="linux" scheme="https://itxusir.com/categories/linux/"/>
+    
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
+    
+    <category term="openssh" scheme="https://itxusir.com/tags/openssh/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>处理一则Oracle未能完全引用大页问题</title>
+    <link href="https://itxusir.com/2025/10/09/%E5%A4%84%E7%90%86%E4%B8%80%E5%88%99Oracle%E6%9C%AA%E8%83%BD%E5%AE%8C%E5%85%A8%E5%BC%95%E7%94%A8%E5%A4%A7%E9%A1%B5%E9%97%AE%E9%A2%98/"/>
+    <id>https://itxusir.com/2025/10/09/%E5%A4%84%E7%90%86%E4%B8%80%E5%88%99Oracle%E6%9C%AA%E8%83%BD%E5%AE%8C%E5%85%A8%E5%BC%95%E7%94%A8%E5%A4%A7%E9%A1%B5%E9%97%AE%E9%A2%98/</id>
+    <published>2025-10-09T06:30:58.000Z</published>
+    <updated>2025-10-13T03:39:45.296Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;关于配置大页&quot;&gt;&lt;a href=&quot;#关于配置大页&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="oracle_tuning" scheme="https://itxusir.com/categories/oracle-tuning/"/>
+    
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
+    
+    <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="https://itxusir.com/tags/database/"/>
+    
+  </entry>
+  
+</feed>
