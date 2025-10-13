@@ -177,35 +177,6 @@ cd /home/cp * -rp /root/cd ~
       </tags>
   </entry>
   <entry>
-    <title>使用expdp按条件导出oracle逻辑备份</title>
-    <url>/2025/10/13/%E4%BD%BF%E7%94%A8expdp%E6%8C%89%E6%9D%A1%E4%BB%B6%E5%AF%BC%E5%87%BAoracle%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/</url>
-    <content><![CDATA[今天遇到一个客户找我处理一个小问题，主要是按条件导出数据表报错，这里记录一下如何处理的。
-expdp 直接带查询条件语句可能出现的情况直接在导出命令里写QUERY&#x3D;&lt;查询SQL&gt;来按条件导出数据表可能会报这些错误
---错误1LRM-00101: unknown parameter name &#x27;empno&#x27;--错误2ORA-39001: invalid argument valueORA-39035: Data filter SUBQUERY has already been specified--错误3ORA-31693: Table data object &quot;SCOTT&quot;.&quot;DEPT&quot; failed to load/unload and is being skipped due to error:ORA-00933: SQL command not properly ended--错误4LRM-00111: no closing quote for value &#x27;&#x27;EXP-19: failed to process parameters, type &#x27;EXP HELP=Y&#x27; for helpEXP-0: Export terminated unsuccessfully--错误5ORA-31693: Table data object &quot;SCOTT&quot;.&quot;DEPT&quot; failed to load/unload and is being skipped due to error:ORA-06502: PL/SQL: numeric or value errorORA-31605: the following was returned from LpxXSLSetTextVar in routine kuxslSetParam:LPX-314: an internal failure occurred--错误6...Processing object type TABLE_EXPORT/TABLE/TABLEORA-31693: Table data object &quot;&lt;SCHEMA_NAME&gt;&quot;.&quot;&lt;TABLE_NAME&gt;&quot; failed to load/unload and is being skipped dueto error:ORA-00911: invalid character
-
-大部分的原因为是因为涉及到特殊字符需要转义，如果没有加转义符号\可能就会报错，但是万一是个复杂SQL还要到处去转义一下比较麻烦。
-解决办法把相关的参数写到配置文件里，expdp直接调用文件即可。
-比如我要导出某张表里指定时间内的数据，并且每个文件30G大小，示例如下：
-oracle用户在当前目录创建文件 query.par，内容如下：
-DIRECTORY=DATA_PUMP_DIRDUMPFILE=2024_%ULOGFILE=2024.logfilesize=30000Mtables=TABLE_01QUERY=TABLE_01:&quot;where to_char(time,&#x27;YYYY-MM-DD hh:mi&#x27;)&gt;=&#x27;2024-01-01 00:00&#x27;and to_char(time,&#x27;YYYY-MM-DD hh:mi&#x27;)&lt;=&#x27;2024-12-31 23:59&#x27;&quot;
-
-执行，手动输入密码即可。
-expdp parfile=query.par
-
-结束不是啥新知识点，不总干数据库的活，手生，现学现用，记录一下。
-更多示例参考Export&#x2F;Import DataPump Parameter QUERY - How to Specify a Query (Doc ID 277010.1)
-]]></content>
-      <categories>
-        <category>oracle_backup</category>
-      </categories>
-      <tags>
-        <tag>linux</tag>
-        <tag>oracle</tag>
-        <tag>database</tag>
-        <tag>逻辑备份</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>DBA必掌握的小技巧-分区满了如何处理2-迁移到新存储</title>
     <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%862-%E8%BF%81%E7%A7%BB%E5%88%B0%E6%96%B0%E5%AD%98%E5%82%A8/</url>
     <content><![CDATA[前情提要话说上次DBA小倩通过删除home lv，把空间扩给了&#x2F;分区，问题暂时得到了解决。
@@ -310,6 +281,35 @@ Starting ORACLE instance (normal)Tue Sep 16 23:51:33 2025***********************
       </tags>
   </entry>
   <entry>
+    <title>使用expdp按条件导出oracle逻辑备份</title>
+    <url>/2025/10/13/%E4%BD%BF%E7%94%A8expdp%E6%8C%89%E6%9D%A1%E4%BB%B6%E5%AF%BC%E5%87%BAoracle%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/</url>
+    <content><![CDATA[今天遇到一个客户找我处理一个小问题，主要是按条件导出数据表报错，这里记录一下如何处理的。
+expdp 直接带查询条件语句可能出现的情况直接在导出命令里写QUERY&#x3D;&lt;查询SQL&gt;来按条件导出数据表可能会报这些错误
+--错误1LRM-00101: unknown parameter name &#x27;empno&#x27;--错误2ORA-39001: invalid argument valueORA-39035: Data filter SUBQUERY has already been specified--错误3ORA-31693: Table data object &quot;SCOTT&quot;.&quot;DEPT&quot; failed to load/unload and is being skipped due to error:ORA-00933: SQL command not properly ended--错误4LRM-00111: no closing quote for value &#x27;&#x27;EXP-19: failed to process parameters, type &#x27;EXP HELP=Y&#x27; for helpEXP-0: Export terminated unsuccessfully--错误5ORA-31693: Table data object &quot;SCOTT&quot;.&quot;DEPT&quot; failed to load/unload and is being skipped due to error:ORA-06502: PL/SQL: numeric or value errorORA-31605: the following was returned from LpxXSLSetTextVar in routine kuxslSetParam:LPX-314: an internal failure occurred--错误6...Processing object type TABLE_EXPORT/TABLE/TABLEORA-31693: Table data object &quot;&lt;SCHEMA_NAME&gt;&quot;.&quot;&lt;TABLE_NAME&gt;&quot; failed to load/unload and is being skipped dueto error:ORA-00911: invalid character
+
+大部分的原因为是因为涉及到特殊字符需要转义，如果没有加转义符号\可能就会报错，但是万一是个复杂SQL还要到处去转义一下比较麻烦。
+解决办法把相关的参数写到配置文件里，expdp直接调用文件即可。
+比如我要导出某张表里指定时间内的数据，并且每个文件30G大小，示例如下：
+oracle用户在当前目录创建文件 query.par，内容如下：
+DIRECTORY=DATA_PUMP_DIRDUMPFILE=2024_%ULOGFILE=2024.logfilesize=30000Mtables=TABLE_01QUERY=TABLE_01:&quot;where to_char(time,&#x27;YYYY-MM-DD hh:mi&#x27;)&gt;=&#x27;2024-01-01 00:00&#x27;and to_char(time,&#x27;YYYY-MM-DD hh:mi&#x27;)&lt;=&#x27;2024-12-31 23:59&#x27;&quot;
+
+执行，手动输入密码即可。
+expdp parfile=query.par
+
+结束不是啥新知识点，不总干数据库的活，手生，现学现用，记录一下。
+更多示例参考Export&#x2F;Import DataPump Parameter QUERY - How to Specify a Query (Doc ID 277010.1)
+]]></content>
+      <categories>
+        <category>oracle_backup</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+        <tag>oracle</tag>
+        <tag>database</tag>
+        <tag>逻辑备份</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>推荐一些学习数据库的BLOG</title>
     <url>/2025/10/13/%E6%8E%A8%E8%8D%90%E4%B8%80%E4%BA%9B%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84BLOG/</url>
     <content><![CDATA[这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。
@@ -398,6 +398,56 @@ forfiles /p &quot;F:\backup&quot; /m *.rar /d -15 /c &quot;cmd /c del @path&quot
       </tags>
   </entry>
   <entry>
+    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
+    <url>/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</url>
+    <content><![CDATA[昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。
+     
+
+想要获取一键安装包可以关注我的公众号联系我获取。
+
+
+今天主要说2个问题：
+1.这么快更新了openssh 10.2解决了啥问题？
+2.顺便说一下这次编译遇到的问题。具体如何编译RPM包，可以看我之前的文章介绍了。手搓OPENSSH安装RPM包
+更新openssh 10.2解决问题本版本为漏洞修复版本，主要修复了 “启用 ControlPersist 后导致 ssh(1) 无法使用” 的问题。
+漏洞修复
+ssh(1)：修复了 “ControlPersist 处于活跃状态时，终端连接处理异常导致会话无法使用” 的问题（漏洞编号：bz3872）。
+ssh-keygen(1)：修复了 “从 PKCS#11 令牌下载密钥” 的功能异常。
+ssh-keygen(1)：修复了 “CA 密钥存储在 ssh-agent(1) 中时，CA 签名操作失败” 的问题（漏洞编号：bz3877）。
+
+可移植性优化
+全组件：支持无 mmap(2) 函数的平台，例如 WASM 构建版本（示例：https://hterm.org）。
+
+全组件：修复了 FreeBSD 系统上因缺少 fnctl.h 头文件导致的构建失败问题。
+
+全组件：修复了 MacOS 10.12（Sierra）以下版本因缺少 clock_gettime(3) 函数导致的构建失败问题。
+
+sshd(8)：若远程主机名为 “UNKNOWN” 占位符，将不执行 PAM_RHOST 操作。此优化可避免部分 PAM 模块尝试解析该主机名时可能出现的挂起问题。需注意，仅当连接不通过 IPv4 或 IPv6 套接字建立时，sshd(8) 才会使用 “UNKNOWN” 作为主机名。
+
+
+编译遇到的错误及解决办法还是用脚本编译最新的安装包，遇到个错误
+~/openssh-rpms-main/el7 ~/openssh-rpms-main‘/root/openssh-rpms-main/downloads/openssh-10.2p1.tar.gz’ -&gt; ‘./SOURCES/openssh-10.2p1.tar.gz’‘/root/openssh-rpms-main/downloads/openssl-3.0.18.tar.gz’ -&gt; ‘./SOURCES/openssl-3.0.18.tar.gz’‘/root/openssh-rpms-main/downloads/x11-ssh-askpass-1.2.4.1.tar.gz’ -&gt; ‘./SOURCES/x11-ssh-askpass-1.2.4.1.tar.gz’Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.CUAJLh+ umask 022+ cd /root/openssh-rpms-main/el7/BUILD+ cd /root/openssh-rpms-main/el7/BUILD+ rm -rf openssh-10.2p1+ /usr/bin/gzip -dc /root/openssh-rpms-main/el7/SOURCES/openssh-10.2p1.tar.gz+ /usr/bin/tar -xf -+ STATUS=0+ &#x27;[&#x27; 0 -ne 0 &#x27;]&#x27;+ cd openssh-10.2p1+ /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .+ mkdir -p openssl+ tar xfz /root/openssh-rpms-main/el7/SOURCES/openssl-3.0.18.tar.gz --strip-components=1 -C openssl+ pushd openssl~/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl ~/openssh-rpms-main/el7/BUILD/openssh-10.2p1+ ./config shared zlib -fPICConfiguring OpenSSL version 3.0.18 for target linux-x86_64Using os-specific seed configurationCreated configdata.pmRunning configdata.pmCreated Makefile.inCan&#x27;t locate Time/Piece.pm in @INC (@INC contains: . /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/Configurations /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/util/perl /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/external/perl/Text-Template-1.56/lib) at Makefile.in line 37.BEGIN failed--compilation aborted at Makefile.in line 37.error: Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)RPM build errors:    Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)
+
+错误的原因可能是当你在运行 Perl 脚本时遇到 Can’t locate time&#x2F;piece.pm in @INC 错误，这意味着 Perl 无法找到所需的模块 Time::Piece。这通常是因为该模块尚未安装。
+示例
+Can&amp;#39;t locate Time/Piece.pm in @INC (@INC contains: /etc/perl /usr/local/lib/perl5 /usr/local/share/perl5 /usr/lib/perl5 /usr/share/perl5 .) at script.pl line 1
+
+解决的办法就是安装该模块
+错误处理过程
+确保你的机器连网，执行以下命令
+perl -MCPAN -e &#x27;install Time::Piece&#x27;
+
+然后一路回车，开始安装，遇到提示就是回车，之后重新编译openssh安装包
+]]></content>
+      <categories>
+        <category>linux</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+        <tag>openssh</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>记一次NetApp FAS2554更换故障硬盘</title>
     <url>/2025/10/11/%E8%AE%B0%E4%B8%80%E6%AC%A1NetApp%20FAS2554%E6%9B%B4%E6%8D%A2%E6%95%85%E9%9A%9C%E7%A1%AC%E7%9B%98/</url>
     <content><![CDATA[案例背景记一次某医院PACS存储NetApp FAS2554更换故障硬盘的过程。
@@ -451,56 +501,6 @@ FAS2240-A*&gt; vol status -s   Pool1 spare disks (empty)Pool0 spare disksRAID Di
         <tag>netapp</tag>
         <tag>存储</tag>
         <tag>硬件维护</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
-    <url>/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</url>
-    <content><![CDATA[昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。
-     
-
-想要获取一键安装包可以关注我的公众号联系我获取。
-
-
-今天主要说2个问题：
-1.这么快更新了openssh 10.2解决了啥问题？
-2.顺便说一下这次编译遇到的问题。具体如何编译RPM包，可以看我之前的文章介绍了。手搓OPENSSH安装RPM包
-更新openssh 10.2解决问题本版本为漏洞修复版本，主要修复了 “启用 ControlPersist 后导致 ssh(1) 无法使用” 的问题。
-漏洞修复
-ssh(1)：修复了 “ControlPersist 处于活跃状态时，终端连接处理异常导致会话无法使用” 的问题（漏洞编号：bz3872）。
-ssh-keygen(1)：修复了 “从 PKCS#11 令牌下载密钥” 的功能异常。
-ssh-keygen(1)：修复了 “CA 密钥存储在 ssh-agent(1) 中时，CA 签名操作失败” 的问题（漏洞编号：bz3877）。
-
-可移植性优化
-全组件：支持无 mmap(2) 函数的平台，例如 WASM 构建版本（示例：https://hterm.org）。
-
-全组件：修复了 FreeBSD 系统上因缺少 fnctl.h 头文件导致的构建失败问题。
-
-全组件：修复了 MacOS 10.12（Sierra）以下版本因缺少 clock_gettime(3) 函数导致的构建失败问题。
-
-sshd(8)：若远程主机名为 “UNKNOWN” 占位符，将不执行 PAM_RHOST 操作。此优化可避免部分 PAM 模块尝试解析该主机名时可能出现的挂起问题。需注意，仅当连接不通过 IPv4 或 IPv6 套接字建立时，sshd(8) 才会使用 “UNKNOWN” 作为主机名。
-
-
-编译遇到的错误及解决办法还是用脚本编译最新的安装包，遇到个错误
-~/openssh-rpms-main/el7 ~/openssh-rpms-main‘/root/openssh-rpms-main/downloads/openssh-10.2p1.tar.gz’ -&gt; ‘./SOURCES/openssh-10.2p1.tar.gz’‘/root/openssh-rpms-main/downloads/openssl-3.0.18.tar.gz’ -&gt; ‘./SOURCES/openssl-3.0.18.tar.gz’‘/root/openssh-rpms-main/downloads/x11-ssh-askpass-1.2.4.1.tar.gz’ -&gt; ‘./SOURCES/x11-ssh-askpass-1.2.4.1.tar.gz’Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.CUAJLh+ umask 022+ cd /root/openssh-rpms-main/el7/BUILD+ cd /root/openssh-rpms-main/el7/BUILD+ rm -rf openssh-10.2p1+ /usr/bin/gzip -dc /root/openssh-rpms-main/el7/SOURCES/openssh-10.2p1.tar.gz+ /usr/bin/tar -xf -+ STATUS=0+ &#x27;[&#x27; 0 -ne 0 &#x27;]&#x27;+ cd openssh-10.2p1+ /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .+ mkdir -p openssl+ tar xfz /root/openssh-rpms-main/el7/SOURCES/openssl-3.0.18.tar.gz --strip-components=1 -C openssl+ pushd openssl~/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl ~/openssh-rpms-main/el7/BUILD/openssh-10.2p1+ ./config shared zlib -fPICConfiguring OpenSSL version 3.0.18 for target linux-x86_64Using os-specific seed configurationCreated configdata.pmRunning configdata.pmCreated Makefile.inCan&#x27;t locate Time/Piece.pm in @INC (@INC contains: . /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/Configurations /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/util/perl /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/external/perl/Text-Template-1.56/lib) at Makefile.in line 37.BEGIN failed--compilation aborted at Makefile.in line 37.error: Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)RPM build errors:    Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)
-
-错误的原因可能是当你在运行 Perl 脚本时遇到 Can’t locate time&#x2F;piece.pm in @INC 错误，这意味着 Perl 无法找到所需的模块 Time::Piece。这通常是因为该模块尚未安装。
-示例
-Can&amp;#39;t locate Time/Piece.pm in @INC (@INC contains: /etc/perl /usr/local/lib/perl5 /usr/local/share/perl5 /usr/lib/perl5 /usr/share/perl5 .) at script.pl line 1
-
-解决的办法就是安装该模块
-错误处理过程
-确保你的机器连网，执行以下命令
-perl -MCPAN -e &#x27;install Time::Piece&#x27;
-
-然后一路回车，开始安装，遇到提示就是回车，之后重新编译openssh安装包
-]]></content>
-      <categories>
-        <category>linux</category>
-      </categories>
-      <tags>
-        <tag>linux</tag>
-        <tag>openssh</tag>
       </tags>
   </entry>
 </search>
