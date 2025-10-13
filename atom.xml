@@ -6,7 +6,7 @@
   <link href="https://itxusir.com/atom.xml" rel="self"/>
   
   <link href="https://itxusir.com/"/>
-  <updated>2025-10-13T09:36:19.650Z</updated>
+  <updated>2025-10-13T14:23:17.188Z</updated>
   <id>https://itxusir.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>AIX系统The largest dump device is too small问题</title>
+    <link href="https://itxusir.com/2025/10/13/AIX%E7%B3%BB%E7%BB%9FThe%20largest%20dump%20device%20is%20too%20small%E9%97%AE%E9%A2%98/"/>
+    <id>https://itxusir.com/2025/10/13/AIX%E7%B3%BB%E7%BB%9FThe%20largest%20dump%20device%20is%20too%20small%E9%97%AE%E9%A2%98/</id>
+    <published>2025-10-13T14:22:00.000Z</published>
+    <updated>2025-10-13T14:23:17.188Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;1、问题报错&quot;&gt;&lt;a href=&quot;#1、问题报错&quot; class=&quot;headerlink&quot; title=&quot;1、问题报错&quot;&gt;&lt;/a&gt;1、问题报错&lt;/h2&gt;&lt;p&gt;今天巡检HIS的数据库服务器，发现小机AIX系统有大量的报错：&lt;/p&gt;
+&lt;figure</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_aix" scheme="https://itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-aix/"/>
+    
+    
+    <category term="aix" scheme="https://itxusir.com/tags/aix/"/>
+    
+  </entry>
   
   <entry>
     <title>AIX平台下Oracle 11g RAC修改PUBLIC/VIP/SCAN</title>
