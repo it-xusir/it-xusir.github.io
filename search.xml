@@ -154,7 +154,7 @@
       
       <categories>
           
-          <category> oracle优化 </category>
+          <category> oracle_tuning </category>
           
       </categories>
       
@@ -164,6 +164,8 @@
             <tag> linux </tag>
             
             <tag> oracle </tag>
+            
+            <tag> database </tag>
             
         </tags>
       
