@@ -6,7 +6,7 @@
   <link href="https://itxusir.com/atom.xml" rel="self"/>
   
   <link href="https://itxusir.com/"/>
-  <updated>2025-10-14T01:02:05.274Z</updated>
+  <updated>2025-10-14T09:51:12.572Z</updated>
   <id>https://itxusir.com/</id>
   
   <author>
@@ -15,6 +15,38 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>OEL7挂载ISCSI存储配置示例</title>
+    <link href="https://itxusir.com/2025/10/14/OEL7%E6%8C%82%E8%BD%BDISCSI%E5%AD%98%E5%82%A8%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B/"/>
+    <id>https://itxusir.com/2025/10/14/OEL7%E6%8C%82%E8%BD%BDISCSI%E5%AD%98%E5%82%A8%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B/</id>
+    <published>2025-10-14T09:00:00.000Z</published>
+    <updated>2025-10-14T09:51:12.572Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;客户让帮忙挂载个ISCSI存储，大概结构如下图所示：&lt;/p&gt;
+&lt;img alt=&quot;1.png&quot; src=&quot;https://i-blog.csdnimg.cn/img_convert/887a5b3d496dbdef664ab1a3373e9048.png&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_linux" scheme="https://itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    
+    
+    <category term="oracle" scheme="https://itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="https://itxusir.com/tags/linux/"/>
+    
+    <category term="iscsi" scheme="https://itxusir.com/tags/iscsi/"/>
+    
+    <category term="parted" scheme="https://itxusir.com/tags/parted/"/>
+    
+  </entry>
   
   <entry>
     <title>IBM_AIX平台搭建GPFS集群演示</title>
