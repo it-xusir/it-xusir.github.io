@@ -6,7 +6,7 @@
   <link href="https://itxusir.com/atom.xml" rel="self"/>
   
   <link href="https://itxusir.com/"/>
-  <updated>2025-10-13T14:23:17.188Z</updated>
+  <updated>2025-10-14T01:02:05.274Z</updated>
   <id>https://itxusir.com/</id>
   
   <author>
@@ -17,19 +17,48 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>IBM_AIX平台搭建GPFS集群演示</title>
+    <link href="https://itxusir.com/2025/10/14/IBM_AIX%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BAGPFS%E9%9B%86%E7%BE%A4/"/>
+    <id>https://itxusir.com/2025/10/14/IBM_AIX%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BAGPFS%E9%9B%86%E7%BE%A4/</id>
+    <published>2025-10-14T01:00:00.000Z</published>
+    <updated>2025-10-14T01:02:05.274Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;早年间的实施记录，重新排版了一下：&lt;/p&gt;
+&lt;h2 id=&quot;基础环境&quot;&gt;&lt;a href=&quot;#基础环境&quot; class=&quot;headerlink&quot; title=&quot;基础环境&quot;&gt;&lt;/a&gt;基础环境&lt;/h2&gt;&lt;p&gt;当年是计划做一套10G的rac：&lt;/p&gt;
+&lt;p&gt;1、用的主机是两台IBM</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_aix" scheme="https://itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-aix/"/>
+    
+    
+    <category term="aix" scheme="https://itxusir.com/tags/aix/"/>
+    
+    <category term="gpfs" scheme="https://itxusir.com/tags/gpfs/"/>
+    
+  </entry>
+  
+  <entry>
     <title>AIX系统The largest dump device is too small问题</title>
     <link href="https://itxusir.com/2025/10/13/AIX%E7%B3%BB%E7%BB%9FThe%20largest%20dump%20device%20is%20too%20small%E9%97%AE%E9%A2%98/"/>
     <id>https://itxusir.com/2025/10/13/AIX%E7%B3%BB%E7%BB%9FThe%20largest%20dump%20device%20is%20too%20small%E9%97%AE%E9%A2%98/</id>
     <published>2025-10-13T14:22:00.000Z</published>
-    <updated>2025-10-13T14:23:17.188Z</updated>
+    <updated>2025-10-14T01:05:18.335Z</updated>
     
     
       
       
         
         
-    <summary type="html">&lt;h2 id=&quot;1、问题报错&quot;&gt;&lt;a href=&quot;#1、问题报错&quot; class=&quot;headerlink&quot; title=&quot;1、问题报错&quot;&gt;&lt;/a&gt;1、问题报错&lt;/h2&gt;&lt;p&gt;今天巡检HIS的数据库服务器，发现小机AIX系统有大量的报错：&lt;/p&gt;
-&lt;figure</summary>
+    <summary type="html">&lt;h2 id=&quot;问题报错&quot;&gt;&lt;a href=&quot;#问题报错&quot; class=&quot;headerlink&quot; title=&quot;问题报错&quot;&gt;&lt;/a&gt;问题报错&lt;/h2&gt;&lt;p&gt;今天巡检HIS的数据库服务器，发现小机AIX系统有大量的报错：&lt;/p&gt;
+&lt;figure class=&quot;highlight</summary>
         
       
     
@@ -47,7 +76,7 @@
     <link href="https://itxusir.com/2025/10/13/AIX%E5%B9%B3%E5%8F%B0%E4%B8%8BOracle%2011g%20RAC%E4%BF%AE%E6%94%B9PUBLIC+VIP+SCAN/"/>
     <id>https://itxusir.com/2025/10/13/AIX%E5%B9%B3%E5%8F%B0%E4%B8%8BOracle%2011g%20RAC%E4%BF%AE%E6%94%B9PUBLIC+VIP+SCAN/</id>
     <published>2025-10-13T09:30:00.000Z</published>
-    <updated>2025-10-13T09:36:19.650Z</updated>
+    <updated>2025-10-14T01:03:20.859Z</updated>
     
     
       
@@ -109,7 +138,7 @@
     <link href="https://itxusir.com/2025/10/13/%E4%BD%BF%E7%94%A8expdp%E6%8C%89%E6%9D%A1%E4%BB%B6%E5%AF%BC%E5%87%BAoracle%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/"/>
     <id>https://itxusir.com/2025/10/13/%E4%BD%BF%E7%94%A8expdp%E6%8C%89%E6%9D%A1%E4%BB%B6%E5%AF%BC%E5%87%BAoracle%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/</id>
     <published>2025-10-13T03:32:00.000Z</published>
-    <updated>2025-10-13T03:37:35.918Z</updated>
+    <updated>2025-10-14T01:03:37.953Z</updated>
     
     
       
@@ -141,7 +170,7 @@
     <link href="https://itxusir.com/2025/10/13/%E7%AE%80%E6%98%93%E5%BC%82%E5%9C%B0%E4%BF%9D%E7%95%99RMAN%E5%A4%87%E4%BB%BD%E7%9A%84%E6%96%B9%E6%A1%88/"/>
     <id>https://itxusir.com/2025/10/13/%E7%AE%80%E6%98%93%E5%BC%82%E5%9C%B0%E4%BF%9D%E7%95%99RMAN%E5%A4%87%E4%BB%BD%E7%9A%84%E6%96%B9%E6%A1%88/</id>
     <published>2025-10-13T01:30:00.000Z</published>
-    <updated>2025-10-13T03:32:56.380Z</updated>
+    <updated>2025-10-14T01:03:46.966Z</updated>
     
     
       
@@ -172,7 +201,7 @@
     <link href="https://itxusir.com/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%862-%E8%BF%81%E7%A7%BB%E5%88%B0%E6%96%B0%E5%AD%98%E5%82%A8/"/>
     <id>https://itxusir.com/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%862-%E8%BF%81%E7%A7%BB%E5%88%B0%E6%96%B0%E5%AD%98%E5%82%A8/</id>
     <published>2025-10-11T13:00:10.000Z</published>
-    <updated>2025-10-13T03:40:48.842Z</updated>
+    <updated>2025-10-14T01:02:20.267Z</updated>
     
     
       
@@ -201,7 +230,7 @@
     <link href="https://itxusir.com/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%861-%E5%88%A0%E9%99%A4home%E6%89%A9%E5%AE%B9%E6%A0%B9%E5%88%86%E5%8C%BA/"/>
     <id>https://itxusir.com/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%861-%E5%88%A0%E9%99%A4home%E6%89%A9%E5%AE%B9%E6%A0%B9%E5%88%86%E5%8C%BA/</id>
     <published>2025-10-11T13:00:00.000Z</published>
-    <updated>2025-10-13T03:40:55.138Z</updated>
+    <updated>2025-10-14T01:02:33.736Z</updated>
     
     
       
@@ -230,7 +259,7 @@
     <link href="https://itxusir.com/2025/10/11/%E8%AE%B0%E4%B8%80%E6%AC%A1NetApp%20FAS2554%E6%9B%B4%E6%8D%A2%E6%95%85%E9%9A%9C%E7%A1%AC%E7%9B%98/"/>
     <id>https://itxusir.com/2025/10/11/%E8%AE%B0%E4%B8%80%E6%AC%A1NetApp%20FAS2554%E6%9B%B4%E6%8D%A2%E6%95%85%E9%9A%9C%E7%A1%AC%E7%9B%98/</id>
     <published>2025-10-11T09:00:00.000Z</published>
-    <updated>2025-10-13T03:39:56.401Z</updated>
+    <updated>2025-10-14T01:03:56.028Z</updated>
     
     
       
@@ -314,7 +343,7 @@
     <link href="https://itxusir.com/2025/10/09/%E5%A4%84%E7%90%86%E4%B8%80%E5%88%99Oracle%E6%9C%AA%E8%83%BD%E5%AE%8C%E5%85%A8%E5%BC%95%E7%94%A8%E5%A4%A7%E9%A1%B5%E9%97%AE%E9%A2%98/"/>
     <id>https://itxusir.com/2025/10/09/%E5%A4%84%E7%90%86%E4%B8%80%E5%88%99Oracle%E6%9C%AA%E8%83%BD%E5%AE%8C%E5%85%A8%E5%BC%95%E7%94%A8%E5%A4%A7%E9%A1%B5%E9%97%AE%E9%A2%98/</id>
     <published>2025-10-09T06:30:58.000Z</published>
-    <updated>2025-10-13T03:39:45.296Z</updated>
+    <updated>2025-10-14T01:04:08.864Z</updated>
     
     
       
