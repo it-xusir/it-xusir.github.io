@@ -1,59 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>AIX平台下Oracle 11g RAC修改PUBLIC/VIP/SCAN</title>
-    <url>/2025/10/13/AIX%E5%B9%B3%E5%8F%B0%E4%B8%8BOracle%2011g%20RAC%E4%BF%AE%E6%94%B9PUBLIC+VIP+SCAN/</url>
-    <content><![CDATA[<h2 id="当前环境"><a href="#当前环境" class="headerlink" title="当前环境"></a>当前环境</h2><p>由于机房网络变更，客户要修改现在RAC的public&#x2F;vip&#x2F;scan地址，这里记录一下。</p>
-<p>主机操作系统：AIX 7.2</p>
-<p>数据库版本：11.2.0.4 rac</p>
-<p>数据库实例名：orcl1&#x2F;orcl2</p>
-<p>当前hosts文件配置</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">192.168.56.10   rac1</span><br><span class="line">192.168.56.11   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.12   rac1-vip</span><br><span class="line">192.168.56.13   rac2-vip</span><br><span class="line">192.168.56.14   rac-scan</span><br></pre></td></tr></table></figure>
-
-<p>计划修改后的IP地址（priv-IP由于两台服务器直连不过交换机，保持不变）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">192.168.56.120   rac1</span><br><span class="line">192.168.56.121   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.122   rac1-vip</span><br><span class="line">192.168.56.123   rac2-vip</span><br><span class="line">192.168.56.124   rac-scan</span><br></pre></td></tr></table></figure>
-
-<h2 id="修改PUBLIC-IP"><a href="#修改PUBLIC-IP" class="headerlink" title="修改PUBLIC-IP"></a>修改PUBLIC-IP</h2><p>1、停止两节点CRS</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/crsctl stop crs</span><br></pre></td></tr></table></figure>
-
-<p>2、备份并修改hosts</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cp /etc/hosts /etc/hosts.bak</span><br><span class="line">注释或删除旧的配置，修改。</span><br><span class="line">cat /etc/hots</span><br><span class="line">192.168.56.120   rac1</span><br><span class="line">192.168.56.121   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.122   rac1-vip</span><br><span class="line">192.168.56.123   rac2-vip</span><br><span class="line">192.168.56.124   rac-scan</span><br></pre></td></tr></table></figure>
-
-<p>3、修改主机IP地址</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#这里以AIX为例，如果是LINUX，请用相应的命令修改，使用root用户执行</span><br><span class="line">chdev -l en8 -a netaddr=192.168.56.120 -a netmask=255.255.255.0 -a state=up</span><br><span class="line">chdev -l en8 -a netaddr=192.168.56.121 -a netmask=255.255.255.0 -a state=up</span><br><span class="line">--修改完重新连接新的IP地址</span><br></pre></td></tr></table></figure>
-
-<p>4、启动CRS</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/crsctl start crs</span><br></pre></td></tr></table></figure>
-
-<p>检查修改情况，此时VIP应该自动使用最新的</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/g01/app/11.2.0/grid/bin/srvctl config nodeapps -a</span><br><span class="line">ifconfig -a</span><br></pre></td></tr></table></figure>
-
-<h2 id="修改SCAN-IP"><a href="#修改SCAN-IP" class="headerlink" title="修改SCAN-IP"></a>修改SCAN-IP</h2><p>srvctl config scan 查看当前设置</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/u01/11.2.0/grid/bin/srvctl config scan</span><br><span class="line">SCAN name: rac-scan, Network: 1/192.168.56.0/255.255.255.0/en8</span><br><span class="line">SCAN VIP name: scan1, IP: /rac-scan/192.168.56.14</span><br></pre></td></tr></table></figure>
-
-<p>执行命令修改</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl stop scan_listener</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl stop scan         </span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl modify scan -n 192.168.56.124</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl start scan_listener</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl config scan        </span><br></pre></td></tr></table></figure>
-
-<p>检查是否修改成功</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl config scan</span><br><span class="line">返回结果</span><br><span class="line">SCAN name: 192.168.56.124, Network: 1/192.168.56.0/255.255.255.0/en8</span><br><span class="line">SCAN VIP name: scan1, IP: /192.168.56.124/192.168.56.124</span><br></pre></td></tr></table></figure>
-
-<h2 id="修改数据库"><a href="#修改数据库" class="headerlink" title="修改数据库"></a>修改数据库</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--登录到数据库执行</span><br><span class="line">alter system set local_listener=&#x27;(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.56.122)(PORT=1521))))&#x27; scope=both sid=&#x27;orcl1&#x27;;</span><br><span class="line">alter system set local_listener=&#x27;(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.56.123)(PORT=1521))))&#x27; scope=both sid=&#x27;orcl2&#x27;;</span><br></pre></td></tr></table></figure>
-
-<p>检查无误，大功告成！</p>
-<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
-<p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
-      <categories>
-        <category>oracle_rac_安装调试</category>
-      </categories>
-      <tags>
-        <tag>aix</tag>
-        <tag>oracle</tag>
-        <tag>database</tag>
-        <tag>rac</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Centos7_x86一键更新openssh10.1p1</title>
     <url>/2025/10/10/Centos7_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.1p1/</url>
     <content><![CDATA[<h2 id="如何完成一键更新OPENSSH"><a href="#如何完成一键更新OPENSSH" class="headerlink" title="如何完成一键更新OPENSSH"></a>如何完成一键更新OPENSSH</h2><p>我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8</p>
@@ -187,6 +134,105 @@
       </tags>
   </entry>
   <entry>
+    <title>AIX平台下Oracle 11g RAC修改PUBLIC/VIP/SCAN</title>
+    <url>/2025/10/13/AIX%E5%B9%B3%E5%8F%B0%E4%B8%8BOracle%2011g%20RAC%E4%BF%AE%E6%94%B9PUBLIC+VIP+SCAN/</url>
+    <content><![CDATA[<h2 id="当前环境"><a href="#当前环境" class="headerlink" title="当前环境"></a>当前环境</h2><p>由于机房网络变更，客户要修改现在RAC的public&#x2F;vip&#x2F;scan地址，这里记录一下。</p>
+<p>主机操作系统：AIX 7.2</p>
+<p>数据库版本：11.2.0.4 rac</p>
+<p>数据库实例名：orcl1&#x2F;orcl2</p>
+<p>当前hosts文件配置</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">192.168.56.10   rac1</span><br><span class="line">192.168.56.11   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.12   rac1-vip</span><br><span class="line">192.168.56.13   rac2-vip</span><br><span class="line">192.168.56.14   rac-scan</span><br></pre></td></tr></table></figure>
+
+<p>计划修改后的IP地址（priv-IP由于两台服务器直连不过交换机，保持不变）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">192.168.56.120   rac1</span><br><span class="line">192.168.56.121   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.122   rac1-vip</span><br><span class="line">192.168.56.123   rac2-vip</span><br><span class="line">192.168.56.124   rac-scan</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改PUBLIC-IP"><a href="#修改PUBLIC-IP" class="headerlink" title="修改PUBLIC-IP"></a>修改PUBLIC-IP</h2><p>1、停止两节点CRS</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/crsctl stop crs</span><br></pre></td></tr></table></figure>
+
+<p>2、备份并修改hosts</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cp /etc/hosts /etc/hosts.bak</span><br><span class="line">注释或删除旧的配置，修改。</span><br><span class="line">cat /etc/hots</span><br><span class="line">192.168.56.120   rac1</span><br><span class="line">192.168.56.121   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.122   rac1-vip</span><br><span class="line">192.168.56.123   rac2-vip</span><br><span class="line">192.168.56.124   rac-scan</span><br></pre></td></tr></table></figure>
+
+<p>3、修改主机IP地址</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#这里以AIX为例，如果是LINUX，请用相应的命令修改，使用root用户执行</span><br><span class="line">chdev -l en8 -a netaddr=192.168.56.120 -a netmask=255.255.255.0 -a state=up</span><br><span class="line">chdev -l en8 -a netaddr=192.168.56.121 -a netmask=255.255.255.0 -a state=up</span><br><span class="line">--修改完重新连接新的IP地址</span><br></pre></td></tr></table></figure>
+
+<p>4、启动CRS</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/crsctl start crs</span><br></pre></td></tr></table></figure>
+
+<p>检查修改情况，此时VIP应该自动使用最新的</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/g01/app/11.2.0/grid/bin/srvctl config nodeapps -a</span><br><span class="line">ifconfig -a</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改SCAN-IP"><a href="#修改SCAN-IP" class="headerlink" title="修改SCAN-IP"></a>修改SCAN-IP</h2><p>srvctl config scan 查看当前设置</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/u01/11.2.0/grid/bin/srvctl config scan</span><br><span class="line">SCAN name: rac-scan, Network: 1/192.168.56.0/255.255.255.0/en8</span><br><span class="line">SCAN VIP name: scan1, IP: /rac-scan/192.168.56.14</span><br></pre></td></tr></table></figure>
+
+<p>执行命令修改</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl stop scan_listener</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl stop scan         </span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl modify scan -n 192.168.56.124</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl start scan_listener</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl config scan        </span><br></pre></td></tr></table></figure>
+
+<p>检查是否修改成功</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl config scan</span><br><span class="line">返回结果</span><br><span class="line">SCAN name: 192.168.56.124, Network: 1/192.168.56.0/255.255.255.0/en8</span><br><span class="line">SCAN VIP name: scan1, IP: /192.168.56.124/192.168.56.124</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改数据库"><a href="#修改数据库" class="headerlink" title="修改数据库"></a>修改数据库</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--登录到数据库执行</span><br><span class="line">alter system set local_listener=&#x27;(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.56.122)(PORT=1521))))&#x27; scope=both sid=&#x27;orcl1&#x27;;</span><br><span class="line">alter system set local_listener=&#x27;(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.56.123)(PORT=1521))))&#x27; scope=both sid=&#x27;orcl2&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>检查无误，大功告成！</p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
+      <categories>
+        <category>oracle_rac_安装调试</category>
+      </categories>
+      <tags>
+        <tag>aix</tag>
+        <tag>oracle</tag>
+        <tag>database</tag>
+        <tag>rac</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>DBA必掌握的小技巧-分区满了如何处理1-删除home扩容根分区</title>
+    <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%861-%E5%88%A0%E9%99%A4home%E6%89%A9%E5%AE%B9%E6%A0%B9%E5%88%86%E5%8C%BA/</url>
+    <content><![CDATA[<h2 id="故障发生了！"><a href="#故障发生了！" class="headerlink" title="故障发生了！"></a>故障发生了！</h2><p>今天DBA小倩接到一个客户紧急任务，客户说自己的业务数据库突然不好使了，连接也出现了问题，开发人员连库就报这个错</p>
+<p>小倩要来了系统的登录用户名密码，登录到了数据库服务器一看</p>
+<p>好家伙！根目录满了。</p>
+<p>仔细检查发现，之前软件实施的人员把数据库直接装到了根目录下，最后导致根目录空间耗尽，数据库无法写入审计文件，无法登录了。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver /]# df -Th</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root xfs        50G   50G   33M 100% /</span><br><span class="line">/dev/mapper/centos-home xfs       445G   33M  445G   1% /home</span><br><span class="line">/dev/sda1               xfs      1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                   tmpfs     378M     0  378M   0% /run/user/0</span><br><span class="line">[root@dbserver /]# ls </span><br><span class="line">bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  u01  usr  var</span><br></pre></td></tr></table></figure>
+
+<p>根分区是没地方了，可是&#x2F;home分区却几乎没用。</p>
+<p>这就是之前的集成实施人员和软件实施人员没有对接好，两个人都是二把刀，导致这么个结果。</p>
+<h2 id="此时如何快速恢复业务呢？"><a href="#此时如何快速恢复业务呢？" class="headerlink" title="此时如何快速恢复业务呢？"></a>此时如何快速恢复业务呢？</h2><p>经过检查&#x2F;home分区下只有用户的默认文件夹，并无其它生产数据，与客户沟通后，小倩建议把&#x2F;home分区删除，扩容到根分区里，快速恢复业务。</p>
+<p>说干就干，首先，先去$ORACLE_BASE目录下释放一点文件，比如下面这些，都可以删除</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/alert   目录下的log_*.xml文件</span><br><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/trace   目录下的日志文件，alert_orcl.log如果不是很大，不建议删除。</span><br></pre></td></tr></table></figure>
+
+<p>备份一下home下的文件，检查了只有oracle目录。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver home]# ls -al</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x.  3 root   root  20 Sep  7 21:59 .</span><br><span class="line">dr-xr-xr-x. 18 root   root 255 Sep  7 22:00 ..</span><br><span class="line">drwx------   2 oracle dba   62 Sep  7 21:59 oracle</span><br></pre></td></tr></table></figure>
+
+<p>这里我们用cp 直接复制&#x2F;home目录下的文件到&#x2F;root目录下。r表示目录下所有子目录也复制，p表进带权限复制。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /home/</span><br><span class="line">cp * -rp /root/</span><br><span class="line">cd ~</span><br></pre></td></tr></table></figure>
+
+<p>下一步，我们要卸载&#x2F;home分区，把&#x2F;home分区对应的lv删除。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# umount  /home/</span><br><span class="line">[root@dbserver ~]# lvremove /dev/centos/home </span><br><span class="line">Do you really want to remove active logical volume centos/home? [y/n]: y</span><br><span class="line">  Logical volume &quot;home&quot; successfully removed</span><br></pre></td></tr></table></figure>
+
+<p>查看VG有空闲空间，这里我们再把剩余的空间扩容到根分区所属于的名为root的lv里。扩容lv后，在线直接扩容设备&#x2F;dev&#x2F;mapper&#x2F;centos-root对应的根文件系统。扩容成功后根分区空间立即够用了，业务立马恢复。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# vgs</span><br><span class="line">  VG     #PV #LV #SN Attr   VSize    VFree  </span><br><span class="line">  centos   1   2   0 wz--n- &lt;499.00g 445.12g</span><br><span class="line">[root@dbserver ~]# lvresize -l +100%FREE /dev/centos/root </span><br><span class="line">  Size of logical volume centos/root changed from 50.00 GiB (12800 extents) to 495.12 GiB (126751 extents).</span><br><span class="line">  Logical volume centos/root successfully resized.</span><br><span class="line">[root@dbserver ~]# lvs</span><br><span class="line">  LV   VG     Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  root centos -wi-ao---- 495.12g                                                    </span><br><span class="line">  swap centos -wi-ao----  &lt;3.88g </span><br><span class="line">[root@dbserver]# xfs_growfs /dev/mapper/centos-root </span><br><span class="line">meta-data=/dev/mapper/centos-root isize=512    agcount=4, agsize=3276800 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0 spinodes=0</span><br><span class="line">data     =                       bsize=4096   blocks=13107200, imaxpct=25</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal               bsize=4096   blocks=6400, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line">data blocks changed from 13107200 to 129793024</span><br><span class="line">[root@dbserver]# df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                    1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root  496G   50G  446G  11% /</span><br><span class="line">/dev/sda1               1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                    378M     0  378M   0% /run/user/0</span><br></pre></td></tr></table></figure>
+
+<p>最后别忘记了把备份走文件恢复到&#x2F;home目录下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# cp -rp oracle/ /home/</span><br></pre></td></tr></table></figure>
+
+<h2 id="完美收工了？"><a href="#完美收工了？" class="headerlink" title="完美收工了？"></a>完美收工了？</h2><p>你以为这样就完了么？</p>
+<p>没过1天，领导又找到了小倩，说数据库在本地磁盘空间太小了，性能也不能，我们又搞了个磁盘阵列，想把数据库整体迁移到存储上。</p>
+<p>下一期我们一起来看看小倩同学怎么操作。</p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+]]></content>
+      <categories>
+        <category>操作系统_linux</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+        <tag>oracle</tag>
+        <tag>dba</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>AIX系统The largest dump device is too small问题</title>
     <url>/2025/10/13/AIX%E7%B3%BB%E7%BB%9FThe%20largest%20dump%20device%20is%20too%20small%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<h2 id="问题报错"><a href="#问题报错" class="headerlink" title="问题报错"></a>问题报错</h2><p>今天巡检HIS的数据库服务器，发现小机AIX系统有大量的报错：</p>
@@ -313,40 +359,55 @@
         <category>操作系统_linux</category>
       </categories>
       <tags>
-        <tag>oracle</tag>
         <tag>linux</tag>
+        <tag>oracle</tag>
         <tag>dba</tag>
       </tags>
   </entry>
   <entry>
-    <title>使用expdp按条件导出oracle逻辑备份</title>
-    <url>/2025/10/13/%E4%BD%BF%E7%94%A8expdp%E6%8C%89%E6%9D%A1%E4%BB%B6%E5%AF%BC%E5%87%BAoracle%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/</url>
-    <content><![CDATA[<p>今天遇到一个客户找我处理一个小问题，主要是按条件导出数据表报错，这里记录一下如何处理的。</p>
-<h2 id="expdp-直接带查询条件语句可能出现的情况"><a href="#expdp-直接带查询条件语句可能出现的情况" class="headerlink" title="expdp 直接带查询条件语句可能出现的情况"></a>expdp 直接带查询条件语句可能出现的情况</h2><p>直接在导出命令里写QUERY&#x3D;&lt;查询SQL&gt;来按条件导出数据表可能会报这些错误</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--错误1</span><br><span class="line">LRM-00101: unknown parameter name &#x27;empno&#x27;</span><br><span class="line">--错误2</span><br><span class="line">ORA-39001: invalid argument value</span><br><span class="line">ORA-39035: Data filter SUBQUERY has already been specified</span><br><span class="line">--错误3</span><br><span class="line">ORA-31693: Table data object &quot;SCOTT&quot;.&quot;DEPT&quot; failed to load/unload and is being skipped due to error:</span><br><span class="line">ORA-00933: SQL command not properly ended</span><br><span class="line">--错误4</span><br><span class="line">LRM-00111: no closing quote for value &#x27;&#x27;</span><br><span class="line">EXP-19: failed to process parameters, type &#x27;EXP HELP=Y&#x27; for help</span><br><span class="line">EXP-0: Export terminated unsuccessfully</span><br><span class="line">--错误5</span><br><span class="line">ORA-31693: Table data object &quot;SCOTT&quot;.&quot;DEPT&quot; failed to load/unload and is being skipped due to error:</span><br><span class="line">ORA-06502: PL/SQL: numeric or value error</span><br><span class="line">ORA-31605: the following was returned from LpxXSLSetTextVar in routine kuxslSetParam:</span><br><span class="line">LPX-314: an internal failure occurred</span><br><span class="line">--错误6</span><br><span class="line">...</span><br><span class="line">Processing object type TABLE_EXPORT/TABLE/TABLE</span><br><span class="line">ORA-31693: Table data object &quot;&lt;SCHEMA_NAME&gt;&quot;.&quot;&lt;TABLE_NAME&gt;&quot; failed to load/unload and is being skipped due</span><br><span class="line">to error:</span><br><span class="line">ORA-00911: invalid character</span><br></pre></td></tr></table></figure>
+    <title>OEL7挂载ISCSI存储配置示例</title>
+    <url>/2025/10/14/OEL7%E6%8C%82%E8%BD%BDISCSI%E5%AD%98%E5%82%A8%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B/</url>
+    <content><![CDATA[<p>客户让帮忙挂载个ISCSI存储，大概结构如下图所示：</p>
+<img alt="1.png" src="https://i-blog.csdnimg.cn/img_convert/887a5b3d496dbdef664ab1a3373e9048.png" referrerpolicy="no-referrer"/>
 
-<p>大部分的原因为是因为涉及到特殊字符需要转义，如果没有加转义符号\可能就会报错，但是万一是个复杂SQL还要到处去转义一下比较麻烦。</p>
-<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p>把相关的参数写到配置文件里，expdp直接调用文件即可。</p>
-<p>比如我要导出某张表里指定时间内的数据，并且每个文件30G大小，示例如下：</p>
-<p>oracle用户在当前目录创建文件 query.par，内容如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DIRECTORY=DATA_PUMP_DIR</span><br><span class="line">DUMPFILE=2024_%U</span><br><span class="line">LOGFILE=2024.log</span><br><span class="line">filesize=30000M</span><br><span class="line">tables=TABLE_01</span><br><span class="line">QUERY=TABLE_01:&quot;where to_char(time,&#x27;YYYY-MM-DD hh:mi&#x27;)&gt;=&#x27;2024-01-01 00:00&#x27;and to_char(time,&#x27;YYYY-MM-DD hh:mi&#x27;)&lt;=&#x27;2024-12-31 23:59&#x27;&quot;</span><br></pre></td></tr></table></figure>
+<p>ISCSI存储为一台安装了truenas的X86服务器，提供存储服务的IP地址为10.16.0.1</p>
+<p>服务器的ETH1网卡配置与10.16.0.1同段网络。</p>
+<p>为了给客户做个简单培训，整理了一下操作步骤。下面是配置示例：</p>
+<h2 id="清空ISCSI存储连接"><a href="#清空ISCSI存储连接" class="headerlink" title="清空ISCSI存储连接"></a>清空ISCSI存储连接</h2><p>为防止有其它配置影响，先断开所有登录会话</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# iscsiadm -m node -U all</span><br><span class="line">Logging out of session [sid: 1, target: iqn.2024.12.org.trusnas.ctl:server1, portal: 10.16.0.1,3260]</span><br><span class="line">Logout of [sid: 1, target: iqn.2024.12.org.trusnas.ctl:server1, portal: 10.16.0.1,3260] successful.</span><br><span class="line">[root@localhost ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0 278.5G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0 277.5G  0 part </span><br><span class="line">  ├─centos-root 253:0    0    50G  0 lvm  /</span><br><span class="line">  ├─centos-swap 253:1    0     4G  0 lvm  [SWAP]</span><br><span class="line">  └─centos-home 253:2    0 223.5G  0 lvm  /home</span><br><span class="line">sr0              11:0    1  1024M  0 rom  </span><br></pre></td></tr></table></figure>
 
-<p>执行，手动输入密码即可。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">expdp parfile=query.par</span><br></pre></td></tr></table></figure>
+<h2 id="登录ISCSI存储会话"><a href="#登录ISCSI存储会话" class="headerlink" title="登录ISCSI存储会话"></a>登录ISCSI存储会话</h2><p>执行命令登陆ISCSI存储，并配置开机自动启动ISCSI和登陆存储</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# iscsiadm -m discovery -t st -p 10.16.0.1</span><br><span class="line">10.16.0.1:3260,1 iqn.2024.12.org.trusnas.ctl:server1</span><br><span class="line">[root@localhost ~]# iscsiadm -m node -p 10.16.0.1 -l</span><br><span class="line">Logging in to [iface: default, target: iqn.2024.12.org.trusnas.ctl:server1, portal: 10.16.0.1,3260] (multiple)</span><br><span class="line">Login to [iface: default, target: iqn.2024.12.org.trusnas.ctl:server1, portal: 10.16.0.1,3260] successful.</span><br><span class="line">[root@localhost ~]# systemctl enable iscsi.service</span><br><span class="line">[root@localhost ~]# iscsiadm -m node -o update -n node.startup -v automatic</span><br><span class="line">[root@localhost ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0 278.5G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0 277.5G  0 part </span><br><span class="line">  ├─centos-root 253:0    0    50G  0 lvm  /</span><br><span class="line">  ├─centos-swap 253:1    0     4G  0 lvm  [SWAP]</span><br><span class="line">  └─centos-home 253:2    0 223.5G  0 lvm  /home</span><br><span class="line">sdc               8:32   0     3T  0 disk </span><br><span class="line">└─sdc1            8:33   0     3T  0 part </span><br><span class="line">sr0              11:0    1  1024M  0 rom  </span><br></pre></td></tr></table></figure>
 
-<h2 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h2><p>不是啥新知识点，不总干数据库的活，手生，现学现用，记录一下。</p>
-<p>更多示例参考Export&#x2F;Import DataPump Parameter QUERY - How to Specify a Query (Doc ID 277010.1)</p>
+<p>登陆成功后，lsblk命令可以查看到发现新磁盘空间sdc</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0 278.5G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0 277.5G  0 part </span><br><span class="line">  ├─centos-root 253:0    0    50G  0 lvm  /</span><br><span class="line">  ├─centos-swap 253:1    0     4G  0 lvm  [SWAP]</span><br><span class="line">  └─centos-home 253:2    0 223.5G  0 lvm  /home</span><br><span class="line">sdc               8:32   0     3T  0 disk </span><br><span class="line">sr0              11:0    1  1024M  0 rom  </span><br></pre></td></tr></table></figure>
+
+<h2 id="配置格式化磁盘"><a href="#配置格式化磁盘" class="headerlink" title="配置格式化磁盘"></a>配置格式化磁盘</h2><p>不确定磁盘是否用过的话，为了清空数据，可以dd接磁盘头</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# dd if=/dev/zero of=/dev/sdc bs=1024k count=100</span><br><span class="line">记录了100+0 的读入</span><br><span class="line">记录了100+0 的写出</span><br></pre></td></tr></table></figure>
+
+<p>这里我们不适用LVM，直接用parted分区，可以参照如下公式对齐分区 (默认创建可以会报警<strong>The resulting partition is not properly aligned for best performance</strong>) </p>
+<p>计算公式如下： </p>
+<p>parted分区起点&#x3D;(optimal_io_size + alignment_offset) &#x2F; physical_block_size &#x3D;  (8388608 + 0) &#x2F; 16384 &#x3D; 512</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# cat /sys/block/sdc/queue/optimal_io_size              </span><br><span class="line">8388608</span><br><span class="line">[root@localhost ~]# cat /sys/block/sdc/queue/minimum_io_size </span><br><span class="line">16384</span><br><span class="line">[root@localhost ~]# cat /sys/block/sdc/alignment_offset </span><br><span class="line">0</span><br><span class="line">[root@localhost ~]# cat /sys/block/sdc/queue/physical_block_size </span><br><span class="line">16384</span><br><span class="line">[root@localhost ~]# parted /dev/sdc</span><br><span class="line">GNU Parted 3.1</span><br><span class="line">使用 /dev/sdc</span><br><span class="line">Welcome to GNU Parted! Type &#x27;help&#x27; to view a list of commands.</span><br><span class="line">(parted) mklabel gpt                        </span><br><span class="line">(parted) mkpart primary 512 100%</span><br><span class="line">(parted) print                                                            </span><br><span class="line">Model: TrueNAS iSCSI Disk (scsi)</span><br><span class="line">Disk /dev/sdc: 3299GB</span><br><span class="line">Sector size (logical/physical): 512B/16384B</span><br><span class="line">Partition Table: gpt</span><br><span class="line">Disk Flags: </span><br><span class="line"></span><br><span class="line">Number  Start  End     Size    File system  Name     标志</span><br><span class="line"> 1      512MB  3299GB  3298GB               primary</span><br><span class="line">(parted) quit                                                             </span><br><span class="line">信息: You may need to update /etc/fstab.</span><br></pre></td></tr></table></figure>
+
+<p>格式化文件系统</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0 278.5G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0 277.5G  0 part </span><br><span class="line">  ├─centos-root 253:0    0    50G  0 lvm  /</span><br><span class="line">  ├─centos-swap 253:1    0     4G  0 lvm  [SWAP]</span><br><span class="line">  └─centos-home 253:2    0 223.5G  0 lvm  /home</span><br><span class="line">sdc               8:32   0     3T  0 disk </span><br><span class="line">└─sdc1            8:33   0     3T  0 part </span><br><span class="line">sr0              11:0    1  1024M  0 rom  </span><br><span class="line">[root@localhost ~]# mkfs.xfs /dev/sdc1 </span><br><span class="line">specified blocksize 4096 is less than device physical sector size 16384</span><br><span class="line">switching to logical sector size 512</span><br><span class="line">meta-data=/dev/sdc1              isize=512    agcount=4, agsize=201294848 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0, sparse=0</span><br><span class="line">data     =                       bsize=4096   blocks=805179392, imaxpct=5</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal log           bsize=4096   blocks=393154, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line"></span><br><span class="line">[root@localhost ~]# blkid |grep sdc1</span><br><span class="line">/dev/sdc1: UUID=&quot;40668fd3-ce0a-4f84-9619-084190ff23ca&quot; TYPE=&quot;xfs&quot; PARTLABEL=&quot;primary&quot; PARTUUID=&quot;9be008d4-9e4a-4569-9bec-33e17a9432d9&quot; </span><br></pre></td></tr></table></figure>
+
+<p>创建挂载点并挂载文件系统</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# mkdir /data</span><br><span class="line">[root@localhost ~]# vi /etc/fstab </span><br><span class="line">[root@localhost ~]# cat /etc/fstab </span><br><span class="line"># /etc/fstab</span><br><span class="line"># Created by anaconda on Wed Mar 19 13:54:48 2025</span><br><span class="line">#</span><br><span class="line"># Accessible filesystems, by reference, are maintained under &#x27;/dev/disk&#x27;</span><br><span class="line"># See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info</span><br><span class="line">#</span><br><span class="line">/dev/mapper/centos-root /                       xfs     defaults        0 0</span><br><span class="line">UUID=3b897744-11d6-4253-870c-03e1819b09f6 /boot                   xfs     defaults        0 0</span><br><span class="line">/dev/mapper/centos-home /home                   xfs     defaults        0 0</span><br><span class="line">/dev/mapper/centos-swap swap                    swap    defaults        0 0</span><br><span class="line">UUID=&quot;40668fd3-ce0a-4f84-9619-084190ff23ca&quot; /data xfs defaults,_netdev 0 0</span><br><span class="line"></span><br><span class="line">[root@localhost ~]# mount -a</span><br><span class="line">[root@localhost ~]# df -h</span><br><span class="line">文件系统                 容量  已用  可用 已用% 挂载点</span><br><span class="line">/dev/mapper/centos-root   50G  4.3G   46G    9% /</span><br><span class="line">devtmpfs                  63G     0   63G    0% /dev</span><br><span class="line">tmpfs                     63G     0   63G    0% /dev/shm</span><br><span class="line">tmpfs                     63G   11M   63G    1% /run</span><br><span class="line">tmpfs                     63G     0   63G    0% /sys/fs/cgroup</span><br><span class="line">/dev/sda1               1014M  179M  836M   18% /boot</span><br><span class="line">/dev/mapper/centos-home  224G   39M  224G    1% /home</span><br><span class="line">tmpfs                     13G   12K   13G    1% /run/user/42</span><br><span class="line">tmpfs                     13G     0   13G    0% /run/user/0</span><br><span class="line">/dev/sdc1                3.0T   33M  3.0T    1% /data</span><br></pre></td></tr></table></figure>
+
 <p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
 <p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+]]></content>
       <categories>
-        <category>oracle_backup</category>
+        <category>操作系统_linux</category>
       </categories>
       <tags>
-        <tag>oracle</tag>
-        <tag>database</tag>
         <tag>linux</tag>
-        <tag>逻辑备份</tag>
+        <tag>oracle</tag>
+        <tag>iscsi</tag>
+        <tag>parted</tag>
       </tags>
   </entry>
   <entry>
@@ -431,49 +492,34 @@
       </tags>
   </entry>
   <entry>
-    <title>OEL7挂载ISCSI存储配置示例</title>
-    <url>/2025/10/14/OEL7%E6%8C%82%E8%BD%BDISCSI%E5%AD%98%E5%82%A8%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B/</url>
-    <content><![CDATA[<p>客户让帮忙挂载个ISCSI存储，大概结构如下图所示：</p>
-<img alt="1.png" src="https://i-blog.csdnimg.cn/img_convert/887a5b3d496dbdef664ab1a3373e9048.png" referrerpolicy="no-referrer"/>
+    <title>使用expdp按条件导出oracle逻辑备份</title>
+    <url>/2025/10/13/%E4%BD%BF%E7%94%A8expdp%E6%8C%89%E6%9D%A1%E4%BB%B6%E5%AF%BC%E5%87%BAoracle%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/</url>
+    <content><![CDATA[<p>今天遇到一个客户找我处理一个小问题，主要是按条件导出数据表报错，这里记录一下如何处理的。</p>
+<h2 id="expdp-直接带查询条件语句可能出现的情况"><a href="#expdp-直接带查询条件语句可能出现的情况" class="headerlink" title="expdp 直接带查询条件语句可能出现的情况"></a>expdp 直接带查询条件语句可能出现的情况</h2><p>直接在导出命令里写QUERY&#x3D;&lt;查询SQL&gt;来按条件导出数据表可能会报这些错误</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--错误1</span><br><span class="line">LRM-00101: unknown parameter name &#x27;empno&#x27;</span><br><span class="line">--错误2</span><br><span class="line">ORA-39001: invalid argument value</span><br><span class="line">ORA-39035: Data filter SUBQUERY has already been specified</span><br><span class="line">--错误3</span><br><span class="line">ORA-31693: Table data object &quot;SCOTT&quot;.&quot;DEPT&quot; failed to load/unload and is being skipped due to error:</span><br><span class="line">ORA-00933: SQL command not properly ended</span><br><span class="line">--错误4</span><br><span class="line">LRM-00111: no closing quote for value &#x27;&#x27;</span><br><span class="line">EXP-19: failed to process parameters, type &#x27;EXP HELP=Y&#x27; for help</span><br><span class="line">EXP-0: Export terminated unsuccessfully</span><br><span class="line">--错误5</span><br><span class="line">ORA-31693: Table data object &quot;SCOTT&quot;.&quot;DEPT&quot; failed to load/unload and is being skipped due to error:</span><br><span class="line">ORA-06502: PL/SQL: numeric or value error</span><br><span class="line">ORA-31605: the following was returned from LpxXSLSetTextVar in routine kuxslSetParam:</span><br><span class="line">LPX-314: an internal failure occurred</span><br><span class="line">--错误6</span><br><span class="line">...</span><br><span class="line">Processing object type TABLE_EXPORT/TABLE/TABLE</span><br><span class="line">ORA-31693: Table data object &quot;&lt;SCHEMA_NAME&gt;&quot;.&quot;&lt;TABLE_NAME&gt;&quot; failed to load/unload and is being skipped due</span><br><span class="line">to error:</span><br><span class="line">ORA-00911: invalid character</span><br></pre></td></tr></table></figure>
 
-<p>ISCSI存储为一台安装了truenas的X86服务器，提供存储服务的IP地址为10.16.0.1</p>
-<p>服务器的ETH1网卡配置与10.16.0.1同段网络。</p>
-<p>为了给客户做个简单培训，整理了一下操作步骤。下面是配置示例：</p>
-<h2 id="清空ISCSI存储连接"><a href="#清空ISCSI存储连接" class="headerlink" title="清空ISCSI存储连接"></a>清空ISCSI存储连接</h2><p>为防止有其它配置影响，先断开所有登录会话</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# iscsiadm -m node -U all</span><br><span class="line">Logging out of session [sid: 1, target: iqn.2024.12.org.trusnas.ctl:server1, portal: 10.16.0.1,3260]</span><br><span class="line">Logout of [sid: 1, target: iqn.2024.12.org.trusnas.ctl:server1, portal: 10.16.0.1,3260] successful.</span><br><span class="line">[root@localhost ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0 278.5G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0 277.5G  0 part </span><br><span class="line">  ├─centos-root 253:0    0    50G  0 lvm  /</span><br><span class="line">  ├─centos-swap 253:1    0     4G  0 lvm  [SWAP]</span><br><span class="line">  └─centos-home 253:2    0 223.5G  0 lvm  /home</span><br><span class="line">sr0              11:0    1  1024M  0 rom  </span><br></pre></td></tr></table></figure>
+<p>大部分的原因为是因为涉及到特殊字符需要转义，如果没有加转义符号\可能就会报错，但是万一是个复杂SQL还要到处去转义一下比较麻烦。</p>
+<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p>把相关的参数写到配置文件里，expdp直接调用文件即可。</p>
+<p>比如我要导出某张表里指定时间内的数据，并且每个文件30G大小，示例如下：</p>
+<p>oracle用户在当前目录创建文件 query.par，内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DIRECTORY=DATA_PUMP_DIR</span><br><span class="line">DUMPFILE=2024_%U</span><br><span class="line">LOGFILE=2024.log</span><br><span class="line">filesize=30000M</span><br><span class="line">tables=TABLE_01</span><br><span class="line">QUERY=TABLE_01:&quot;where to_char(time,&#x27;YYYY-MM-DD hh:mi&#x27;)&gt;=&#x27;2024-01-01 00:00&#x27;and to_char(time,&#x27;YYYY-MM-DD hh:mi&#x27;)&lt;=&#x27;2024-12-31 23:59&#x27;&quot;</span><br></pre></td></tr></table></figure>
 
-<h2 id="登录ISCSI存储会话"><a href="#登录ISCSI存储会话" class="headerlink" title="登录ISCSI存储会话"></a>登录ISCSI存储会话</h2><p>执行命令登陆ISCSI存储，并配置开机自动启动ISCSI和登陆存储</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# iscsiadm -m discovery -t st -p 10.16.0.1</span><br><span class="line">10.16.0.1:3260,1 iqn.2024.12.org.trusnas.ctl:server1</span><br><span class="line">[root@localhost ~]# iscsiadm -m node -p 10.16.0.1 -l</span><br><span class="line">Logging in to [iface: default, target: iqn.2024.12.org.trusnas.ctl:server1, portal: 10.16.0.1,3260] (multiple)</span><br><span class="line">Login to [iface: default, target: iqn.2024.12.org.trusnas.ctl:server1, portal: 10.16.0.1,3260] successful.</span><br><span class="line">[root@localhost ~]# systemctl enable iscsi.service</span><br><span class="line">[root@localhost ~]# iscsiadm -m node -o update -n node.startup -v automatic</span><br><span class="line">[root@localhost ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0 278.5G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0 277.5G  0 part </span><br><span class="line">  ├─centos-root 253:0    0    50G  0 lvm  /</span><br><span class="line">  ├─centos-swap 253:1    0     4G  0 lvm  [SWAP]</span><br><span class="line">  └─centos-home 253:2    0 223.5G  0 lvm  /home</span><br><span class="line">sdc               8:32   0     3T  0 disk </span><br><span class="line">└─sdc1            8:33   0     3T  0 part </span><br><span class="line">sr0              11:0    1  1024M  0 rom  </span><br></pre></td></tr></table></figure>
+<p>执行，手动输入密码即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">expdp parfile=query.par</span><br></pre></td></tr></table></figure>
 
-<p>登陆成功后，lsblk命令可以查看到发现新磁盘空间sdc</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0 278.5G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0 277.5G  0 part </span><br><span class="line">  ├─centos-root 253:0    0    50G  0 lvm  /</span><br><span class="line">  ├─centos-swap 253:1    0     4G  0 lvm  [SWAP]</span><br><span class="line">  └─centos-home 253:2    0 223.5G  0 lvm  /home</span><br><span class="line">sdc               8:32   0     3T  0 disk </span><br><span class="line">sr0              11:0    1  1024M  0 rom  </span><br></pre></td></tr></table></figure>
-
-<h2 id="配置格式化磁盘"><a href="#配置格式化磁盘" class="headerlink" title="配置格式化磁盘"></a>配置格式化磁盘</h2><p>不确定磁盘是否用过的话，为了清空数据，可以dd接磁盘头</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# dd if=/dev/zero of=/dev/sdc bs=1024k count=100</span><br><span class="line">记录了100+0 的读入</span><br><span class="line">记录了100+0 的写出</span><br></pre></td></tr></table></figure>
-
-<p>这里我们不适用LVM，直接用parted分区，可以参照如下公式对齐分区 (默认创建可以会报警<strong>The resulting partition is not properly aligned for best performance</strong>) </p>
-<p>计算公式如下： </p>
-<p>parted分区起点&#x3D;(optimal_io_size + alignment_offset) &#x2F; physical_block_size &#x3D;  (8388608 + 0) &#x2F; 16384 &#x3D; 512</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# cat /sys/block/sdc/queue/optimal_io_size              </span><br><span class="line">8388608</span><br><span class="line">[root@localhost ~]# cat /sys/block/sdc/queue/minimum_io_size </span><br><span class="line">16384</span><br><span class="line">[root@localhost ~]# cat /sys/block/sdc/alignment_offset </span><br><span class="line">0</span><br><span class="line">[root@localhost ~]# cat /sys/block/sdc/queue/physical_block_size </span><br><span class="line">16384</span><br><span class="line">[root@localhost ~]# parted /dev/sdc</span><br><span class="line">GNU Parted 3.1</span><br><span class="line">使用 /dev/sdc</span><br><span class="line">Welcome to GNU Parted! Type &#x27;help&#x27; to view a list of commands.</span><br><span class="line">(parted) mklabel gpt                        </span><br><span class="line">(parted) mkpart primary 512 100%</span><br><span class="line">(parted) print                                                            </span><br><span class="line">Model: TrueNAS iSCSI Disk (scsi)</span><br><span class="line">Disk /dev/sdc: 3299GB</span><br><span class="line">Sector size (logical/physical): 512B/16384B</span><br><span class="line">Partition Table: gpt</span><br><span class="line">Disk Flags: </span><br><span class="line"></span><br><span class="line">Number  Start  End     Size    File system  Name     标志</span><br><span class="line"> 1      512MB  3299GB  3298GB               primary</span><br><span class="line">(parted) quit                                                             </span><br><span class="line">信息: You may need to update /etc/fstab.</span><br></pre></td></tr></table></figure>
-
-<p>格式化文件系统</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0 278.5G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0 277.5G  0 part </span><br><span class="line">  ├─centos-root 253:0    0    50G  0 lvm  /</span><br><span class="line">  ├─centos-swap 253:1    0     4G  0 lvm  [SWAP]</span><br><span class="line">  └─centos-home 253:2    0 223.5G  0 lvm  /home</span><br><span class="line">sdc               8:32   0     3T  0 disk </span><br><span class="line">└─sdc1            8:33   0     3T  0 part </span><br><span class="line">sr0              11:0    1  1024M  0 rom  </span><br><span class="line">[root@localhost ~]# mkfs.xfs /dev/sdc1 </span><br><span class="line">specified blocksize 4096 is less than device physical sector size 16384</span><br><span class="line">switching to logical sector size 512</span><br><span class="line">meta-data=/dev/sdc1              isize=512    agcount=4, agsize=201294848 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0, sparse=0</span><br><span class="line">data     =                       bsize=4096   blocks=805179392, imaxpct=5</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal log           bsize=4096   blocks=393154, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line"></span><br><span class="line">[root@localhost ~]# blkid |grep sdc1</span><br><span class="line">/dev/sdc1: UUID=&quot;40668fd3-ce0a-4f84-9619-084190ff23ca&quot; TYPE=&quot;xfs&quot; PARTLABEL=&quot;primary&quot; PARTUUID=&quot;9be008d4-9e4a-4569-9bec-33e17a9432d9&quot; </span><br></pre></td></tr></table></figure>
-
-<p>创建挂载点并挂载文件系统</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# mkdir /data</span><br><span class="line">[root@localhost ~]# vi /etc/fstab </span><br><span class="line">[root@localhost ~]# cat /etc/fstab </span><br><span class="line"># /etc/fstab</span><br><span class="line"># Created by anaconda on Wed Mar 19 13:54:48 2025</span><br><span class="line">#</span><br><span class="line"># Accessible filesystems, by reference, are maintained under &#x27;/dev/disk&#x27;</span><br><span class="line"># See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info</span><br><span class="line">#</span><br><span class="line">/dev/mapper/centos-root /                       xfs     defaults        0 0</span><br><span class="line">UUID=3b897744-11d6-4253-870c-03e1819b09f6 /boot                   xfs     defaults        0 0</span><br><span class="line">/dev/mapper/centos-home /home                   xfs     defaults        0 0</span><br><span class="line">/dev/mapper/centos-swap swap                    swap    defaults        0 0</span><br><span class="line">UUID=&quot;40668fd3-ce0a-4f84-9619-084190ff23ca&quot; /data xfs defaults,_netdev 0 0</span><br><span class="line"></span><br><span class="line">[root@localhost ~]# mount -a</span><br><span class="line">[root@localhost ~]# df -h</span><br><span class="line">文件系统                 容量  已用  可用 已用% 挂载点</span><br><span class="line">/dev/mapper/centos-root   50G  4.3G   46G    9% /</span><br><span class="line">devtmpfs                  63G     0   63G    0% /dev</span><br><span class="line">tmpfs                     63G     0   63G    0% /dev/shm</span><br><span class="line">tmpfs                     63G   11M   63G    1% /run</span><br><span class="line">tmpfs                     63G     0   63G    0% /sys/fs/cgroup</span><br><span class="line">/dev/sda1               1014M  179M  836M   18% /boot</span><br><span class="line">/dev/mapper/centos-home  224G   39M  224G    1% /home</span><br><span class="line">tmpfs                     13G   12K   13G    1% /run/user/42</span><br><span class="line">tmpfs                     13G     0   13G    0% /run/user/0</span><br><span class="line">/dev/sdc1                3.0T   33M  3.0T    1% /data</span><br></pre></td></tr></table></figure>
-
+<h2 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h2><p>不是啥新知识点，不总干数据库的活，手生，现学现用，记录一下。</p>
+<p>更多示例参考Export&#x2F;Import DataPump Parameter QUERY - How to Specify a Query (Doc ID 277010.1)</p>
 <p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
 <p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-]]></content>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
       <categories>
-        <category>操作系统_linux</category>
+        <category>oracle_backup</category>
       </categories>
       <tags>
-        <tag>oracle</tag>
         <tag>linux</tag>
-        <tag>iscsi</tag>
-        <tag>parted</tag>
+        <tag>oracle</tag>
+        <tag>database</tag>
+        <tag>逻辑备份</tag>
       </tags>
   </entry>
   <entry>
@@ -521,55 +567,9 @@
         <category>oracle_tuning</category>
       </categories>
       <tags>
+        <tag>linux</tag>
         <tag>oracle</tag>
         <tag>database</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>DBA必掌握的小技巧-分区满了如何处理1-删除home扩容根分区</title>
-    <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%861-%E5%88%A0%E9%99%A4home%E6%89%A9%E5%AE%B9%E6%A0%B9%E5%88%86%E5%8C%BA/</url>
-    <content><![CDATA[<h2 id="故障发生了！"><a href="#故障发生了！" class="headerlink" title="故障发生了！"></a>故障发生了！</h2><p>今天DBA小倩接到一个客户紧急任务，客户说自己的业务数据库突然不好使了，连接也出现了问题，开发人员连库就报这个错</p>
-<p>小倩要来了系统的登录用户名密码，登录到了数据库服务器一看</p>
-<p>好家伙！根目录满了。</p>
-<p>仔细检查发现，之前软件实施的人员把数据库直接装到了根目录下，最后导致根目录空间耗尽，数据库无法写入审计文件，无法登录了。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver /]# df -Th</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root xfs        50G   50G   33M 100% /</span><br><span class="line">/dev/mapper/centos-home xfs       445G   33M  445G   1% /home</span><br><span class="line">/dev/sda1               xfs      1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                   tmpfs     378M     0  378M   0% /run/user/0</span><br><span class="line">[root@dbserver /]# ls </span><br><span class="line">bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  u01  usr  var</span><br></pre></td></tr></table></figure>
-
-<p>根分区是没地方了，可是&#x2F;home分区却几乎没用。</p>
-<p>这就是之前的集成实施人员和软件实施人员没有对接好，两个人都是二把刀，导致这么个结果。</p>
-<h2 id="此时如何快速恢复业务呢？"><a href="#此时如何快速恢复业务呢？" class="headerlink" title="此时如何快速恢复业务呢？"></a>此时如何快速恢复业务呢？</h2><p>经过检查&#x2F;home分区下只有用户的默认文件夹，并无其它生产数据，与客户沟通后，小倩建议把&#x2F;home分区删除，扩容到根分区里，快速恢复业务。</p>
-<p>说干就干，首先，先去$ORACLE_BASE目录下释放一点文件，比如下面这些，都可以删除</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/alert   目录下的log_*.xml文件</span><br><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/trace   目录下的日志文件，alert_orcl.log如果不是很大，不建议删除。</span><br></pre></td></tr></table></figure>
-
-<p>备份一下home下的文件，检查了只有oracle目录。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver home]# ls -al</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x.  3 root   root  20 Sep  7 21:59 .</span><br><span class="line">dr-xr-xr-x. 18 root   root 255 Sep  7 22:00 ..</span><br><span class="line">drwx------   2 oracle dba   62 Sep  7 21:59 oracle</span><br></pre></td></tr></table></figure>
-
-<p>这里我们用cp 直接复制&#x2F;home目录下的文件到&#x2F;root目录下。r表示目录下所有子目录也复制，p表进带权限复制。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /home/</span><br><span class="line">cp * -rp /root/</span><br><span class="line">cd ~</span><br></pre></td></tr></table></figure>
-
-<p>下一步，我们要卸载&#x2F;home分区，把&#x2F;home分区对应的lv删除。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# umount  /home/</span><br><span class="line">[root@dbserver ~]# lvremove /dev/centos/home </span><br><span class="line">Do you really want to remove active logical volume centos/home? [y/n]: y</span><br><span class="line">  Logical volume &quot;home&quot; successfully removed</span><br></pre></td></tr></table></figure>
-
-<p>查看VG有空闲空间，这里我们再把剩余的空间扩容到根分区所属于的名为root的lv里。扩容lv后，在线直接扩容设备&#x2F;dev&#x2F;mapper&#x2F;centos-root对应的根文件系统。扩容成功后根分区空间立即够用了，业务立马恢复。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# vgs</span><br><span class="line">  VG     #PV #LV #SN Attr   VSize    VFree  </span><br><span class="line">  centos   1   2   0 wz--n- &lt;499.00g 445.12g</span><br><span class="line">[root@dbserver ~]# lvresize -l +100%FREE /dev/centos/root </span><br><span class="line">  Size of logical volume centos/root changed from 50.00 GiB (12800 extents) to 495.12 GiB (126751 extents).</span><br><span class="line">  Logical volume centos/root successfully resized.</span><br><span class="line">[root@dbserver ~]# lvs</span><br><span class="line">  LV   VG     Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  root centos -wi-ao---- 495.12g                                                    </span><br><span class="line">  swap centos -wi-ao----  &lt;3.88g </span><br><span class="line">[root@dbserver]# xfs_growfs /dev/mapper/centos-root </span><br><span class="line">meta-data=/dev/mapper/centos-root isize=512    agcount=4, agsize=3276800 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0 spinodes=0</span><br><span class="line">data     =                       bsize=4096   blocks=13107200, imaxpct=25</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal               bsize=4096   blocks=6400, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line">data blocks changed from 13107200 to 129793024</span><br><span class="line">[root@dbserver]# df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                    1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root  496G   50G  446G  11% /</span><br><span class="line">/dev/sda1               1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                    378M     0  378M   0% /run/user/0</span><br></pre></td></tr></table></figure>
-
-<p>最后别忘记了把备份走文件恢复到&#x2F;home目录下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# cp -rp oracle/ /home/</span><br></pre></td></tr></table></figure>
-
-<h2 id="完美收工了？"><a href="#完美收工了？" class="headerlink" title="完美收工了？"></a>完美收工了？</h2><p>你以为这样就完了么？</p>
-<p>没过1天，领导又找到了小倩，说数据库在本地磁盘空间太小了，性能也不能，我们又搞了个磁盘阵列，想把数据库整体迁移到存储上。</p>
-<p>下一期我们一起来看看小倩同学怎么操作。</p>
-<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
-<p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-]]></content>
-      <categories>
-        <category>操作系统_linux</category>
-      </categories>
-      <tags>
-        <tag>oracle</tag>
-        <tag>linux</tag>
-        <tag>dba</tag>
       </tags>
   </entry>
   <entry>
@@ -607,9 +607,9 @@
         <category>学习推荐</category>
       </categories>
       <tags>
+        <tag>linux</tag>
         <tag>oracle</tag>
         <tag>database</tag>
-        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -658,9 +658,9 @@
         <category>oracle_backup</category>
       </categories>
       <tags>
+        <tag>linux</tag>
         <tag>oracle</tag>
         <tag>database</tag>
-        <tag>linux</tag>
         <tag>rman备份</tag>
       </tags>
   </entry>
