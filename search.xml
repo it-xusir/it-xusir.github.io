@@ -1,59 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>AIX平台下Oracle 11g RAC修改PUBLIC/VIP/SCAN</title>
-    <url>/2025/10/13/AIX%E5%B9%B3%E5%8F%B0%E4%B8%8BOracle%2011g%20RAC%E4%BF%AE%E6%94%B9PUBLIC+VIP+SCAN/</url>
-    <content><![CDATA[<h2 id="当前环境"><a href="#当前环境" class="headerlink" title="当前环境"></a>当前环境</h2><p>由于机房网络变更，客户要修改现在RAC的public&#x2F;vip&#x2F;scan地址，这里记录一下。</p>
-<p>主机操作系统：AIX 7.2</p>
-<p>数据库版本：11.2.0.4 rac</p>
-<p>数据库实例名：orcl1&#x2F;orcl2</p>
-<p>当前hosts文件配置</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">192.168.56.10   rac1</span><br><span class="line">192.168.56.11   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.12   rac1-vip</span><br><span class="line">192.168.56.13   rac2-vip</span><br><span class="line">192.168.56.14   rac-scan</span><br></pre></td></tr></table></figure>
-
-<p>计划修改后的IP地址（priv-IP由于两台服务器直连不过交换机，保持不变）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">192.168.56.120   rac1</span><br><span class="line">192.168.56.121   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.122   rac1-vip</span><br><span class="line">192.168.56.123   rac2-vip</span><br><span class="line">192.168.56.124   rac-scan</span><br></pre></td></tr></table></figure>
-
-<h2 id="修改PUBLIC-IP"><a href="#修改PUBLIC-IP" class="headerlink" title="修改PUBLIC-IP"></a>修改PUBLIC-IP</h2><p>1、停止两节点CRS</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/crsctl stop crs</span><br></pre></td></tr></table></figure>
-
-<p>2、备份并修改hosts</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cp /etc/hosts /etc/hosts.bak</span><br><span class="line">注释或删除旧的配置，修改。</span><br><span class="line">cat /etc/hots</span><br><span class="line">192.168.56.120   rac1</span><br><span class="line">192.168.56.121   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.122   rac1-vip</span><br><span class="line">192.168.56.123   rac2-vip</span><br><span class="line">192.168.56.124   rac-scan</span><br></pre></td></tr></table></figure>
-
-<p>3、修改主机IP地址</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#这里以AIX为例，如果是LINUX，请用相应的命令修改，使用root用户执行</span><br><span class="line">chdev -l en8 -a netaddr=192.168.56.120 -a netmask=255.255.255.0 -a state=up</span><br><span class="line">chdev -l en8 -a netaddr=192.168.56.121 -a netmask=255.255.255.0 -a state=up</span><br><span class="line">--修改完重新连接新的IP地址</span><br></pre></td></tr></table></figure>
-
-<p>4、启动CRS</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/crsctl start crs</span><br></pre></td></tr></table></figure>
-
-<p>检查修改情况，此时VIP应该自动使用最新的</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/g01/app/11.2.0/grid/bin/srvctl config nodeapps -a</span><br><span class="line">ifconfig -a</span><br></pre></td></tr></table></figure>
-
-<h2 id="修改SCAN-IP"><a href="#修改SCAN-IP" class="headerlink" title="修改SCAN-IP"></a>修改SCAN-IP</h2><p>srvctl config scan 查看当前设置</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/u01/11.2.0/grid/bin/srvctl config scan</span><br><span class="line">SCAN name: rac-scan, Network: 1/192.168.56.0/255.255.255.0/en8</span><br><span class="line">SCAN VIP name: scan1, IP: /rac-scan/192.168.56.14</span><br></pre></td></tr></table></figure>
-
-<p>执行命令修改</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl stop scan_listener</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl stop scan         </span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl modify scan -n 192.168.56.124</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl start scan_listener</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl config scan        </span><br></pre></td></tr></table></figure>
-
-<p>检查是否修改成功</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl config scan</span><br><span class="line">返回结果</span><br><span class="line">SCAN name: 192.168.56.124, Network: 1/192.168.56.0/255.255.255.0/en8</span><br><span class="line">SCAN VIP name: scan1, IP: /192.168.56.124/192.168.56.124</span><br></pre></td></tr></table></figure>
-
-<h2 id="修改数据库"><a href="#修改数据库" class="headerlink" title="修改数据库"></a>修改数据库</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--登录到数据库执行</span><br><span class="line">alter system set local_listener=&#x27;(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.56.122)(PORT=1521))))&#x27; scope=both sid=&#x27;orcl1&#x27;;</span><br><span class="line">alter system set local_listener=&#x27;(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.56.123)(PORT=1521))))&#x27; scope=both sid=&#x27;orcl2&#x27;;</span><br></pre></td></tr></table></figure>
-
-<p>检查无误，大功告成！</p>
-<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
-<p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
-      <categories>
-        <category>oracle_rac_安装调试</category>
-      </categories>
-      <tags>
-        <tag>aix</tag>
-        <tag>oracle</tag>
-        <tag>database</tag>
-        <tag>rac</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Centos7_x86一键更新openssh10.1p1</title>
     <url>/2025/10/10/Centos7_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.1p1/</url>
     <content><![CDATA[<h2 id="如何完成一键更新OPENSSH"><a href="#如何完成一键更新OPENSSH" class="headerlink" title="如何完成一键更新OPENSSH"></a>如何完成一键更新OPENSSH</h2><p>我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8</p>
@@ -187,6 +134,59 @@
       </tags>
   </entry>
   <entry>
+    <title>AIX平台下Oracle 11g RAC修改PUBLIC/VIP/SCAN</title>
+    <url>/2025/10/13/AIX%E5%B9%B3%E5%8F%B0%E4%B8%8BOracle%2011g%20RAC%E4%BF%AE%E6%94%B9PUBLIC+VIP+SCAN/</url>
+    <content><![CDATA[<h2 id="当前环境"><a href="#当前环境" class="headerlink" title="当前环境"></a>当前环境</h2><p>由于机房网络变更，客户要修改现在RAC的public&#x2F;vip&#x2F;scan地址，这里记录一下。</p>
+<p>主机操作系统：AIX 7.2</p>
+<p>数据库版本：11.2.0.4 rac</p>
+<p>数据库实例名：orcl1&#x2F;orcl2</p>
+<p>当前hosts文件配置</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">192.168.56.10   rac1</span><br><span class="line">192.168.56.11   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.12   rac1-vip</span><br><span class="line">192.168.56.13   rac2-vip</span><br><span class="line">192.168.56.14   rac-scan</span><br></pre></td></tr></table></figure>
+
+<p>计划修改后的IP地址（priv-IP由于两台服务器直连不过交换机，保持不变）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">192.168.56.120   rac1</span><br><span class="line">192.168.56.121   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.122   rac1-vip</span><br><span class="line">192.168.56.123   rac2-vip</span><br><span class="line">192.168.56.124   rac-scan</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改PUBLIC-IP"><a href="#修改PUBLIC-IP" class="headerlink" title="修改PUBLIC-IP"></a>修改PUBLIC-IP</h2><p>1、停止两节点CRS</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/crsctl stop crs</span><br></pre></td></tr></table></figure>
+
+<p>2、备份并修改hosts</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cp /etc/hosts /etc/hosts.bak</span><br><span class="line">注释或删除旧的配置，修改。</span><br><span class="line">cat /etc/hots</span><br><span class="line">192.168.56.120   rac1</span><br><span class="line">192.168.56.121   rac2</span><br><span class="line">10.10.10.1      rac1-priv</span><br><span class="line">10.10.10.2      rac2-priv</span><br><span class="line">192.168.56.122   rac1-vip</span><br><span class="line">192.168.56.123   rac2-vip</span><br><span class="line">192.168.56.124   rac-scan</span><br></pre></td></tr></table></figure>
+
+<p>3、修改主机IP地址</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#这里以AIX为例，如果是LINUX，请用相应的命令修改，使用root用户执行</span><br><span class="line">chdev -l en8 -a netaddr=192.168.56.120 -a netmask=255.255.255.0 -a state=up</span><br><span class="line">chdev -l en8 -a netaddr=192.168.56.121 -a netmask=255.255.255.0 -a state=up</span><br><span class="line">--修改完重新连接新的IP地址</span><br></pre></td></tr></table></figure>
+
+<p>4、启动CRS</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/crsctl start crs</span><br></pre></td></tr></table></figure>
+
+<p>检查修改情况，此时VIP应该自动使用最新的</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/g01/app/11.2.0/grid/bin/srvctl config nodeapps -a</span><br><span class="line">ifconfig -a</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改SCAN-IP"><a href="#修改SCAN-IP" class="headerlink" title="修改SCAN-IP"></a>修改SCAN-IP</h2><p>srvctl config scan 查看当前设置</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/u01/11.2.0/grid/bin/srvctl config scan</span><br><span class="line">SCAN name: rac-scan, Network: 1/192.168.56.0/255.255.255.0/en8</span><br><span class="line">SCAN VIP name: scan1, IP: /rac-scan/192.168.56.14</span><br></pre></td></tr></table></figure>
+
+<p>执行命令修改</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl stop scan_listener</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl stop scan         </span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl modify scan -n 192.168.56.124</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl start scan_listener</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl config scan        </span><br></pre></td></tr></table></figure>
+
+<p>检查是否修改成功</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--root用户执行</span><br><span class="line">/g01/app/11.2.0/grid/bin/srvctl config scan</span><br><span class="line">返回结果</span><br><span class="line">SCAN name: 192.168.56.124, Network: 1/192.168.56.0/255.255.255.0/en8</span><br><span class="line">SCAN VIP name: scan1, IP: /192.168.56.124/192.168.56.124</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改数据库"><a href="#修改数据库" class="headerlink" title="修改数据库"></a>修改数据库</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--登录到数据库执行</span><br><span class="line">alter system set local_listener=&#x27;(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.56.122)(PORT=1521))))&#x27; scope=both sid=&#x27;orcl1&#x27;;</span><br><span class="line">alter system set local_listener=&#x27;(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.56.123)(PORT=1521))))&#x27; scope=both sid=&#x27;orcl2&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>检查无误，大功告成！</p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
+      <categories>
+        <category>oracle_rac_安装调试</category>
+      </categories>
+      <tags>
+        <tag>aix</tag>
+        <tag>oracle</tag>
+        <tag>database</tag>
+        <tag>rac</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>AIX系统The largest dump device is too small问题</title>
     <url>/2025/10/13/AIX%E7%B3%BB%E7%BB%9FThe%20largest%20dump%20device%20is%20too%20small%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<h2 id="问题报错"><a href="#问题报错" class="headerlink" title="问题报错"></a>问题报错</h2><p>今天巡检HIS的数据库服务器，发现小机AIX系统有大量的报错：</p>
@@ -299,8 +299,68 @@
         <category>操作系统_linux</category>
       </categories>
       <tags>
-        <tag>oracle</tag>
         <tag>linux</tag>
+        <tag>oracle</tag>
+        <tag>dba</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>DBA必掌握的小技巧-分区满了如何处理2-迁移到新存储</title>
+    <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%862-%E8%BF%81%E7%A7%BB%E5%88%B0%E6%96%B0%E5%AD%98%E5%82%A8/</url>
+    <content><![CDATA[<h2 id="前情提要"><a href="#前情提要" class="headerlink" title="前情提要"></a>前情提要</h2><p>话说上次DBA小倩通过删除home lv，把空间扩给了&#x2F;分区，问题暂时得到了解决。</p>
+<p>没过几天，领导找到小倩下达任务，客户说数据库在本地磁盘空间太小了又快要满了，由于之前用的服务器本地磁盘，性能也比较差，现在不想扩展服务器本地硬盘了。正好这台服务器有HBA卡，客户从别的高端存储上划了个2TB的LUN过来，映射给这台数据库服务器，想让DBA小倩来做一下数据迁移，当然停机时间己经客户己经安排好了，就差小倩上线了。</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>正式停机之前还有一些准备工作要作，比如先把存储空间挂载到服务器上（后做也可以，用不了多久）。</p>
+<p>检查一下当前磁盘空间情况，根目录满上要用光了。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# df -Th</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                   tmpfs     1.9G  259M  1.6G  14% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root xfs       496G  493G  2.8G 100% /</span><br><span class="line">/dev/sda1               xfs      1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                   tmpfs     378M     0  378M   0% /run/user/0</span><br></pre></td></tr></table></figure>
+
+<p>再看一下磁盘情况，目前只是识别到了一块磁盘</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0   500G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0   499G  0 part </span><br><span class="line">  ├─centos-root 253:0    0 495.1G  0 lvm  /</span><br><span class="line">  └─centos-swap 253:1    0   3.9G  0 lvm  [SWAP]</span><br><span class="line">sr0              11:0    1   4.4G  0 rom  </span><br></pre></td></tr></table></figure>
+
+<p>下面说一下怎么识别磁盘，正常这个操作是需要客户的系统管理员来操作（非必要DBA不要操作）。我这里用虚拟机给大家演示，就直接简化操作了（<strong>实际生产环境有可能还需要配置ISCSI、多路径，比较复杂，一般有专人处理，这个放在后面单独一章简单给大家做个知识补充</strong>）</p>
+<p><strong>我这里用虚拟机模拟，那么操作就是这样，扫描之后发现2T磁盘</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver scsi_host]# lsscsi</span><br><span class="line">[0:0:0:0]    disk    VMware,  VMware Virtual S 1.0   /dev/sda </span><br><span class="line">[2:0:0:0]    cd/dvd  NECVMWar VMware IDE CDR10 1.00  /dev/sr0 </span><br><span class="line">[root@dbserver scsi_host]# echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host0/scan </span><br><span class="line">[root@dbserver scsi_host]# </span><br><span class="line">[root@dbserver scsi_host]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0   500G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0   499G  0 part </span><br><span class="line">  ├─centos-root 253:0    0 495.1G  0 lvm  /</span><br><span class="line">  └─centos-swap 253:1    0   3.9G  0 lvm  [SWAP]</span><br><span class="line">sdb               8:16   0     2T  0 disk </span><br><span class="line">sr0              11:0    1   4.4G  0 rom  </span><br></pre></td></tr></table></figure>
+
+<p>下面对2T磁盘进行分区，并标记为LVM格式（划分区再标记这是标准做法，这样避免以后被别人当成空盘，直接给用了。当然也可以直接pvcreate &#x2F;dev&#x2F;sdb，但是这样就没有标记了。）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# parted -s /dev/sdb mklabel gpt</span><br><span class="line">[root@dbserver ~]# parted -s /dev/sdb mkpart primary 2048s 100%</span><br><span class="line">[root@dbserver ~]# parted -s /dev/sdb toggle 1 lvm</span><br><span class="line"></span><br><span class="line">[root@dbserver ~]# fdisk -l /dev/sdb</span><br><span class="line">WARNING: fdisk GPT support is currently new, and therefore in an experimental phase. Use at your own discretion.</span><br><span class="line"></span><br><span class="line">Disk /dev/sdb: 2199.0 GB, 2199023255552 bytes, 4294967296 sectors</span><br><span class="line">Units = sectors of 1 * 512 = 512 bytes</span><br><span class="line">Sector size (logical/physical): 512 bytes / 512 bytes</span><br><span class="line">I/O size (minimum/optimal): 512 bytes / 512 bytes</span><br><span class="line">Disk label type: gpt</span><br><span class="line">Disk identifier: 96DE5EB7-29A5-42AA-9651-03995AF95DEC</span><br><span class="line"></span><br><span class="line">#         Start          End    Size  Type            Name</span><br><span class="line"> 1         2048   4294965247      2T  Linux LVM       primary</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>下一步就是创建lvm，创建挂载点，挂载到操作系统上。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# pvcreate /dev/sdb1 </span><br><span class="line">  Physical volume &quot;/dev/sdb1&quot; successfully created.</span><br><span class="line">[root@dbserver ~]# vgcreate oradatavg /dev/sdb1 </span><br><span class="line">  Volume group &quot;oradatavg&quot; successfully created</span><br><span class="line">[root@dbserver ~]# lvcreate -l 100%FREE -n oralv oradatavg</span><br><span class="line">  Logical volume &quot;oralv&quot; created.</span><br><span class="line">[root@dbserver ~]# lvs</span><br><span class="line">  LV    VG        Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  root  centos    -wi-ao---- 495.12g                                                    </span><br><span class="line">  swap  centos    -wi-ao----  &lt;3.88g                                                    </span><br><span class="line">  oralv oradatavg -wi-a-----  &lt;2.00t                                                    </span><br><span class="line">[root@dbserver ~]# vgs</span><br><span class="line">  VG        #PV #LV #SN Attr   VSize    VFree</span><br><span class="line">  centos      1   2   0 wz--n- &lt;499.00g    0 </span><br><span class="line">  oradatavg   1   1   0 wz--n-   &lt;2.00t    0 </span><br><span class="line">[root@dbserver ~]# mkfs.xfs /dev/mapper/oradatavg-oralv </span><br><span class="line">meta-data=/dev/mapper/oradatavg-oralv isize=512    agcount=4, agsize=134217472 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0, sparse=0</span><br><span class="line">data     =                       bsize=4096   blocks=536869888, imaxpct=5</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal log           bsize=4096   blocks=262143, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br></pre></td></tr></table></figure>
+
+<h2 id="开始迁移"><a href="#开始迁移" class="headerlink" title="开始迁移"></a>开始迁移</h2><p>开始停机，先让客户结束业务办理，把应用系统都关了，然后建议是先把LOCAL&#x3D;NO进程全KILL，不然生产库一般很难正常shutdown immediate。操作步骤：先杀进程、关监听、关库、关EM</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ps -ef |grep LOCAL=NO|grep -v grep|cut -c 9-15|xargs kill -9</span><br><span class="line">[oracle@dbserver ~]$ lsnrctl stop</span><br><span class="line"></span><br><span class="line">LSNRCTL for Linux: Version 11.2.0.4.0 - Production on 11-SEP-2024 23:07:17</span><br><span class="line"></span><br><span class="line">Copyright (c) 1991, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))</span><br><span class="line">The command completed successfully</span><br><span class="line">[oracle@dbserver ~]$ sqlplus / as sysdba</span><br><span class="line"></span><br><span class="line">SQL*Plus: Release 11.2.0.4.0 Production on Wed Sep 11 23:07:00 2024</span><br><span class="line"></span><br><span class="line">Copyright (c) 1982, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Connected to:</span><br><span class="line">Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production</span><br><span class="line">With the Partitioning, OLAP, Data Mining and Real Application Testing options</span><br><span class="line"></span><br><span class="line">SQL&gt; shutdown immediate;</span><br><span class="line">Database closed.</span><br><span class="line">Database dismounted.</span><br><span class="line">ORACLE instance shut down.</span><br><span class="line">SQL&gt; exit</span><br><span class="line">Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production</span><br><span class="line">With the Partitioning, OLAP, Data Mining and Real Application Testing options</span><br><span class="line"></span><br><span class="line">[oracle@dbserver ~]$ emctl stop dbconsole</span><br><span class="line">OC4J Configuration issue. /u01/app/oracle/product/11.2.0/dbhome_1/oc4j/j2ee/OC4J_DBConsole_dbserver_oracle not found.</span><br></pre></td></tr></table></figure>
+
+<p>操作步骤是这样：</p>
+<p>1、先重命名&#x2F;u01目录为&#x2F;u01.old</p>
+<p>2、创建新的&#x2F;u01目录，然后挂载&#x2F;dev&#x2F;mapper&#x2F;oradatavg-oralv到&#x2F;u01</p>
+<p>3、给&#x2F;u01目录赋予oracle:oinstall权限</p>
+<p>4、使用rsync迁移&#x2F;u01.old目录里的文件到&#x2F;u01目录下（这里写成脚本用nohup运行，防止终端断开），这里注意rsync源目录后面要带&#x2F;，就是比如这样&#x2F;u01.old&#x2F;</p>
+<p>5、启动数据库恢复业务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]#cd /</span><br><span class="line">[root@dbserver /]#mv /u01 /u01.old</span><br><span class="line">[root@dbserver /]# mkdir -p /u01</span><br><span class="line">[root@dbserver /]# echo &quot;/dev/mapper/oradatavg-oralv /u01 xfs defaults 0 0&quot; &gt;&gt; /etc/fstab </span><br><span class="line">[root@dbserver /]# mount -a</span><br><span class="line">[root@dbserver /]# df -h</span><br><span class="line">Filesystem                   Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                     1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                        1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                        1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                        1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root      496G  493G  2.8G 100% /</span><br><span class="line">/dev/sda1                   1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                        378M     0  378M   0% /run/user/0</span><br><span class="line">/dev/mapper/oradatavg-oralv  2.0T   33M  2.0T   1% /u01</span><br><span class="line">[root@dbserver /]# chown  oracle:oinstall /u01</span><br><span class="line">[root@dbserver /]# echo &quot;/usr/bin/rsync -av /u01.old/ /u01&quot; &gt;rsync.sh</span><br><span class="line">[root@dbserver /]# chmod +x rsync.sh </span><br><span class="line">[root@dbserver /]# nohup ./rsync.sh &amp;</span><br><span class="line">#如果需要查看同步情况,最后显示完成</span><br><span class="line">[root@dbserver /]# tail -f nohup.out </span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxus.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxus.msg</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxzhs.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxus.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxus.msg</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxzhs.msb</span><br><span class="line"></span><br><span class="line">sent 6,049,894,594 bytes  received 709,411 bytes  145,797,686.87 bytes/sec</span><br><span class="line">total size is 6,046,010,967  speedup is 1.00</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>最后启动数据库，成功运行后，确认无错误，就可以把&#x2F;u01.old目录删除释放空间了。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[oracle@dbserver ~]$ lsnrctl start</span><br><span class="line"></span><br><span class="line">LSNRCTL for Linux: Version 11.2.0.4.0 - Production on 11-SEP-2024 23:29:57</span><br><span class="line"></span><br><span class="line">Copyright (c) 1991, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Starting /u01/app/oracle/product/11.2.0/dbhome_1/bin/tnslsnr: please wait...</span><br><span class="line"></span><br><span class="line">TNSLSNR for Linux: Version 11.2.0.4.0 - Production</span><br><span class="line">System parameter file is /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/listener.ora</span><br><span class="line">Log messages written to /u01/app/oracle/diag/tnslsnr/dbserver/listener/alert/log.xml</span><br><span class="line">Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1521)))</span><br><span class="line">Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=dbserver)(PORT=1521)))</span><br><span class="line"></span><br><span class="line">Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))</span><br><span class="line">STATUS of the LISTENER</span><br><span class="line">------------------------</span><br><span class="line">Alias                     LISTENER</span><br><span class="line">Version                   TNSLSNR for Linux: Version 11.2.0.4.0 - Production</span><br><span class="line">Start Date                11-SEP-2024 23:29:57</span><br><span class="line">Uptime                    0 days 0 hr. 0 min. 0 sec</span><br><span class="line">Trace Level               off</span><br><span class="line">Security                  ON: Local OS Authentication</span><br><span class="line">SNMP                      OFF</span><br><span class="line">Listener Parameter File   /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/listener.ora</span><br><span class="line">Listener Log File         /u01/app/oracle/diag/tnslsnr/dbserver/listener/alert/log.xml</span><br><span class="line">Listening Endpoints Summary...</span><br><span class="line">  (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1521)))</span><br><span class="line">  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=dbserver)(PORT=1521)))</span><br><span class="line">The listener supports no services</span><br><span class="line">The command completed successfully</span><br><span class="line">[oracle@dbserver ~]$ sqlplus / as sysdba</span><br><span class="line"></span><br><span class="line">SQL*Plus: Release 11.2.0.4.0 Production on Wed Sep 11 23:30:03 2024</span><br><span class="line"></span><br><span class="line">Copyright (c) 1982, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Connected to an idle instance.</span><br><span class="line"></span><br><span class="line">SQL&gt; startup;</span><br><span class="line">ORACLE instance started.</span><br><span class="line"></span><br><span class="line">Total System Global Area 1586708480 bytes</span><br><span class="line">Fixed Size		    2253624 bytes</span><br><span class="line">Variable Size		  989859016 bytes</span><br><span class="line">Database Buffers	  587202560 bytes</span><br><span class="line">Redo Buffers		    7393280 bytes</span><br><span class="line">Database mounted.</span><br><span class="line">Database opened.</span><br><span class="line">SQL&gt; exit</span><br></pre></td></tr></table></figure>
+
+<h2 id="扩展知识"><a href="#扩展知识" class="headerlink" title="扩展知识"></a>扩展知识</h2><p>1、如果生产服务器用的是hba卡的话一般都2块卡，需要重新扫描一下hba卡就可以发现新硬盘了，我给大家看一下我这有一个生产环境样例是这样：主机有2块HBA卡为host1、host2。host0是本地的硬盘控制器。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@rac1]# cd /sys/class/fc_host/</span><br><span class="line">[root@rac1 fc_host]# ls -l</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host1 -&gt; ../../devices/pci0000:00/0000:00:03.0/0000:04:00.0/host1/fc_host/host1</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host2 -&gt; ../../devices/pci0000:40/0000:40:02.2/0000:47:00.0/host2/fc_host/host2</span><br><span class="line">[root@rac1 fc_host]# cd /sys/class/scsi_host/</span><br><span class="line">[root@rac1 scsi_host]# ls -l</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host0 -&gt; ../../devices/pci0000:00/0000:00:02.0/0000:02:00.0/host0/scsi_host/host0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host1 -&gt; ../../devices/pci0000:00/0000:00:03.0/0000:04:00.0/host1/scsi_host/host1</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host2 -&gt; ../../devices/pci0000:40/0000:40:02.2/0000:47:00.0/host2/scsi_host/host2</span><br><span class="line">[root@rac1 scsi_host]# lsscsi</span><br><span class="line">[0:0:0:0]    disk    HP       LOGICAL VOLUME   4.04  /dev/sda </span><br><span class="line">[0:3:0:0]    storage HP       P830i            4.04  -       </span><br><span class="line">[1:0:0:0]    disk    3PARdata VV               3315  /dev/sdb </span><br><span class="line">[1:0:0:1]    disk    3PARdata VV               3315  /dev/sdc </span><br><span class="line">[1:0:0:2]    disk    3PARdata VV               3315  /dev/sdd </span><br><span class="line">[1:0:0:3]    disk    3PARdata VV               3315  /dev/sde </span><br><span class="line">[1:0:0:4]    disk    3PARdata VV               3315  /dev/sdf </span><br><span class="line">[1:0:0:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[1:0:1:0]    disk    3PARdata VV               3315  /dev/sdg </span><br><span class="line">[1:0:1:1]    disk    3PARdata VV               3315  /dev/sdh </span><br><span class="line">[1:0:1:3]    disk    3PARdata VV               3315  /dev/sdi </span><br><span class="line">[1:0:1:4]    disk    3PARdata VV               3315  /dev/sdj </span><br><span class="line">[1:0:1:5]    disk    3PARdata VV               3315  /dev/sdk </span><br><span class="line">[1:0:1:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[2:0:0:0]    disk    3PARdata VV               3315  /dev/sdl </span><br><span class="line">[2:0:0:1]    disk    3PARdata VV               3315  /dev/sdm </span><br><span class="line">[2:0:0:3]    disk    3PARdata VV               3315  /dev/sdn </span><br><span class="line">[2:0:0:4]    disk    3PARdata VV               3315  /dev/sdo </span><br><span class="line">[2:0:0:5]    disk    3PARdata VV               3315  /dev/sdp </span><br><span class="line">[2:0:0:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[root@rac1 scsi_host]# </span><br></pre></td></tr></table></figure>
+
+<p>那么需要进行的操作就是扫描两块HBA卡。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host1/scan</span><br><span class="line">echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host2/scan</span><br></pre></td></tr></table></figure>
+
+<p>2、如果是用万兆ISCSI连接的存储，那么就需要配置ISCSI，主机需要安装iscsi-initiator。生产一般会接2个网卡做为冗余，假设主机这边对接ISCSI存储的IP是192.168.1.2，存储侧是192.168.1.101、192.168.1.102</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">iscsiadm -m discovery -t st -p 192.168.1.101</span><br><span class="line">iscsiadm -m node -p 192.168.1.101 -l</span><br><span class="line">iscsiadm -m discovery -t st -p 192.168.1.102</span><br><span class="line">iscsiadm -m node -p 192.168.1.102 -l</span><br><span class="line">systemctl enable iscsi.service</span><br><span class="line">iscsiadm -m node -o update -n node.startup -v automatic</span><br></pre></td></tr></table></figure>
+
+<p>3、上面无论是FC-HBA或是ISCSI连接完存储后，剩下需要做的就是配置多路径multipath或者直接安装存储厂商的多路径软件（如果客户现场没有多个存储要同时用的话，推荐使用存储厂商的多路径软件，这样几乎不用啥配置），此处略长，大家要有兴趣我回头再写一篇。</p>
+<h2 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h2><p>解决了这个问题，又来了一个棘手的活， 这回客户也是数据库装在根目录，然后根目录总满了，目前是一直手动清日志保证业务能用。但不一样的是，这次客户用的是虚拟机系统，而且虚拟机没用LVM装的系统，客户系统又不能停机，看看下期DBA小倩如何处理。</p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+]]></content>
+      <categories>
+        <category>操作系统_linux</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+        <tag>oracle</tag>
         <tag>dba</tag>
       </tags>
   </entry>
@@ -386,66 +446,6 @@
       </tags>
   </entry>
   <entry>
-    <title>DBA必掌握的小技巧-分区满了如何处理2-迁移到新存储</title>
-    <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%862-%E8%BF%81%E7%A7%BB%E5%88%B0%E6%96%B0%E5%AD%98%E5%82%A8/</url>
-    <content><![CDATA[<h2 id="前情提要"><a href="#前情提要" class="headerlink" title="前情提要"></a>前情提要</h2><p>话说上次DBA小倩通过删除home lv，把空间扩给了&#x2F;分区，问题暂时得到了解决。</p>
-<p>没过几天，领导找到小倩下达任务，客户说数据库在本地磁盘空间太小了又快要满了，由于之前用的服务器本地磁盘，性能也比较差，现在不想扩展服务器本地硬盘了。正好这台服务器有HBA卡，客户从别的高端存储上划了个2TB的LUN过来，映射给这台数据库服务器，想让DBA小倩来做一下数据迁移，当然停机时间己经客户己经安排好了，就差小倩上线了。</p>
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>正式停机之前还有一些准备工作要作，比如先把存储空间挂载到服务器上（后做也可以，用不了多久）。</p>
-<p>检查一下当前磁盘空间情况，根目录满上要用光了。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# df -Th</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                   tmpfs     1.9G  259M  1.6G  14% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root xfs       496G  493G  2.8G 100% /</span><br><span class="line">/dev/sda1               xfs      1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                   tmpfs     378M     0  378M   0% /run/user/0</span><br></pre></td></tr></table></figure>
-
-<p>再看一下磁盘情况，目前只是识别到了一块磁盘</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0   500G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0   499G  0 part </span><br><span class="line">  ├─centos-root 253:0    0 495.1G  0 lvm  /</span><br><span class="line">  └─centos-swap 253:1    0   3.9G  0 lvm  [SWAP]</span><br><span class="line">sr0              11:0    1   4.4G  0 rom  </span><br></pre></td></tr></table></figure>
-
-<p>下面说一下怎么识别磁盘，正常这个操作是需要客户的系统管理员来操作（非必要DBA不要操作）。我这里用虚拟机给大家演示，就直接简化操作了（<strong>实际生产环境有可能还需要配置ISCSI、多路径，比较复杂，一般有专人处理，这个放在后面单独一章简单给大家做个知识补充</strong>）</p>
-<p><strong>我这里用虚拟机模拟，那么操作就是这样，扫描之后发现2T磁盘</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver scsi_host]# lsscsi</span><br><span class="line">[0:0:0:0]    disk    VMware,  VMware Virtual S 1.0   /dev/sda </span><br><span class="line">[2:0:0:0]    cd/dvd  NECVMWar VMware IDE CDR10 1.00  /dev/sr0 </span><br><span class="line">[root@dbserver scsi_host]# echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host0/scan </span><br><span class="line">[root@dbserver scsi_host]# </span><br><span class="line">[root@dbserver scsi_host]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0   500G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0   499G  0 part </span><br><span class="line">  ├─centos-root 253:0    0 495.1G  0 lvm  /</span><br><span class="line">  └─centos-swap 253:1    0   3.9G  0 lvm  [SWAP]</span><br><span class="line">sdb               8:16   0     2T  0 disk </span><br><span class="line">sr0              11:0    1   4.4G  0 rom  </span><br></pre></td></tr></table></figure>
-
-<p>下面对2T磁盘进行分区，并标记为LVM格式（划分区再标记这是标准做法，这样避免以后被别人当成空盘，直接给用了。当然也可以直接pvcreate &#x2F;dev&#x2F;sdb，但是这样就没有标记了。）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# parted -s /dev/sdb mklabel gpt</span><br><span class="line">[root@dbserver ~]# parted -s /dev/sdb mkpart primary 2048s 100%</span><br><span class="line">[root@dbserver ~]# parted -s /dev/sdb toggle 1 lvm</span><br><span class="line"></span><br><span class="line">[root@dbserver ~]# fdisk -l /dev/sdb</span><br><span class="line">WARNING: fdisk GPT support is currently new, and therefore in an experimental phase. Use at your own discretion.</span><br><span class="line"></span><br><span class="line">Disk /dev/sdb: 2199.0 GB, 2199023255552 bytes, 4294967296 sectors</span><br><span class="line">Units = sectors of 1 * 512 = 512 bytes</span><br><span class="line">Sector size (logical/physical): 512 bytes / 512 bytes</span><br><span class="line">I/O size (minimum/optimal): 512 bytes / 512 bytes</span><br><span class="line">Disk label type: gpt</span><br><span class="line">Disk identifier: 96DE5EB7-29A5-42AA-9651-03995AF95DEC</span><br><span class="line"></span><br><span class="line">#         Start          End    Size  Type            Name</span><br><span class="line"> 1         2048   4294965247      2T  Linux LVM       primary</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>下一步就是创建lvm，创建挂载点，挂载到操作系统上。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# pvcreate /dev/sdb1 </span><br><span class="line">  Physical volume &quot;/dev/sdb1&quot; successfully created.</span><br><span class="line">[root@dbserver ~]# vgcreate oradatavg /dev/sdb1 </span><br><span class="line">  Volume group &quot;oradatavg&quot; successfully created</span><br><span class="line">[root@dbserver ~]# lvcreate -l 100%FREE -n oralv oradatavg</span><br><span class="line">  Logical volume &quot;oralv&quot; created.</span><br><span class="line">[root@dbserver ~]# lvs</span><br><span class="line">  LV    VG        Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  root  centos    -wi-ao---- 495.12g                                                    </span><br><span class="line">  swap  centos    -wi-ao----  &lt;3.88g                                                    </span><br><span class="line">  oralv oradatavg -wi-a-----  &lt;2.00t                                                    </span><br><span class="line">[root@dbserver ~]# vgs</span><br><span class="line">  VG        #PV #LV #SN Attr   VSize    VFree</span><br><span class="line">  centos      1   2   0 wz--n- &lt;499.00g    0 </span><br><span class="line">  oradatavg   1   1   0 wz--n-   &lt;2.00t    0 </span><br><span class="line">[root@dbserver ~]# mkfs.xfs /dev/mapper/oradatavg-oralv </span><br><span class="line">meta-data=/dev/mapper/oradatavg-oralv isize=512    agcount=4, agsize=134217472 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0, sparse=0</span><br><span class="line">data     =                       bsize=4096   blocks=536869888, imaxpct=5</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal log           bsize=4096   blocks=262143, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br></pre></td></tr></table></figure>
-
-<h2 id="开始迁移"><a href="#开始迁移" class="headerlink" title="开始迁移"></a>开始迁移</h2><p>开始停机，先让客户结束业务办理，把应用系统都关了，然后建议是先把LOCAL&#x3D;NO进程全KILL，不然生产库一般很难正常shutdown immediate。操作步骤：先杀进程、关监听、关库、关EM</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ps -ef |grep LOCAL=NO|grep -v grep|cut -c 9-15|xargs kill -9</span><br><span class="line">[oracle@dbserver ~]$ lsnrctl stop</span><br><span class="line"></span><br><span class="line">LSNRCTL for Linux: Version 11.2.0.4.0 - Production on 11-SEP-2024 23:07:17</span><br><span class="line"></span><br><span class="line">Copyright (c) 1991, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))</span><br><span class="line">The command completed successfully</span><br><span class="line">[oracle@dbserver ~]$ sqlplus / as sysdba</span><br><span class="line"></span><br><span class="line">SQL*Plus: Release 11.2.0.4.0 Production on Wed Sep 11 23:07:00 2024</span><br><span class="line"></span><br><span class="line">Copyright (c) 1982, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Connected to:</span><br><span class="line">Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production</span><br><span class="line">With the Partitioning, OLAP, Data Mining and Real Application Testing options</span><br><span class="line"></span><br><span class="line">SQL&gt; shutdown immediate;</span><br><span class="line">Database closed.</span><br><span class="line">Database dismounted.</span><br><span class="line">ORACLE instance shut down.</span><br><span class="line">SQL&gt; exit</span><br><span class="line">Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production</span><br><span class="line">With the Partitioning, OLAP, Data Mining and Real Application Testing options</span><br><span class="line"></span><br><span class="line">[oracle@dbserver ~]$ emctl stop dbconsole</span><br><span class="line">OC4J Configuration issue. /u01/app/oracle/product/11.2.0/dbhome_1/oc4j/j2ee/OC4J_DBConsole_dbserver_oracle not found.</span><br></pre></td></tr></table></figure>
-
-<p>操作步骤是这样：</p>
-<p>1、先重命名&#x2F;u01目录为&#x2F;u01.old</p>
-<p>2、创建新的&#x2F;u01目录，然后挂载&#x2F;dev&#x2F;mapper&#x2F;oradatavg-oralv到&#x2F;u01</p>
-<p>3、给&#x2F;u01目录赋予oracle:oinstall权限</p>
-<p>4、使用rsync迁移&#x2F;u01.old目录里的文件到&#x2F;u01目录下（这里写成脚本用nohup运行，防止终端断开），这里注意rsync源目录后面要带&#x2F;，就是比如这样&#x2F;u01.old&#x2F;</p>
-<p>5、启动数据库恢复业务</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]#cd /</span><br><span class="line">[root@dbserver /]#mv /u01 /u01.old</span><br><span class="line">[root@dbserver /]# mkdir -p /u01</span><br><span class="line">[root@dbserver /]# echo &quot;/dev/mapper/oradatavg-oralv /u01 xfs defaults 0 0&quot; &gt;&gt; /etc/fstab </span><br><span class="line">[root@dbserver /]# mount -a</span><br><span class="line">[root@dbserver /]# df -h</span><br><span class="line">Filesystem                   Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                     1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                        1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                        1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                        1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root      496G  493G  2.8G 100% /</span><br><span class="line">/dev/sda1                   1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                        378M     0  378M   0% /run/user/0</span><br><span class="line">/dev/mapper/oradatavg-oralv  2.0T   33M  2.0T   1% /u01</span><br><span class="line">[root@dbserver /]# chown  oracle:oinstall /u01</span><br><span class="line">[root@dbserver /]# echo &quot;/usr/bin/rsync -av /u01.old/ /u01&quot; &gt;rsync.sh</span><br><span class="line">[root@dbserver /]# chmod +x rsync.sh </span><br><span class="line">[root@dbserver /]# nohup ./rsync.sh &amp;</span><br><span class="line">#如果需要查看同步情况,最后显示完成</span><br><span class="line">[root@dbserver /]# tail -f nohup.out </span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxus.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxus.msg</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxzhs.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxus.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxus.msg</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxzhs.msb</span><br><span class="line"></span><br><span class="line">sent 6,049,894,594 bytes  received 709,411 bytes  145,797,686.87 bytes/sec</span><br><span class="line">total size is 6,046,010,967  speedup is 1.00</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>最后启动数据库，成功运行后，确认无错误，就可以把&#x2F;u01.old目录删除释放空间了。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[oracle@dbserver ~]$ lsnrctl start</span><br><span class="line"></span><br><span class="line">LSNRCTL for Linux: Version 11.2.0.4.0 - Production on 11-SEP-2024 23:29:57</span><br><span class="line"></span><br><span class="line">Copyright (c) 1991, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Starting /u01/app/oracle/product/11.2.0/dbhome_1/bin/tnslsnr: please wait...</span><br><span class="line"></span><br><span class="line">TNSLSNR for Linux: Version 11.2.0.4.0 - Production</span><br><span class="line">System parameter file is /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/listener.ora</span><br><span class="line">Log messages written to /u01/app/oracle/diag/tnslsnr/dbserver/listener/alert/log.xml</span><br><span class="line">Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1521)))</span><br><span class="line">Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=dbserver)(PORT=1521)))</span><br><span class="line"></span><br><span class="line">Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))</span><br><span class="line">STATUS of the LISTENER</span><br><span class="line">------------------------</span><br><span class="line">Alias                     LISTENER</span><br><span class="line">Version                   TNSLSNR for Linux: Version 11.2.0.4.0 - Production</span><br><span class="line">Start Date                11-SEP-2024 23:29:57</span><br><span class="line">Uptime                    0 days 0 hr. 0 min. 0 sec</span><br><span class="line">Trace Level               off</span><br><span class="line">Security                  ON: Local OS Authentication</span><br><span class="line">SNMP                      OFF</span><br><span class="line">Listener Parameter File   /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/listener.ora</span><br><span class="line">Listener Log File         /u01/app/oracle/diag/tnslsnr/dbserver/listener/alert/log.xml</span><br><span class="line">Listening Endpoints Summary...</span><br><span class="line">  (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1521)))</span><br><span class="line">  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=dbserver)(PORT=1521)))</span><br><span class="line">The listener supports no services</span><br><span class="line">The command completed successfully</span><br><span class="line">[oracle@dbserver ~]$ sqlplus / as sysdba</span><br><span class="line"></span><br><span class="line">SQL*Plus: Release 11.2.0.4.0 Production on Wed Sep 11 23:30:03 2024</span><br><span class="line"></span><br><span class="line">Copyright (c) 1982, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Connected to an idle instance.</span><br><span class="line"></span><br><span class="line">SQL&gt; startup;</span><br><span class="line">ORACLE instance started.</span><br><span class="line"></span><br><span class="line">Total System Global Area 1586708480 bytes</span><br><span class="line">Fixed Size		    2253624 bytes</span><br><span class="line">Variable Size		  989859016 bytes</span><br><span class="line">Database Buffers	  587202560 bytes</span><br><span class="line">Redo Buffers		    7393280 bytes</span><br><span class="line">Database mounted.</span><br><span class="line">Database opened.</span><br><span class="line">SQL&gt; exit</span><br></pre></td></tr></table></figure>
-
-<h2 id="扩展知识"><a href="#扩展知识" class="headerlink" title="扩展知识"></a>扩展知识</h2><p>1、如果生产服务器用的是hba卡的话一般都2块卡，需要重新扫描一下hba卡就可以发现新硬盘了，我给大家看一下我这有一个生产环境样例是这样：主机有2块HBA卡为host1、host2。host0是本地的硬盘控制器。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@rac1]# cd /sys/class/fc_host/</span><br><span class="line">[root@rac1 fc_host]# ls -l</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host1 -&gt; ../../devices/pci0000:00/0000:00:03.0/0000:04:00.0/host1/fc_host/host1</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host2 -&gt; ../../devices/pci0000:40/0000:40:02.2/0000:47:00.0/host2/fc_host/host2</span><br><span class="line">[root@rac1 fc_host]# cd /sys/class/scsi_host/</span><br><span class="line">[root@rac1 scsi_host]# ls -l</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host0 -&gt; ../../devices/pci0000:00/0000:00:02.0/0000:02:00.0/host0/scsi_host/host0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host1 -&gt; ../../devices/pci0000:00/0000:00:03.0/0000:04:00.0/host1/scsi_host/host1</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host2 -&gt; ../../devices/pci0000:40/0000:40:02.2/0000:47:00.0/host2/scsi_host/host2</span><br><span class="line">[root@rac1 scsi_host]# lsscsi</span><br><span class="line">[0:0:0:0]    disk    HP       LOGICAL VOLUME   4.04  /dev/sda </span><br><span class="line">[0:3:0:0]    storage HP       P830i            4.04  -       </span><br><span class="line">[1:0:0:0]    disk    3PARdata VV               3315  /dev/sdb </span><br><span class="line">[1:0:0:1]    disk    3PARdata VV               3315  /dev/sdc </span><br><span class="line">[1:0:0:2]    disk    3PARdata VV               3315  /dev/sdd </span><br><span class="line">[1:0:0:3]    disk    3PARdata VV               3315  /dev/sde </span><br><span class="line">[1:0:0:4]    disk    3PARdata VV               3315  /dev/sdf </span><br><span class="line">[1:0:0:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[1:0:1:0]    disk    3PARdata VV               3315  /dev/sdg </span><br><span class="line">[1:0:1:1]    disk    3PARdata VV               3315  /dev/sdh </span><br><span class="line">[1:0:1:3]    disk    3PARdata VV               3315  /dev/sdi </span><br><span class="line">[1:0:1:4]    disk    3PARdata VV               3315  /dev/sdj </span><br><span class="line">[1:0:1:5]    disk    3PARdata VV               3315  /dev/sdk </span><br><span class="line">[1:0:1:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[2:0:0:0]    disk    3PARdata VV               3315  /dev/sdl </span><br><span class="line">[2:0:0:1]    disk    3PARdata VV               3315  /dev/sdm </span><br><span class="line">[2:0:0:3]    disk    3PARdata VV               3315  /dev/sdn </span><br><span class="line">[2:0:0:4]    disk    3PARdata VV               3315  /dev/sdo </span><br><span class="line">[2:0:0:5]    disk    3PARdata VV               3315  /dev/sdp </span><br><span class="line">[2:0:0:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[root@rac1 scsi_host]# </span><br></pre></td></tr></table></figure>
-
-<p>那么需要进行的操作就是扫描两块HBA卡。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host1/scan</span><br><span class="line">echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host2/scan</span><br></pre></td></tr></table></figure>
-
-<p>2、如果是用万兆ISCSI连接的存储，那么就需要配置ISCSI，主机需要安装iscsi-initiator。生产一般会接2个网卡做为冗余，假设主机这边对接ISCSI存储的IP是192.168.1.2，存储侧是192.168.1.101、192.168.1.102</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">iscsiadm -m discovery -t st -p 192.168.1.101</span><br><span class="line">iscsiadm -m node -p 192.168.1.101 -l</span><br><span class="line">iscsiadm -m discovery -t st -p 192.168.1.102</span><br><span class="line">iscsiadm -m node -p 192.168.1.102 -l</span><br><span class="line">systemctl enable iscsi.service</span><br><span class="line">iscsiadm -m node -o update -n node.startup -v automatic</span><br></pre></td></tr></table></figure>
-
-<p>3、上面无论是FC-HBA或是ISCSI连接完存储后，剩下需要做的就是配置多路径multipath或者直接安装存储厂商的多路径软件（如果客户现场没有多个存储要同时用的话，推荐使用存储厂商的多路径软件，这样几乎不用啥配置），此处略长，大家要有兴趣我回头再写一篇。</p>
-<h2 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h2><p>解决了这个问题，又来了一个棘手的活， 这回客户也是数据库装在根目录，然后根目录总满了，目前是一直手动清日志保证业务能用。但不一样的是，这次客户用的是虚拟机系统，而且虚拟机没用LVM装的系统，客户系统又不能停机，看看下期DBA小倩如何处理。</p>
-<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
-<p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-]]></content>
-      <categories>
-        <category>操作系统_linux</category>
-      </categories>
-      <tags>
-        <tag>oracle</tag>
-        <tag>linux</tag>
-        <tag>dba</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>OEL7挂载ISCSI存储配置示例</title>
     <url>/2025/10/14/OEL7%E6%8C%82%E8%BD%BDISCSI%E5%AD%98%E5%82%A8%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B/</url>
     <content><![CDATA[<p>客户让帮忙挂载个ISCSI存储，大概结构如下图所示：</p>
@@ -485,8 +485,8 @@
         <category>操作系统_linux</category>
       </categories>
       <tags>
-        <tag>oracle</tag>
         <tag>linux</tag>
+        <tag>oracle</tag>
         <tag>iscsi</tag>
         <tag>parted</tag>
       </tags>
@@ -516,50 +516,10 @@
         <category>oracle_backup</category>
       </categories>
       <tags>
+        <tag>linux</tag>
         <tag>oracle</tag>
         <tag>database</tag>
-        <tag>linux</tag>
         <tag>逻辑备份</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>推荐一些学习数据库的BLOG</title>
-    <url>/2025/10/13/%E6%8E%A8%E8%8D%90%E4%B8%80%E4%BA%9B%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84BLOG/</url>
-    <content><![CDATA[<p>这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。</p>
-<p><strong>Oracle top 100-blog排名</strong></p>
-<p><a href="https://developer.feedspot.com/oracle_blogs/">https://developer.feedspot.com/oracle_blogs/</a></p>
-<p><strong>英国老牌ACE  Tim Hall的BLOG，几乎涵盖了所有版本Oracle的安装配置，写的非常的详细，入门必看</strong></p>
-<p><a href="https://oracle-base.com/">https://oracle-base.com/</a></p>
-<p><strong>徐小强的blog，都是详解万字长文！</strong></p>
-<p><a href="https://blog.csdn.net/JiekeXu">https://blog.csdn.net/JiekeXu</a></p>
-<p><strong>尹总监的blog，19c全系列实战干货</strong></p>
-<p><a href="https://blog.csdn.net/yhw1809">https://blog.csdn.net/yhw1809</a></p>
-<p><strong>陈举超大佬的文章也是十分的详细🔎的实验</strong></p>
-<p><a href="https://www.modb.pro/u/4703">https://www.modb.pro/u/4703</a></p>
-<p><strong>三哥的自动化安装脚本可谓是全网第一，还有各种干货。</strong></p>
-<p><a href="https://luciferliu.blog.csdn.net/">https://luciferliu.blog.csdn.net/</a></p>
-<p><strong>云和恩墨的专家张维照，内容很全，可以通篇看一遍</strong></p>
-<p><a href="https://www.anbob.com/aboutme-page">https://www.anbob.com/aboutme-page</a></p>
-<p><strong>墨天轮知识图谱，涵盖大部分数据库，己经按照相应的学习路线整理好文章。</strong></p>
-<p><a href="https://www.modb.pro/graph">https://www.modb.pro/graph</a></p>
-<p><strong>墨天轮高分技术文档分享——Oracle升级迁移篇（共96个）</strong></p>
-<p><a href="https://www.modb.pro/db/406311">https://www.modb.pro/db/406311</a></p>
-<p><strong>来自大名顶顶存储公司Pure Storage的Oracle ACE专家Ro****n</strong></p>
-<p><a href="https://ronekins.com/">https://ronekins.com/</a></p>
-<p><strong>具体是谁这个没看明白，不过blog写的内容十分具有参考价值</strong></p>
-<p><a href="https://www.howtosop.com/">https://www.howtosop.com/</a></p>
-<p><strong>来自印度大佬的BLOG，内容也很全面</strong></p>
-<p><a href="https://oracledbwr.com/">https://oracledbwr.com/</a></p>
-<p><strong>还有一个或取知识的好办法，就是直接登陆oracle ace directory网站，找到任意ACE的链接进入，看看ACE大佬们的BLOG，哈哈！</strong></p>
-<p><a href="https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory">https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory</a></p>
-]]></content>
-      <categories>
-        <category>学习推荐</category>
-      </categories>
-      <tags>
-        <tag>oracle</tag>
-        <tag>database</tag>
-        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -607,9 +567,49 @@
         <category>oracle_tuning</category>
       </categories>
       <tags>
+        <tag>linux</tag>
         <tag>oracle</tag>
         <tag>database</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>推荐一些学习数据库的BLOG</title>
+    <url>/2025/10/13/%E6%8E%A8%E8%8D%90%E4%B8%80%E4%BA%9B%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84BLOG/</url>
+    <content><![CDATA[<p>这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。</p>
+<p><strong>Oracle top 100-blog排名</strong></p>
+<p><a href="https://developer.feedspot.com/oracle_blogs/">https://developer.feedspot.com/oracle_blogs/</a></p>
+<p><strong>英国老牌ACE  Tim Hall的BLOG，几乎涵盖了所有版本Oracle的安装配置，写的非常的详细，入门必看</strong></p>
+<p><a href="https://oracle-base.com/">https://oracle-base.com/</a></p>
+<p><strong>徐小强的blog，都是详解万字长文！</strong></p>
+<p><a href="https://blog.csdn.net/JiekeXu">https://blog.csdn.net/JiekeXu</a></p>
+<p><strong>尹总监的blog，19c全系列实战干货</strong></p>
+<p><a href="https://blog.csdn.net/yhw1809">https://blog.csdn.net/yhw1809</a></p>
+<p><strong>陈举超大佬的文章也是十分的详细🔎的实验</strong></p>
+<p><a href="https://www.modb.pro/u/4703">https://www.modb.pro/u/4703</a></p>
+<p><strong>三哥的自动化安装脚本可谓是全网第一，还有各种干货。</strong></p>
+<p><a href="https://luciferliu.blog.csdn.net/">https://luciferliu.blog.csdn.net/</a></p>
+<p><strong>云和恩墨的专家张维照，内容很全，可以通篇看一遍</strong></p>
+<p><a href="https://www.anbob.com/aboutme-page">https://www.anbob.com/aboutme-page</a></p>
+<p><strong>墨天轮知识图谱，涵盖大部分数据库，己经按照相应的学习路线整理好文章。</strong></p>
+<p><a href="https://www.modb.pro/graph">https://www.modb.pro/graph</a></p>
+<p><strong>墨天轮高分技术文档分享——Oracle升级迁移篇（共96个）</strong></p>
+<p><a href="https://www.modb.pro/db/406311">https://www.modb.pro/db/406311</a></p>
+<p><strong>来自大名顶顶存储公司Pure Storage的Oracle ACE专家Ro****n</strong></p>
+<p><a href="https://ronekins.com/">https://ronekins.com/</a></p>
+<p><strong>具体是谁这个没看明白，不过blog写的内容十分具有参考价值</strong></p>
+<p><a href="https://www.howtosop.com/">https://www.howtosop.com/</a></p>
+<p><strong>来自印度大佬的BLOG，内容也很全面</strong></p>
+<p><a href="https://oracledbwr.com/">https://oracledbwr.com/</a></p>
+<p><strong>还有一个或取知识的好办法，就是直接登陆oracle ace directory网站，找到任意ACE的链接进入，看看ACE大佬们的BLOG，哈哈！</strong></p>
+<p><a href="https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory">https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory</a></p>
+]]></content>
+      <categories>
+        <category>学习推荐</category>
+      </categories>
+      <tags>
         <tag>linux</tag>
+        <tag>oracle</tag>
+        <tag>database</tag>
       </tags>
   </entry>
   <entry>
@@ -658,60 +658,10 @@
         <category>oracle_backup</category>
       </categories>
       <tags>
+        <tag>linux</tag>
         <tag>oracle</tag>
         <tag>database</tag>
-        <tag>linux</tag>
         <tag>rman备份</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
-    <url>/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</url>
-    <content><![CDATA[<p>昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。</p>
-<div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115350238665617&bvid=BV1dV4HzTEaq&cid=32972934127;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
-
-<p>想要获取一键安装包可以关注我的公众号联系我获取。</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-
-<p>今天主要说2个问题：</p>
-<p>1.这么快更新了openssh 10.2解决了啥问题？</p>
-<p>2.顺便说一下这次编译遇到的问题。具体如何编译RPM包，可以看我之前的文章介绍了。<a href="https://mp.weixin.qq.com/s/Uz5dDzvP7mSXNjuD1fxpMQ">手搓OPENSSH安装RPM包</a></p>
-<h2 id="更新openssh-10-2解决问题"><a href="#更新openssh-10-2解决问题" class="headerlink" title="更新openssh 10.2解决问题"></a>更新openssh 10.2解决问题</h2><p>本版本为漏洞修复版本，主要修复了 “启用 ControlPersist 后导致 <code>ssh(1)</code> 无法使用” 的问题。</p>
-<h3 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h3><ol>
-<li><strong><code>ssh(1)</code></strong>：修复了 “ControlPersist 处于活跃状态时，终端连接处理异常导致会话无法使用” 的问题（漏洞编号：bz3872）。</li>
-<li><strong><code>ssh-keygen(1)</code></strong>：修复了 “从 PKCS#11 令牌下载密钥” 的功能异常。</li>
-<li><strong><code>ssh-keygen(1)</code></strong>：修复了 “CA 密钥存储在 <code>ssh-agent(1)</code> 中时，CA 签名操作失败” 的问题（漏洞编号：bz3877）。</li>
-</ol>
-<h3 id="可移植性优化"><a href="#可移植性优化" class="headerlink" title="可移植性优化"></a>可移植性优化</h3><ul>
-<li><p><strong>全组件</strong>：支持无 <code>mmap(2)</code> 函数的平台，例如 WASM 构建版本（示例：<a href="https://hterm.org/">https://hterm.org</a>）。</p>
-</li>
-<li><p><strong>全组件</strong>：修复了 FreeBSD 系统上因缺少 <code>fnctl.h</code> 头文件导致的构建失败问题。</p>
-</li>
-<li><p><strong>全组件</strong>：修复了 MacOS 10.12（Sierra）以下版本因缺少 <code>clock_gettime(3)</code> 函数导致的构建失败问题。</p>
-</li>
-<li><p><strong><code>sshd(8)</code></strong>：若远程主机名为 “UNKNOWN” 占位符，将不执行 <code>PAM_RHOST</code> 操作。此优化可避免部分 PAM 模块尝试解析该主机名时可能出现的挂起问题。需注意，仅当连接不通过 IPv4 或 IPv6 套接字建立时，<code>sshd(8)</code> 才会使用 “UNKNOWN” 作为主机名。</p>
-</li>
-</ul>
-<h2 id="编译遇到的错误及解决办法"><a href="#编译遇到的错误及解决办法" class="headerlink" title="编译遇到的错误及解决办法"></a>编译遇到的错误及解决办法</h2><p>还是用脚本编译最新的安装包，遇到个错误</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">~/openssh-rpms-main/el7 ~/openssh-rpms-main</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssh-10.2p1.tar.gz’ -&gt; ‘./SOURCES/openssh-10.2p1.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssl-3.0.18.tar.gz’ -&gt; ‘./SOURCES/openssl-3.0.18.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/x11-ssh-askpass-1.2.4.1.tar.gz’ -&gt; ‘./SOURCES/x11-ssh-askpass-1.2.4.1.tar.gz’</span><br><span class="line">Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.CUAJLh</span><br><span class="line">+ umask 022</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ rm -rf openssh-10.2p1</span><br><span class="line">+ /usr/bin/gzip -dc /root/openssh-rpms-main/el7/SOURCES/openssh-10.2p1.tar.gz</span><br><span class="line">+ /usr/bin/tar -xf -</span><br><span class="line">+ STATUS=0</span><br><span class="line">+ &#x27;[&#x27; 0 -ne 0 &#x27;]&#x27;</span><br><span class="line">+ cd openssh-10.2p1</span><br><span class="line">+ /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .</span><br><span class="line">+ mkdir -p openssl</span><br><span class="line">+ tar xfz /root/openssh-rpms-main/el7/SOURCES/openssl-3.0.18.tar.gz --strip-components=1 -C openssl</span><br><span class="line">+ pushd openssl</span><br><span class="line">~/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl ~/openssh-rpms-main/el7/BUILD/openssh-10.2p1</span><br><span class="line">+ ./config shared zlib -fPIC</span><br><span class="line">Configuring OpenSSL version 3.0.18 for target linux-x86_64</span><br><span class="line">Using os-specific seed configuration</span><br><span class="line">Created configdata.pm</span><br><span class="line">Running configdata.pm</span><br><span class="line">Created Makefile.in</span><br><span class="line">Can&#x27;t locate Time/Piece.pm in @INC (@INC contains: . /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/Configurations /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/util/perl /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/external/perl/Text-Template-1.56/lib) at Makefile.in line 37.</span><br><span class="line">BEGIN failed--compilation aborted at Makefile.in line 37.</span><br><span class="line">error: Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RPM build errors:</span><br><span class="line">    Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br></pre></td></tr></table></figure>
-
-<p>错误的原因可能是当你在运行 Perl 脚本时遇到 <em>Can’t locate time&#x2F;piece.pm in @INC</em> 错误，这意味着 Perl 无法找到所需的模块 <em>Time::Piece</em>。这通常是因为该模块尚未安装。</p>
-<p>示例</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Can&amp;#39;t locate Time/Piece.pm in @INC (@INC contains: /etc/perl /usr/local/lib/perl5 /usr/local/share/perl5 /usr/lib/perl5 /usr/share/perl5 .) at script.pl line 1</span><br></pre></td></tr></table></figure>
-
-<p>解决的办法就是安装该模块</p>
-<p><strong>错误处理过程</strong></p>
-<p>确保你的机器连网，执行以下命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">perl -MCPAN -e &#x27;install Time::Piece&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>然后一路回车，开始安装，遇到提示就是回车，之后重新编译openssh安装包</p>
-]]></content>
-      <categories>
-        <category>操作系统_linux</category>
-      </categories>
-      <tags>
-        <tag>linux</tag>
-        <tag>openssh</tag>
       </tags>
   </entry>
   <entry>
@@ -770,6 +720,56 @@
         <tag>netapp</tag>
         <tag>存储</tag>
         <tag>硬件维护</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
+    <url>/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</url>
+    <content><![CDATA[<p>昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。</p>
+<div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115350238665617&bvid=BV1dV4HzTEaq&cid=32972934127;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
+
+<p>想要获取一键安装包可以关注我的公众号联系我获取。</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
+<p>今天主要说2个问题：</p>
+<p>1.这么快更新了openssh 10.2解决了啥问题？</p>
+<p>2.顺便说一下这次编译遇到的问题。具体如何编译RPM包，可以看我之前的文章介绍了。<a href="https://mp.weixin.qq.com/s/Uz5dDzvP7mSXNjuD1fxpMQ">手搓OPENSSH安装RPM包</a></p>
+<h2 id="更新openssh-10-2解决问题"><a href="#更新openssh-10-2解决问题" class="headerlink" title="更新openssh 10.2解决问题"></a>更新openssh 10.2解决问题</h2><p>本版本为漏洞修复版本，主要修复了 “启用 ControlPersist 后导致 <code>ssh(1)</code> 无法使用” 的问题。</p>
+<h3 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h3><ol>
+<li><strong><code>ssh(1)</code></strong>：修复了 “ControlPersist 处于活跃状态时，终端连接处理异常导致会话无法使用” 的问题（漏洞编号：bz3872）。</li>
+<li><strong><code>ssh-keygen(1)</code></strong>：修复了 “从 PKCS#11 令牌下载密钥” 的功能异常。</li>
+<li><strong><code>ssh-keygen(1)</code></strong>：修复了 “CA 密钥存储在 <code>ssh-agent(1)</code> 中时，CA 签名操作失败” 的问题（漏洞编号：bz3877）。</li>
+</ol>
+<h3 id="可移植性优化"><a href="#可移植性优化" class="headerlink" title="可移植性优化"></a>可移植性优化</h3><ul>
+<li><p><strong>全组件</strong>：支持无 <code>mmap(2)</code> 函数的平台，例如 WASM 构建版本（示例：<a href="https://hterm.org/">https://hterm.org</a>）。</p>
+</li>
+<li><p><strong>全组件</strong>：修复了 FreeBSD 系统上因缺少 <code>fnctl.h</code> 头文件导致的构建失败问题。</p>
+</li>
+<li><p><strong>全组件</strong>：修复了 MacOS 10.12（Sierra）以下版本因缺少 <code>clock_gettime(3)</code> 函数导致的构建失败问题。</p>
+</li>
+<li><p><strong><code>sshd(8)</code></strong>：若远程主机名为 “UNKNOWN” 占位符，将不执行 <code>PAM_RHOST</code> 操作。此优化可避免部分 PAM 模块尝试解析该主机名时可能出现的挂起问题。需注意，仅当连接不通过 IPv4 或 IPv6 套接字建立时，<code>sshd(8)</code> 才会使用 “UNKNOWN” 作为主机名。</p>
+</li>
+</ul>
+<h2 id="编译遇到的错误及解决办法"><a href="#编译遇到的错误及解决办法" class="headerlink" title="编译遇到的错误及解决办法"></a>编译遇到的错误及解决办法</h2><p>还是用脚本编译最新的安装包，遇到个错误</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">~/openssh-rpms-main/el7 ~/openssh-rpms-main</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssh-10.2p1.tar.gz’ -&gt; ‘./SOURCES/openssh-10.2p1.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssl-3.0.18.tar.gz’ -&gt; ‘./SOURCES/openssl-3.0.18.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/x11-ssh-askpass-1.2.4.1.tar.gz’ -&gt; ‘./SOURCES/x11-ssh-askpass-1.2.4.1.tar.gz’</span><br><span class="line">Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.CUAJLh</span><br><span class="line">+ umask 022</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ rm -rf openssh-10.2p1</span><br><span class="line">+ /usr/bin/gzip -dc /root/openssh-rpms-main/el7/SOURCES/openssh-10.2p1.tar.gz</span><br><span class="line">+ /usr/bin/tar -xf -</span><br><span class="line">+ STATUS=0</span><br><span class="line">+ &#x27;[&#x27; 0 -ne 0 &#x27;]&#x27;</span><br><span class="line">+ cd openssh-10.2p1</span><br><span class="line">+ /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .</span><br><span class="line">+ mkdir -p openssl</span><br><span class="line">+ tar xfz /root/openssh-rpms-main/el7/SOURCES/openssl-3.0.18.tar.gz --strip-components=1 -C openssl</span><br><span class="line">+ pushd openssl</span><br><span class="line">~/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl ~/openssh-rpms-main/el7/BUILD/openssh-10.2p1</span><br><span class="line">+ ./config shared zlib -fPIC</span><br><span class="line">Configuring OpenSSL version 3.0.18 for target linux-x86_64</span><br><span class="line">Using os-specific seed configuration</span><br><span class="line">Created configdata.pm</span><br><span class="line">Running configdata.pm</span><br><span class="line">Created Makefile.in</span><br><span class="line">Can&#x27;t locate Time/Piece.pm in @INC (@INC contains: . /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/Configurations /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/util/perl /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/external/perl/Text-Template-1.56/lib) at Makefile.in line 37.</span><br><span class="line">BEGIN failed--compilation aborted at Makefile.in line 37.</span><br><span class="line">error: Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RPM build errors:</span><br><span class="line">    Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br></pre></td></tr></table></figure>
+
+<p>错误的原因可能是当你在运行 Perl 脚本时遇到 <em>Can’t locate time&#x2F;piece.pm in @INC</em> 错误，这意味着 Perl 无法找到所需的模块 <em>Time::Piece</em>。这通常是因为该模块尚未安装。</p>
+<p>示例</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Can&amp;#39;t locate Time/Piece.pm in @INC (@INC contains: /etc/perl /usr/local/lib/perl5 /usr/local/share/perl5 /usr/lib/perl5 /usr/share/perl5 .) at script.pl line 1</span><br></pre></td></tr></table></figure>
+
+<p>解决的办法就是安装该模块</p>
+<p><strong>错误处理过程</strong></p>
+<p>确保你的机器连网，执行以下命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">perl -MCPAN -e &#x27;install Time::Piece&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>然后一路回车，开始安装，遇到提示就是回车，之后重新编译openssh安装包</p>
+]]></content>
+      <categories>
+        <category>操作系统_linux</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+        <tag>openssh</tag>
       </tags>
   </entry>
 </search>
