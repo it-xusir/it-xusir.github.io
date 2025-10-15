@@ -126,6 +126,185 @@
       </tags>
   </entry>
   <entry>
+    <title>Centos7_x86一键更新openssh10.1p1</title>
+    <url>/2025/10/10/Centos7_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.1p1/</url>
+    <content><![CDATA[<h2 id="如何完成一键更新OPENSSH"><a href="#如何完成一键更新OPENSSH" class="headerlink" title="如何完成一键更新OPENSSH"></a>如何完成一键更新OPENSSH</h2><p>我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8</p>
+<div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115344299528429&bvid=BV1mHxCz7EYK&cid=32946720040;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
+
+<p>想要获取一键安装包可以关注我的公众号联系我获取</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
+<h2 id="openssh更新了啥？"><a href="#openssh更新了啥？" class="headerlink" title="openssh更新了啥？"></a>openssh更新了啥？</h2><p>OpenSSH 10.1 版本核心变更对照表</p>
+<table>
+<thead>
+<tr>
+<th>变更类型</th>
+<th>涉及组件</th>
+<th>关键影响与核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>未来弃用警告</strong></td>
+<td>全组件</td>
+<td>弃用SHA1格式SSHFP记录，仅保留SHA256格式；SHA256自2012年OpenSSH 6.1起已支持。</td>
+</tr>
+<tr>
+<td><strong>潜在不兼容变更</strong></td>
+<td>ssh(1)</td>
+<td>非后量子密钥协商算法触发警告，可通过<code>WarnWeakCrypto</code>配置控制（默认开启）。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)、sshd(8)</td>
+<td>DSCP&#x2F;IPQoS逻辑重构：交互式流量默认用EF类别，非交互式用系统默认，支持动态切换。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)、sshd(8)</td>
+<td>弃用IPQoS中的ToS关键字（lowdelay&#x2F;reliability&#x2F;throughput），改用DSCP。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh-add(1)</td>
+<td>证书过期时间+5分钟宽限期，代理自动清理过期证书；<code>ssh-add -N</code>可禁用此功能。</td>
+</tr>
+<tr>
+<td></td>
+<td>全组件</td>
+<td>移除XMSS密钥实验性支持，计划后续实现新后量子签名方案。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh-agent(1)、sshd(8)</td>
+<td>代理套接字从<code>/tmp</code>迁移至<code>~/.ssh/agent</code>，新增自动清理功能与多个控制选项（-U&#x2F;-u等）。</td>
+</tr>
+<tr>
+<td><strong>安全修复</strong></td>
+<td>ssh(1)</td>
+<td>禁止用户名含控制字符、URI含<code>\0</code>字符，防范shell注入；可信配置文件用户名无此限制。</td>
+</tr>
+<tr>
+<td><strong>新增功能</strong></td>
+<td>ssh(1)、sshd(8)</td>
+<td>新增SIGINFO处理器，记录活跃通道与会话信息。</td>
+</tr>
+<tr>
+<td></td>
+<td>sshd(8)</td>
+<td>拒绝证书认证时，额外记录证书标识信息，便于调试。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)、ssh-agent(1)</td>
+<td>支持PKCS#11令牌上的ed25519密钥。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)</td>
+<td>新增<code>RefuseConnection</code>配置项，可在配置中添加连接阻断提醒（如弃用主机提示）。</td>
+</tr>
+<tr>
+<td></td>
+<td>sshd(8)</td>
+<td>X11显示号检查适配<code>X11DisplayOffset</code>，支持更高端口范围配置。</td>
+</tr>
+<tr>
+<td></td>
+<td>测试框架</td>
+<td>新增基准测试功能，OpenBSD用<code>make UNITTEST_BENCHMARK=yes</code>，Portable版用<code>make unit-bench</code>。</td>
+</tr>
+<tr>
+<td><strong>漏洞修复</strong></td>
+<td>sshd(8)</td>
+<td>修复<code>MaxStartups</code>进程跟踪异常，避免插槽占满导致拒绝新连接。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh(1)</td>
+<td>修复启用<code>ObscureKeystrokeTiming</code>时X客户端启动延迟问题（bz#3820）。</td>
+</tr>
+<tr>
+<td></td>
+<td>sshd(8)</td>
+<td>配置文件最大限制从256KB提升至4MB，超限时提前报错。</td>
+</tr>
+<tr>
+<td></td>
+<td>全组件</td>
+<td>修复多处内存泄漏，优化日志显示（如密钥加载失败详情、<code>PermitRootLogin</code>别名修正）。</td>
+</tr>
+<tr>
+<td><strong>可移植性优化</strong></td>
+<td>sshd(8)</td>
+<td>检查PAM事务用户名变更，避免配置错误导致的授权异常；FreeBSD适配<code>SSH_TUN_COMPAT_AF</code>。</td>
+</tr>
+<tr>
+<td></td>
+<td>全组件</td>
+<td>补充缺失系统头文件，减少跨平台编译差异；macOS适配<code>nlist</code>函数检查逻辑。</td>
+</tr>
+<tr>
+<td></td>
+<td>ssh-agent(1)</td>
+<td>systemd套接字激活模式下，<code>SIGTERM</code>退出返回0，避免服务错误标记为“失败”。</td>
+</tr>
+</tbody></table>
+]]></content>
+      <categories>
+        <category>操作系统_linux</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+        <tag>openssh</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>DBA必掌握的小技巧-分区满了如何处理1-删除home扩容根分区</title>
+    <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%861-%E5%88%A0%E9%99%A4home%E6%89%A9%E5%AE%B9%E6%A0%B9%E5%88%86%E5%8C%BA/</url>
+    <content><![CDATA[<h2 id="故障发生了！"><a href="#故障发生了！" class="headerlink" title="故障发生了！"></a>故障发生了！</h2><p>今天DBA小倩接到一个客户紧急任务，客户说自己的业务数据库突然不好使了，连接也出现了问题，开发人员连库就报这个错</p>
+<p>小倩要来了系统的登录用户名密码，登录到了数据库服务器一看</p>
+<p>好家伙！根目录满了。</p>
+<p>仔细检查发现，之前软件实施的人员把数据库直接装到了根目录下，最后导致根目录空间耗尽，数据库无法写入审计文件，无法登录了。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver /]# df -Th</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root xfs        50G   50G   33M 100% /</span><br><span class="line">/dev/mapper/centos-home xfs       445G   33M  445G   1% /home</span><br><span class="line">/dev/sda1               xfs      1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                   tmpfs     378M     0  378M   0% /run/user/0</span><br><span class="line">[root@dbserver /]# ls </span><br><span class="line">bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  u01  usr  var</span><br></pre></td></tr></table></figure>
+
+<p>根分区是没地方了，可是&#x2F;home分区却几乎没用。</p>
+<p>这就是之前的集成实施人员和软件实施人员没有对接好，两个人都是二把刀，导致这么个结果。</p>
+<h2 id="此时如何快速恢复业务呢？"><a href="#此时如何快速恢复业务呢？" class="headerlink" title="此时如何快速恢复业务呢？"></a>此时如何快速恢复业务呢？</h2><p>经过检查&#x2F;home分区下只有用户的默认文件夹，并无其它生产数据，与客户沟通后，小倩建议把&#x2F;home分区删除，扩容到根分区里，快速恢复业务。</p>
+<p>说干就干，首先，先去$ORACLE_BASE目录下释放一点文件，比如下面这些，都可以删除</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/alert   目录下的log_*.xml文件</span><br><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/trace   目录下的日志文件，alert_orcl.log如果不是很大，不建议删除。</span><br></pre></td></tr></table></figure>
+
+<p>备份一下home下的文件，检查了只有oracle目录。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver home]# ls -al</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x.  3 root   root  20 Sep  7 21:59 .</span><br><span class="line">dr-xr-xr-x. 18 root   root 255 Sep  7 22:00 ..</span><br><span class="line">drwx------   2 oracle dba   62 Sep  7 21:59 oracle</span><br></pre></td></tr></table></figure>
+
+<p>这里我们用cp 直接复制&#x2F;home目录下的文件到&#x2F;root目录下。r表示目录下所有子目录也复制，p表进带权限复制。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /home/</span><br><span class="line">cp * -rp /root/</span><br><span class="line">cd ~</span><br></pre></td></tr></table></figure>
+
+<p>下一步，我们要卸载&#x2F;home分区，把&#x2F;home分区对应的lv删除。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# umount  /home/</span><br><span class="line">[root@dbserver ~]# lvremove /dev/centos/home </span><br><span class="line">Do you really want to remove active logical volume centos/home? [y/n]: y</span><br><span class="line">  Logical volume &quot;home&quot; successfully removed</span><br></pre></td></tr></table></figure>
+
+<p>查看VG有空闲空间，这里我们再把剩余的空间扩容到根分区所属于的名为root的lv里。扩容lv后，在线直接扩容设备&#x2F;dev&#x2F;mapper&#x2F;centos-root对应的根文件系统。扩容成功后根分区空间立即够用了，业务立马恢复。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# vgs</span><br><span class="line">  VG     #PV #LV #SN Attr   VSize    VFree  </span><br><span class="line">  centos   1   2   0 wz--n- &lt;499.00g 445.12g</span><br><span class="line">[root@dbserver ~]# lvresize -l +100%FREE /dev/centos/root </span><br><span class="line">  Size of logical volume centos/root changed from 50.00 GiB (12800 extents) to 495.12 GiB (126751 extents).</span><br><span class="line">  Logical volume centos/root successfully resized.</span><br><span class="line">[root@dbserver ~]# lvs</span><br><span class="line">  LV   VG     Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  root centos -wi-ao---- 495.12g                                                    </span><br><span class="line">  swap centos -wi-ao----  &lt;3.88g </span><br><span class="line">[root@dbserver]# xfs_growfs /dev/mapper/centos-root </span><br><span class="line">meta-data=/dev/mapper/centos-root isize=512    agcount=4, agsize=3276800 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0 spinodes=0</span><br><span class="line">data     =                       bsize=4096   blocks=13107200, imaxpct=25</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal               bsize=4096   blocks=6400, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line">data blocks changed from 13107200 to 129793024</span><br><span class="line">[root@dbserver]# df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                    1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root  496G   50G  446G  11% /</span><br><span class="line">/dev/sda1               1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                    378M     0  378M   0% /run/user/0</span><br></pre></td></tr></table></figure>
+
+<p>最后别忘记了把备份走文件恢复到&#x2F;home目录下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# cp -rp oracle/ /home/</span><br></pre></td></tr></table></figure>
+
+<h2 id="完美收工了？"><a href="#完美收工了？" class="headerlink" title="完美收工了？"></a>完美收工了？</h2><p>你以为这样就完了么？</p>
+<p>没过1天，领导又找到了小倩，说数据库在本地磁盘空间太小了，性能也不能，我们又搞了个磁盘阵列，想把数据库整体迁移到存储上。</p>
+<p>下一期我们一起来看看小倩同学怎么操作。</p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+]]></content>
+      <categories>
+        <category>操作系统_linux</category>
+      </categories>
+      <tags>
+        <tag>oracle</tag>
+        <tag>linux</tag>
+        <tag>dba</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>DBA必掌握的小技巧-分区满了如何处理2-迁移到新存储</title>
     <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%862-%E8%BF%81%E7%A7%BB%E5%88%B0%E6%96%B0%E5%AD%98%E5%82%A8/</url>
     <content><![CDATA[<h2 id="前情提要"><a href="#前情提要" class="headerlink" title="前情提要"></a>前情提要</h2><p>话说上次DBA小倩通过删除home lv，把空间扩给了&#x2F;分区，问题暂时得到了解决。</p>
@@ -394,139 +573,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Centos7_x86一键更新openssh10.1p1</title>
-    <url>/2025/10/10/Centos7_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.1p1/</url>
-    <content><![CDATA[<h2 id="如何完成一键更新OPENSSH"><a href="#如何完成一键更新OPENSSH" class="headerlink" title="如何完成一键更新OPENSSH"></a>如何完成一键更新OPENSSH</h2><p>我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8</p>
-<div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115344299528429&bvid=BV1mHxCz7EYK&cid=32946720040;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
-
-<p>想要获取一键安装包可以关注我的公众号联系我获取</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-
-<h2 id="openssh更新了啥？"><a href="#openssh更新了啥？" class="headerlink" title="openssh更新了啥？"></a>openssh更新了啥？</h2><p>OpenSSH 10.1 版本核心变更对照表</p>
-<table>
-<thead>
-<tr>
-<th>变更类型</th>
-<th>涉及组件</th>
-<th>关键影响与核心内容</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>未来弃用警告</strong></td>
-<td>全组件</td>
-<td>弃用SHA1格式SSHFP记录，仅保留SHA256格式；SHA256自2012年OpenSSH 6.1起已支持。</td>
-</tr>
-<tr>
-<td><strong>潜在不兼容变更</strong></td>
-<td>ssh(1)</td>
-<td>非后量子密钥协商算法触发警告，可通过<code>WarnWeakCrypto</code>配置控制（默认开启）。</td>
-</tr>
-<tr>
-<td></td>
-<td>ssh(1)、sshd(8)</td>
-<td>DSCP&#x2F;IPQoS逻辑重构：交互式流量默认用EF类别，非交互式用系统默认，支持动态切换。</td>
-</tr>
-<tr>
-<td></td>
-<td>ssh(1)、sshd(8)</td>
-<td>弃用IPQoS中的ToS关键字（lowdelay&#x2F;reliability&#x2F;throughput），改用DSCP。</td>
-</tr>
-<tr>
-<td></td>
-<td>ssh-add(1)</td>
-<td>证书过期时间+5分钟宽限期，代理自动清理过期证书；<code>ssh-add -N</code>可禁用此功能。</td>
-</tr>
-<tr>
-<td></td>
-<td>全组件</td>
-<td>移除XMSS密钥实验性支持，计划后续实现新后量子签名方案。</td>
-</tr>
-<tr>
-<td></td>
-<td>ssh-agent(1)、sshd(8)</td>
-<td>代理套接字从<code>/tmp</code>迁移至<code>~/.ssh/agent</code>，新增自动清理功能与多个控制选项（-U&#x2F;-u等）。</td>
-</tr>
-<tr>
-<td><strong>安全修复</strong></td>
-<td>ssh(1)</td>
-<td>禁止用户名含控制字符、URI含<code>\0</code>字符，防范shell注入；可信配置文件用户名无此限制。</td>
-</tr>
-<tr>
-<td><strong>新增功能</strong></td>
-<td>ssh(1)、sshd(8)</td>
-<td>新增SIGINFO处理器，记录活跃通道与会话信息。</td>
-</tr>
-<tr>
-<td></td>
-<td>sshd(8)</td>
-<td>拒绝证书认证时，额外记录证书标识信息，便于调试。</td>
-</tr>
-<tr>
-<td></td>
-<td>ssh(1)、ssh-agent(1)</td>
-<td>支持PKCS#11令牌上的ed25519密钥。</td>
-</tr>
-<tr>
-<td></td>
-<td>ssh(1)</td>
-<td>新增<code>RefuseConnection</code>配置项，可在配置中添加连接阻断提醒（如弃用主机提示）。</td>
-</tr>
-<tr>
-<td></td>
-<td>sshd(8)</td>
-<td>X11显示号检查适配<code>X11DisplayOffset</code>，支持更高端口范围配置。</td>
-</tr>
-<tr>
-<td></td>
-<td>测试框架</td>
-<td>新增基准测试功能，OpenBSD用<code>make UNITTEST_BENCHMARK=yes</code>，Portable版用<code>make unit-bench</code>。</td>
-</tr>
-<tr>
-<td><strong>漏洞修复</strong></td>
-<td>sshd(8)</td>
-<td>修复<code>MaxStartups</code>进程跟踪异常，避免插槽占满导致拒绝新连接。</td>
-</tr>
-<tr>
-<td></td>
-<td>ssh(1)</td>
-<td>修复启用<code>ObscureKeystrokeTiming</code>时X客户端启动延迟问题（bz#3820）。</td>
-</tr>
-<tr>
-<td></td>
-<td>sshd(8)</td>
-<td>配置文件最大限制从256KB提升至4MB，超限时提前报错。</td>
-</tr>
-<tr>
-<td></td>
-<td>全组件</td>
-<td>修复多处内存泄漏，优化日志显示（如密钥加载失败详情、<code>PermitRootLogin</code>别名修正）。</td>
-</tr>
-<tr>
-<td><strong>可移植性优化</strong></td>
-<td>sshd(8)</td>
-<td>检查PAM事务用户名变更，避免配置错误导致的授权异常；FreeBSD适配<code>SSH_TUN_COMPAT_AF</code>。</td>
-</tr>
-<tr>
-<td></td>
-<td>全组件</td>
-<td>补充缺失系统头文件，减少跨平台编译差异；macOS适配<code>nlist</code>函数检查逻辑。</td>
-</tr>
-<tr>
-<td></td>
-<td>ssh-agent(1)</td>
-<td>systemd套接字激活模式下，<code>SIGTERM</code>退出返回0，避免服务错误标记为“失败”。</td>
-</tr>
-</tbody></table>
-]]></content>
-      <categories>
-        <category>操作系统_linux</category>
-      </categories>
-      <tags>
-        <tag>linux</tag>
-        <tag>openssh</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>推荐一些学习数据库的BLOG</title>
     <url>/2025/10/13/%E6%8E%A8%E8%8D%90%E4%B8%80%E4%BA%9B%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84BLOG/</url>
     <content><![CDATA[<p>这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。</p>
@@ -625,58 +671,6 @@
       </tags>
   </entry>
   <entry>
-    <title>简易异地保留RMAN备份的方案</title>
-    <url>/2025/10/13/%E7%AE%80%E6%98%93%E5%BC%82%E5%9C%B0%E4%BF%9D%E7%95%99RMAN%E5%A4%87%E4%BB%BD%E7%9A%84%E6%96%B9%E6%A1%88/</url>
-    <content><![CDATA[<h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><p>客户原有个中心机房A，里面有台windows 服务器运行oracle 11g</p>
-<p>在不远的机房B里有台XXG备份一体机对这个oracle进行定时备份，但是由于XXG备份一本体过保且备份故障无法继续了。</p>
-<p>客户想要实现一个简易的备份，并能存储到B机房的服务器中，以防止数据丢失。</p>
-<h2 id="简易RMAN设计"><a href="#简易RMAN设计" class="headerlink" title="简易RMAN设计"></a>简易RMAN设计</h2><p>由于数据库不是很大，实际的数据量只有几十G，于是计划如下：</p>
-<p>1、在A中心的数据库服务器上配置定时RMAN备份</p>
-<p>2、在B中心的服务器上配置FTP，并打通A中心数据库服务器到B中心FTP的网络</p>
-<p>3、配置A中心的数据库RMAN备份后，进行RAR压缩备份，再上传备份包到B中心的FTP上</p>
-<p>4、A中心的数据库服务器保留15天备份。B中心的备份一直保留。</p>
-<p>A中心的数据库服务器新建如下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--备份目录</span><br><span class="line">F:\BACKUP</span><br><span class="line">--FTP上传日志记录</span><br><span class="line">F:\backup\FTP-LOG</span><br><span class="line">--存储相关的执行脚本</span><br><span class="line">F:\scriptr\rman_backup_full.bat  //备份执行脚本</span><br><span class="line">F:\script\Dbfull.rman            //备份脚本</span><br><span class="line">F:\script\ftp.bat                //FTP上传脚本</span><br><span class="line">F:\script\clear15.bat            //定时清理</span><br></pre></td></tr></table></figure>
-
-<h2 id="配置脚本"><a href="#配置脚本" class="headerlink" title="配置脚本"></a>配置脚本</h2><p>1、创建备份脚本</p>
-<p>备份脚本F:\script\Dbfull.rman</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">run&#123;   </span><br><span class="line">allocate channel c1 type disk;   </span><br><span class="line">backup  incremental level 0 tag &#x27;db0&#x27; format &#x27;f:\backup\rman_backup_db%u_%s_%p.dbf&#x27;database </span><br><span class="line">include current controlfile;</span><br><span class="line">release channel c1;   </span><br><span class="line">sql &#x27;alter system archive log current&#x27;;</span><br><span class="line">allocate channel c10 type disk;</span><br><span class="line">backup filesperset 50 format &#x27;f:\backup\rman_backup_arch%u_%s_%p.dbf&#x27; archivelog all delete input;    </span><br><span class="line">release channel c10;    </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line">run&#123;</span><br><span class="line">allocate channel t1 type disk;  </span><br><span class="line">allocate channel t2 type disk;  </span><br><span class="line">allocate channel t3 type disk;  </span><br><span class="line">report obsolete;</span><br><span class="line">crosscheck backup;</span><br><span class="line">crosscheck archivelog all;</span><br><span class="line">delete noprompt obsolete;</span><br><span class="line">delete noprompt expired backup;</span><br><span class="line">delete noprompt expired archivelog all;</span><br><span class="line">release channel t1;  </span><br><span class="line">release channel t2;  </span><br><span class="line">release channel t3;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>执行任务脚本F:\scriptr\rman_backup_full.bat</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rman target  / log=&#x27;F:\backup\FTP-LOG\RMAN_BACKUP_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%&quot;.log&#x27; cmdfile=f:\script\Dbfull.rman</span><br></pre></td></tr></table></figure>
-
-<p>FTP定时上传任务脚本F:\script\ftp.bat </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&quot;c:\Program Files (x86)\WinRAR\Rar.exe&quot; a -ep -df -m0 F:\backup\RMAN_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%.rar F:\backup\*.log  F:\backup\*.dbf</span><br><span class="line"></span><br><span class="line">set FILENAME=RMAN_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%.rar</span><br><span class="line"></span><br><span class="line">echo open 10.10.1.253 &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo ftpuser&gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo Jiacheng2022&gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo bin &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo prompt off &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo lcd f:\backup &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo mput %FILENAME% &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo prompt on  &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo bye  &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo quit &gt;&gt;F:\script\ftp.txt</span><br><span class="line"></span><br><span class="line">ftp -s:F:\script\ftp.txt &gt;F:\backup\FTP-LOG\ftp_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%.log 2&gt;F:\backup\FTP-LOG\err_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%.log</span><br><span class="line"></span><br><span class="line">del f:\script\ftp.txt</span><br></pre></td></tr></table></figure>
-
-<p>保留15天备份脚本F:\script\clear15.bat </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">forfiles /p &quot;F:\backup&quot; /m *.rar /d -15 /c &quot;cmd /c del @path&quot;</span><br></pre></td></tr></table></figure>
-
-<p>最后在windows上创建三个定时任务：</p>
-<p>1、每天定时备份oracle脚本:\scriptr\rman_backup_full.bat</p>
-<p>2、定时FTP上传脚本F:\script\ftp.bat  （与第一个任务时间错开）</p>
-<p>3、定时清理空间F:\script\clear15.bat </p>
-<p>最后就是告诉运维工程师，定期检查F:\BACKUP\FTP-LOG目录，看看有没有报错即可。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这个就是个纯简易方案，还是存在不少缺陷</p>
-<p>1、没有任何的纠错机制，各个脚本之间独立运行，一步报错后面步步错。</p>
-<p>2、任务之间的时间间隔要自己提前计算好</p>
-<p>3、还需要运维工程师定期检查</p>
-<p>当然，白嫖还想要啥，哈哈！对付能用就行。</p>
-<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
-<p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-
-]]></content>
-      <categories>
-        <category>oracle_backup</category>
-      </categories>
-      <tags>
-        <tag>oracle</tag>
-        <tag>database</tag>
-        <tag>linux</tag>
-        <tag>rman备份</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
     <url>/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</url>
     <content><![CDATA[<p>昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。</p>
@@ -727,49 +721,55 @@
       </tags>
   </entry>
   <entry>
-    <title>DBA必掌握的小技巧-分区满了如何处理1-删除home扩容根分区</title>
-    <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%861-%E5%88%A0%E9%99%A4home%E6%89%A9%E5%AE%B9%E6%A0%B9%E5%88%86%E5%8C%BA/</url>
-    <content><![CDATA[<h2 id="故障发生了！"><a href="#故障发生了！" class="headerlink" title="故障发生了！"></a>故障发生了！</h2><p>今天DBA小倩接到一个客户紧急任务，客户说自己的业务数据库突然不好使了，连接也出现了问题，开发人员连库就报这个错</p>
-<p>小倩要来了系统的登录用户名密码，登录到了数据库服务器一看</p>
-<p>好家伙！根目录满了。</p>
-<p>仔细检查发现，之前软件实施的人员把数据库直接装到了根目录下，最后导致根目录空间耗尽，数据库无法写入审计文件，无法登录了。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver /]# df -Th</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root xfs        50G   50G   33M 100% /</span><br><span class="line">/dev/mapper/centos-home xfs       445G   33M  445G   1% /home</span><br><span class="line">/dev/sda1               xfs      1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                   tmpfs     378M     0  378M   0% /run/user/0</span><br><span class="line">[root@dbserver /]# ls </span><br><span class="line">bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  u01  usr  var</span><br></pre></td></tr></table></figure>
+    <title>简易异地保留RMAN备份的方案</title>
+    <url>/2025/10/13/%E7%AE%80%E6%98%93%E5%BC%82%E5%9C%B0%E4%BF%9D%E7%95%99RMAN%E5%A4%87%E4%BB%BD%E7%9A%84%E6%96%B9%E6%A1%88/</url>
+    <content><![CDATA[<h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><p>客户原有个中心机房A，里面有台windows 服务器运行oracle 11g</p>
+<p>在不远的机房B里有台XXG备份一体机对这个oracle进行定时备份，但是由于XXG备份一本体过保且备份故障无法继续了。</p>
+<p>客户想要实现一个简易的备份，并能存储到B机房的服务器中，以防止数据丢失。</p>
+<h2 id="简易RMAN设计"><a href="#简易RMAN设计" class="headerlink" title="简易RMAN设计"></a>简易RMAN设计</h2><p>由于数据库不是很大，实际的数据量只有几十G，于是计划如下：</p>
+<p>1、在A中心的数据库服务器上配置定时RMAN备份</p>
+<p>2、在B中心的服务器上配置FTP，并打通A中心数据库服务器到B中心FTP的网络</p>
+<p>3、配置A中心的数据库RMAN备份后，进行RAR压缩备份，再上传备份包到B中心的FTP上</p>
+<p>4、A中心的数据库服务器保留15天备份。B中心的备份一直保留。</p>
+<p>A中心的数据库服务器新建如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--备份目录</span><br><span class="line">F:\BACKUP</span><br><span class="line">--FTP上传日志记录</span><br><span class="line">F:\backup\FTP-LOG</span><br><span class="line">--存储相关的执行脚本</span><br><span class="line">F:\scriptr\rman_backup_full.bat  //备份执行脚本</span><br><span class="line">F:\script\Dbfull.rman            //备份脚本</span><br><span class="line">F:\script\ftp.bat                //FTP上传脚本</span><br><span class="line">F:\script\clear15.bat            //定时清理</span><br></pre></td></tr></table></figure>
 
-<p>根分区是没地方了，可是&#x2F;home分区却几乎没用。</p>
-<p>这就是之前的集成实施人员和软件实施人员没有对接好，两个人都是二把刀，导致这么个结果。</p>
-<h2 id="此时如何快速恢复业务呢？"><a href="#此时如何快速恢复业务呢？" class="headerlink" title="此时如何快速恢复业务呢？"></a>此时如何快速恢复业务呢？</h2><p>经过检查&#x2F;home分区下只有用户的默认文件夹，并无其它生产数据，与客户沟通后，小倩建议把&#x2F;home分区删除，扩容到根分区里，快速恢复业务。</p>
-<p>说干就干，首先，先去$ORACLE_BASE目录下释放一点文件，比如下面这些，都可以删除</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/alert   目录下的log_*.xml文件</span><br><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/trace   目录下的日志文件，alert_orcl.log如果不是很大，不建议删除。</span><br></pre></td></tr></table></figure>
+<h2 id="配置脚本"><a href="#配置脚本" class="headerlink" title="配置脚本"></a>配置脚本</h2><p>1、创建备份脚本</p>
+<p>备份脚本F:\script\Dbfull.rman</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">run&#123;   </span><br><span class="line">allocate channel c1 type disk;   </span><br><span class="line">backup  incremental level 0 tag &#x27;db0&#x27; format &#x27;f:\backup\rman_backup_db%u_%s_%p.dbf&#x27;database </span><br><span class="line">include current controlfile;</span><br><span class="line">release channel c1;   </span><br><span class="line">sql &#x27;alter system archive log current&#x27;;</span><br><span class="line">allocate channel c10 type disk;</span><br><span class="line">backup filesperset 50 format &#x27;f:\backup\rman_backup_arch%u_%s_%p.dbf&#x27; archivelog all delete input;    </span><br><span class="line">release channel c10;    </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line">run&#123;</span><br><span class="line">allocate channel t1 type disk;  </span><br><span class="line">allocate channel t2 type disk;  </span><br><span class="line">allocate channel t3 type disk;  </span><br><span class="line">report obsolete;</span><br><span class="line">crosscheck backup;</span><br><span class="line">crosscheck archivelog all;</span><br><span class="line">delete noprompt obsolete;</span><br><span class="line">delete noprompt expired backup;</span><br><span class="line">delete noprompt expired archivelog all;</span><br><span class="line">release channel t1;  </span><br><span class="line">release channel t2;  </span><br><span class="line">release channel t3;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>备份一下home下的文件，检查了只有oracle目录。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver home]# ls -al</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x.  3 root   root  20 Sep  7 21:59 .</span><br><span class="line">dr-xr-xr-x. 18 root   root 255 Sep  7 22:00 ..</span><br><span class="line">drwx------   2 oracle dba   62 Sep  7 21:59 oracle</span><br></pre></td></tr></table></figure>
+<p>执行任务脚本F:\scriptr\rman_backup_full.bat</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rman target  / log=&#x27;F:\backup\FTP-LOG\RMAN_BACKUP_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%&quot;.log&#x27; cmdfile=f:\script\Dbfull.rman</span><br></pre></td></tr></table></figure>
 
-<p>这里我们用cp 直接复制&#x2F;home目录下的文件到&#x2F;root目录下。r表示目录下所有子目录也复制，p表进带权限复制。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /home/</span><br><span class="line">cp * -rp /root/</span><br><span class="line">cd ~</span><br></pre></td></tr></table></figure>
+<p>FTP定时上传任务脚本F:\script\ftp.bat </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&quot;c:\Program Files (x86)\WinRAR\Rar.exe&quot; a -ep -df -m0 F:\backup\RMAN_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%.rar F:\backup\*.log  F:\backup\*.dbf</span><br><span class="line"></span><br><span class="line">set FILENAME=RMAN_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%.rar</span><br><span class="line"></span><br><span class="line">echo open 10.10.1.253 &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo ftpuser&gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo Jiacheng2022&gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo bin &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo prompt off &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo lcd f:\backup &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo mput %FILENAME% &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo prompt on  &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo bye  &gt;&gt;F:\script\ftp.txt</span><br><span class="line">echo quit &gt;&gt;F:\script\ftp.txt</span><br><span class="line"></span><br><span class="line">ftp -s:F:\script\ftp.txt &gt;F:\backup\FTP-LOG\ftp_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%.log 2&gt;F:\backup\FTP-LOG\err_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%.log</span><br><span class="line"></span><br><span class="line">del f:\script\ftp.txt</span><br></pre></td></tr></table></figure>
 
-<p>下一步，我们要卸载&#x2F;home分区，把&#x2F;home分区对应的lv删除。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# umount  /home/</span><br><span class="line">[root@dbserver ~]# lvremove /dev/centos/home </span><br><span class="line">Do you really want to remove active logical volume centos/home? [y/n]: y</span><br><span class="line">  Logical volume &quot;home&quot; successfully removed</span><br></pre></td></tr></table></figure>
+<p>保留15天备份脚本F:\script\clear15.bat </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">forfiles /p &quot;F:\backup&quot; /m *.rar /d -15 /c &quot;cmd /c del @path&quot;</span><br></pre></td></tr></table></figure>
 
-<p>查看VG有空闲空间，这里我们再把剩余的空间扩容到根分区所属于的名为root的lv里。扩容lv后，在线直接扩容设备&#x2F;dev&#x2F;mapper&#x2F;centos-root对应的根文件系统。扩容成功后根分区空间立即够用了，业务立马恢复。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# vgs</span><br><span class="line">  VG     #PV #LV #SN Attr   VSize    VFree  </span><br><span class="line">  centos   1   2   0 wz--n- &lt;499.00g 445.12g</span><br><span class="line">[root@dbserver ~]# lvresize -l +100%FREE /dev/centos/root </span><br><span class="line">  Size of logical volume centos/root changed from 50.00 GiB (12800 extents) to 495.12 GiB (126751 extents).</span><br><span class="line">  Logical volume centos/root successfully resized.</span><br><span class="line">[root@dbserver ~]# lvs</span><br><span class="line">  LV   VG     Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  root centos -wi-ao---- 495.12g                                                    </span><br><span class="line">  swap centos -wi-ao----  &lt;3.88g </span><br><span class="line">[root@dbserver]# xfs_growfs /dev/mapper/centos-root </span><br><span class="line">meta-data=/dev/mapper/centos-root isize=512    agcount=4, agsize=3276800 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0 spinodes=0</span><br><span class="line">data     =                       bsize=4096   blocks=13107200, imaxpct=25</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal               bsize=4096   blocks=6400, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line">data blocks changed from 13107200 to 129793024</span><br><span class="line">[root@dbserver]# df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                    1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root  496G   50G  446G  11% /</span><br><span class="line">/dev/sda1               1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                    378M     0  378M   0% /run/user/0</span><br></pre></td></tr></table></figure>
-
-<p>最后别忘记了把备份走文件恢复到&#x2F;home目录下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# cp -rp oracle/ /home/</span><br></pre></td></tr></table></figure>
-
-<h2 id="完美收工了？"><a href="#完美收工了？" class="headerlink" title="完美收工了？"></a>完美收工了？</h2><p>你以为这样就完了么？</p>
-<p>没过1天，领导又找到了小倩，说数据库在本地磁盘空间太小了，性能也不能，我们又搞了个磁盘阵列，想把数据库整体迁移到存储上。</p>
-<p>下一期我们一起来看看小倩同学怎么操作。</p>
+<p>最后在windows上创建三个定时任务：</p>
+<p>1、每天定时备份oracle脚本:\scriptr\rman_backup_full.bat</p>
+<p>2、定时FTP上传脚本F:\script\ftp.bat  （与第一个任务时间错开）</p>
+<p>3、定时清理空间F:\script\clear15.bat </p>
+<p>最后就是告诉运维工程师，定期检查F:\BACKUP\FTP-LOG目录，看看有没有报错即可。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这个就是个纯简易方案，还是存在不少缺陷</p>
+<p>1、没有任何的纠错机制，各个脚本之间独立运行，一步报错后面步步错。</p>
+<p>2、任务之间的时间间隔要自己提前计算好</p>
+<p>3、还需要运维工程师定期检查</p>
+<p>当然，白嫖还想要啥，哈哈！对付能用就行。</p>
 <p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
 <p>也欢迎关注我的公众号：</p>
 <img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
 ]]></content>
       <categories>
-        <category>操作系统_linux</category>
+        <category>oracle_backup</category>
       </categories>
       <tags>
         <tag>oracle</tag>
+        <tag>database</tag>
         <tag>linux</tag>
-        <tag>dba</tag>
+        <tag>rman备份</tag>
       </tags>
   </entry>
 </search>
