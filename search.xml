@@ -54,6 +54,78 @@
       </tags>
   </entry>
   <entry>
+    <title>AIX系统The largest dump device is too small问题</title>
+    <url>/2025/10/13/AIX%E7%B3%BB%E7%BB%9FThe%20largest%20dump%20device%20is%20too%20small%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="问题报错"><a href="#问题报错" class="headerlink" title="问题报错"></a>问题报错</h2><p>今天巡检HIS的数据库服务器，发现小机AIX系统有大量的报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]errpt</span><br><span class="line">IDENTIFIER TIMESTAMP  T C RESOURCE_NAME  DESCRIPTION</span><br><span class="line">E87EF1BE   0207150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0206150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0205150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0204150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0203150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0202150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0201150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0131150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0130150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0129150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0128150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0127150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0126150025 P O dumpcheck      The largest dump device is too small.</span><br></pre></td></tr></table></figure>
+
+<p>关于AIX报错errpt有具体含义如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">这里的输出分为六列依次为：</span><br><span class="line"></span><br><span class="line">1．错误标示符IDENTIFIER：并不唯一，由它来确定使用的错误模板，显然同一种错误的IDENTIFIER是相同的。</span><br><span class="line"></span><br><span class="line">2．时间戳TIMESTAMP：错误发生的时间，MMDDhhmmYY,依次表示月日时分年。</span><br><span class="line"></span><br><span class="line">3．类型TYPE：错误的类型，或者说严重的程度，共分为6种：</span><br><span class="line">PEND 设备或功能组件可能丢失 简写P</span><br><span class="line">PERF 性能严重下降 P</span><br><span class="line">PERM 硬件设备或软件模块损坏，确诊了的 P</span><br><span class="line">TEMP 临时性错误，经过重试后已经恢复正常 T</span><br><span class="line">INFO 一般消息，不是错误 I</span><br><span class="line">UNKN 不能确定错误的严重性 U</span><br><span class="line"></span><br><span class="line">4．种类CLASS c:指出错误源</span><br><span class="line">H 硬件故障 Hardware</span><br><span class="line">S 软件故障 Software</span><br><span class="line">O 人为操作 Operation</span><br><span class="line">U 不能确定 Unknown</span><br><span class="line"></span><br><span class="line">5． 资源名RESOURCE_NAME</span><br><span class="line">最初检测到错误的资源名软件或者硬件，并不代表这个资源有问题，而只是最先在它发现的。</span><br><span class="line"></span><br><span class="line">6．描述</span><br><span class="line">具体的错误代表的意义可以打IBM的支持热线寻求帮助。</span><br></pre></td></tr></table></figure>
+
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>那么让我们查看一下报错的具体内容是什么，使用errpt -aj E87EF1BE |more进行分页查看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">---------------------------------------------------------------------------</span><br><span class="line">LABEL:          DMPCHK_TOOSMALL</span><br><span class="line">IDENTIFIER:     E87EF1BE</span><br><span class="line"></span><br><span class="line">Date/Time:       Fri Feb  7 15:00:00 CST 2025</span><br><span class="line">Sequence Number: 498</span><br><span class="line">Machine Id:      00CB4D104B00</span><br><span class="line">Node Id:         hisdb02</span><br><span class="line">Class:           O</span><br><span class="line">Type:            PEND</span><br><span class="line">WPAR:            Global</span><br><span class="line">Resource Name:   dumpcheck       </span><br><span class="line"></span><br><span class="line">Description</span><br><span class="line">The largest dump device is too small.</span><br><span class="line"></span><br><span class="line">Probable Causes</span><br><span class="line">Neither dump device is large enough to accommodate a system dump at this time.</span><br><span class="line"></span><br><span class="line">        Recommended Actions</span><br><span class="line">        Increase the size of one or both dump devices.</span><br><span class="line"></span><br><span class="line">Detail Data</span><br><span class="line">Largest dump device</span><br><span class="line">lg_dumplv                                                                                                                       </span><br><span class="line">Largest dump device size in kb</span><br><span class="line">     4194304</span><br><span class="line">Current estimated dump size in kb</span><br><span class="line">     4637388</span><br><span class="line">---------------------------------------------------------------------------</span><br><span class="line">LABEL:          DMPCHK_TOOSMALL</span><br><span class="line">IDENTIFIER:     E87EF1BE</span><br></pre></td></tr></table></figure>
+
+<p>根据上述的内容可以看出Probable Causes的原因是lg_dumplv空间不足导致的，设置的大小是4194304，实际的大小是</p>
+<p>4637388，因此报错。关于<strong>dump devices</strong> IBM的描述如下：</p>
+<blockquote>
+<p>When an unexpected system halt occurs, the system dump facility automatically copies selected areas of kernel data to the primary dump device. These areas include kernel segment 0, and other areas registered in the Master Dump Table by kernel modules or kernel extensions.</p>
+<p>当系统意外停止时，系统转储工具会自动将内核数据的选定区域复制到主转储设备。这些区域包括内核段 0 以及内核模块或内核扩展在 Master Dump Table 中注册的其他区域。</p>
+</blockquote>
+<p>可以通过命令查看当前大小</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]sysdumpdev -e</span><br><span class="line">0453-041 Estimated dump size in bytes: 4505080954</span><br></pre></td></tr></table></figure>
+
+<p>比较有意思的就是这个报错总在每天的15点报错，这是为啥呢。其实是系统的默认定时任务</p>
+<p>通过crontab -l可以看到每天15：00有个默认的任务执行&#x2F;usr&#x2F;lib&#x2F;ras&#x2F;dumpcheck</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]crontab -l</span><br><span class="line"># @(#)08        1.15.1.3  src/bos/usr/sbin/cron/root, cmdcntl, bos720 2/11/94 17:19:47</span><br><span class="line"># IBM_PROLOG_BEGIN_TAG </span><br><span class="line"># This is an automatically generated prolog. </span><br><span class="line">#  </span><br><span class="line"># bos720 src/bos/usr/sbin/cron/root 1.15.1.3 </span><br><span class="line">#  </span><br><span class="line"># Licensed Materials - Property of IBM </span><br><span class="line">#  </span><br><span class="line"># COPYRIGHT International Business Machines Corp. 1989,1994 </span><br><span class="line"># All Rights Reserved </span><br><span class="line">#  </span><br><span class="line"># US Government Users Restricted Rights - Use, duplication or </span><br><span class="line"># disclosure restricted by GSA ADP Schedule Contract with IBM Corp. </span><br><span class="line">#  </span><br><span class="line"># IBM_PROLOG_END_TAG </span><br><span class="line">#</span><br><span class="line"># COMPONENT_NAME: (CMDCNTL) commands needed for basic system needs</span><br><span class="line">#</span><br><span class="line"># FUNCTIONS: </span><br><span class="line">#</span><br><span class="line"># ORIGINS: 27</span><br><span class="line">#</span><br><span class="line"># (C) COPYRIGHT International Business Machines Corp. 1989,1994</span><br><span class="line"># All Rights Reserved</span><br><span class="line"># Licensed Materials - Property of IBM</span><br><span class="line">#</span><br><span class="line"># US Government Users Restricted Rights - Use, duplication or</span><br><span class="line"># disclosure restricted by GSA ADP Schedule Contract with IBM Corp.</span><br><span class="line">#</span><br><span class="line">#0 3 * * * /usr/sbin/skulker</span><br><span class="line">#45 2 * * 0 /usr/lib/spell/compress</span><br><span class="line">#45 23 * * * ulimit 5000; /usr/lib/smdemon.cleanu &gt; /dev/null</span><br><span class="line">0 11 * * * /usr/bin/errclear -d S,O 30</span><br><span class="line">0 12 * * * /usr/bin/errclear -d H 90</span><br><span class="line">0,5,10,15,20,25,30,35,40,45,50,55 * * * * /usr/sbin/dumpctrl -k &gt;/dev/null 2&gt;/dev/null</span><br><span class="line">0 15 * * *  /usr/lib/ras/dumpcheck &gt;/dev/null 2&gt;&amp;1</span><br><span class="line">30 23 * * * /usr/sbin/ntpdate 192.168.50.250</span><br><span class="line">0 0 * * * /usr/bin/nmon -f -N -m /nmon -s 30 -c 2880</span><br></pre></td></tr></table></figure>
+
+<p>我们来简单看一下这个命令的作用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]/usr/lib/ras/dumpcheck -h</span><br><span class="line">getopt: Not a recognized flag: h</span><br><span class="line">Usage:</span><br><span class="line">dumpcheck [[-l] [-p ] [-t time-parameters] [-P ]]</span><br><span class="line">dumpcheck [-r ]</span><br><span class="line"></span><br><span class="line">Checks to see that the dump device and copy directory </span><br><span class="line">are able to receive the system dump.</span><br><span class="line"></span><br><span class="line">-l                      Log any warnings to the error log. </span><br><span class="line">-p                      Print any warnings produced to stdout.</span><br><span class="line">-r                      Remove the crontab entry for this function.</span><br><span class="line">-P                      Indicates that the changes are to be made permenently.</span><br><span class="line">-t time-parameters      Change the time when dumpcheck is executed.</span><br><span class="line"></span><br><span class="line">The -r parameter must be specified alone, </span><br><span class="line">(i.e.) it is not valid with any other parameters. </span><br></pre></td></tr></table></figure>
+
+<p>执行一下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]/usr/lib/ras/dumpcheck -p</span><br><span class="line">The largest dump device is too small.</span><br><span class="line"></span><br><span class="line">Largest dump device</span><br><span class="line">         lg_dumplv</span><br><span class="line">Largest dump device size in kb</span><br><span class="line">         4194304</span><br><span class="line">Current estimated dump size in kb</span><br><span class="line">         4637388</span><br></pre></td></tr></table></figure>
+
+<h2 id="问题处理"><a href="#问题处理" class="headerlink" title="问题处理"></a>问题处理</h2><p>即然确定了问题哪里来的，下面进行一下问题fix，先确认一下lg_dumplv分配的大小，默认分配的是4G（PPS&#x3D;4，PP SIZE&#x3D;1024M）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]lslv lg_dumplv</span><br><span class="line">LOGICAL VOLUME:     lg_dumplv              VOLUME GROUP:   rootvg</span><br><span class="line">LV IDENTIFIER:      00cb47b000004b0000000189e0b21f89.12 PERMISSION:     read/write</span><br><span class="line">VG STATE:           active/complete        LV STATE:       opened/syncd</span><br><span class="line">TYPE:               sysdump                WRITE VERIFY:   off</span><br><span class="line">MAX LPs:            512                    PP SIZE:        1024 megabyte(s)</span><br><span class="line">COPIES:             1                      SCHED POLICY:   parallel</span><br><span class="line">LPs:                4                      PPs:            4</span><br><span class="line">STALE PPs:          0                      BB POLICY:      relocatable</span><br><span class="line">INTER-POLICY:       minimum                RELOCATABLE:    yes</span><br><span class="line">INTRA-POLICY:       middle                 UPPER BOUND:    32</span><br><span class="line">MOUNT POINT:        N/A                    LABEL:          None</span><br><span class="line">MIRROR WRITE CONSISTENCY: on/ACTIVE                              </span><br><span class="line">EACH LP COPY ON A SEPARATE PV ?: yes                                    </span><br><span class="line">Serialize IO ?:     NO                                     </span><br><span class="line">INFINITE RETRY:     no                     PREFERRED READ: 0</span><br><span class="line">ENCRYPTION:         no                                     </span><br></pre></td></tr></table></figure>
+
+<p>lg_dumplv来自于系统rootvg，该LV为非mirror lv，可以看到lg_dumplov来自于hdisk0磁盘上。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]lsvg -l rootvg</span><br><span class="line">rootvg:</span><br><span class="line">LV NAME             TYPE       LPs     PPs     PVs  LV STATE      MOUNT POINT</span><br><span class="line">hd5                 boot       1       2       2    closed/syncd  N/A</span><br><span class="line">hd6                 paging     33      66      2    open/syncd    N/A</span><br><span class="line">hd8                 jfs2log    1       2       2    open/syncd    N/A</span><br><span class="line">hd4                 jfs2       50      100     2    open/syncd    /</span><br><span class="line">hd2                 jfs2       10      20      2    open/syncd    /usr</span><br><span class="line">hd9var              jfs2       10      20      2    open/syncd    /var</span><br><span class="line">hd3                 jfs2       10      20      2    open/syncd    /tmp</span><br><span class="line">hd1                 jfs2       1       2       2    open/syncd    /home</span><br><span class="line">hd10opt             jfs2       10      20      2    open/syncd    /opt</span><br><span class="line">hd11admin           jfs2       1       2       2    open/syncd    /admin</span><br><span class="line">fwdump              jfs2       3       6       2    open/syncd    /var/adm/ras/platform</span><br><span class="line">lg_dumplv           sysdump    6       6       1    open/syncd    N/A</span><br><span class="line">livedump            jfs2       1       2       2    open/syncd    /var/adm/ras/livedump</span><br><span class="line">fslv00              jfs2       100     200     2    open/syncd    /u01</span><br><span class="line">fslv01              jfs2       100     200     2    open/syncd    /g01</span><br><span class="line">[root@hisdb01:/]lspv -l hdisk0</span><br><span class="line">hdisk0:</span><br><span class="line">LV NAME               LPs     PPs     DISTRIBUTION          MOUNT POINT</span><br><span class="line">fwdump                3       3       00..03..00..00..00    /var/adm/ras/platform</span><br><span class="line">hd11admin             1       1       00..00..01..00..00    /admin</span><br><span class="line">livedump              1       1       00..01..00..00..00    /var/adm/ras/livedump</span><br><span class="line">lg_dumplv             6       6       00..06..00..00..00    N/A</span><br><span class="line">fslv01                100     100     00..00..43..57..00    /g01</span><br><span class="line">fslv00                100     100     100..00..00..00..00   /u01</span><br><span class="line">hd5                   1       1       01..00..00..00..00    N/A</span><br><span class="line">hd6                   33      33      00..33..00..00..00    N/A</span><br><span class="line">hd8                   1       1       00..00..01..00..00    N/A</span><br><span class="line">hd4                   50      50      00..30..20..00..00    /</span><br><span class="line">hd2                   10      10      00..00..10..00..00    /usr</span><br><span class="line">hd9var                10      10      00..00..10..00..00    /var</span><br><span class="line">hd3                   10      10      00..00..10..00..00    /tmp</span><br><span class="line">hd1                   1       1       00..00..01..00..00    /home</span><br><span class="line">hd10opt               10      10      00..00..10..00..00    /opt</span><br><span class="line">[root@hisdb01:/]lspv -l hdisk1</span><br><span class="line">hdisk1:</span><br><span class="line">LV NAME               LPs     PPs     DISTRIBUTION          MOUNT POINT</span><br><span class="line">fwdump                3       3       00..03..00..00..00    /var/adm/ras/platform</span><br><span class="line">hd11admin             1       1       00..00..01..00..00    /admin</span><br><span class="line">livedump              1       1       00..01..00..00..00    /var/adm/ras/livedump</span><br><span class="line">fslv01                100     100     00..00..43..57..00    /g01</span><br><span class="line">fslv00                100     100     100..00..00..00..00   /u01</span><br><span class="line">hd5                   1       1       01..00..00..00..00    N/A</span><br><span class="line">hd6                   33      33      00..33..00..00..00    N/A</span><br><span class="line">hd8                   1       1       00..00..01..00..00    N/A</span><br><span class="line">hd4                   50      50      00..30..20..00..00    /</span><br><span class="line">hd2                   10      10      00..00..10..00..00    /usr</span><br><span class="line">hd9var                10      10      00..00..10..00..00    /var</span><br><span class="line">hd3                   10      10      00..00..10..00..00    /tmp</span><br><span class="line">hd1                   1       1       00..00..01..00..00    /home</span><br><span class="line">hd10opt               10      10      00..00..10..00..00    /opt</span><br></pre></td></tr></table></figure>
+
+<p>检查一下rootvg是否有可用空间</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]lsvg rootvg</span><br><span class="line">VOLUME GROUP:       rootvg                   VG IDENTIFIER:  00cb47b000004b0000000189e0b21f89</span><br><span class="line">VG STATE:           active                   PP SIZE:        1024 megabyte(s)</span><br><span class="line">VG PERMISSION:      read/write               TOTAL PPs:      1064 (1089536 megabytes)</span><br><span class="line">MAX LVs:            256                      FREE PPs:       398 (407552 megabytes)</span><br><span class="line">LVs:                15                       USED PPs:       666 (681984 megabytes)</span><br><span class="line">OPEN LVs:           14                       QUORUM:         1 (Disabled)</span><br><span class="line">TOTAL PVs:          2                        VG DESCRIPTORS: 3</span><br><span class="line">STALE PVs:          0                        STALE PPs:      0</span><br><span class="line">ACTIVE PVs:         2                        AUTO ON:        yes</span><br><span class="line">MAX PPs per VG:     32512                                     </span><br><span class="line">MAX PPs per PV:     1016                     MAX PVs:        32</span><br><span class="line">LTG size (Dynamic): 256 kilobyte(s)          AUTO SYNC:      no</span><br><span class="line">HOT SPARE:          no                       BB POLICY:      relocatable </span><br><span class="line">PV RESTRICTION:     none                     INFINITE RETRY: no</span><br><span class="line">DISK BLOCK SIZE:    512                      CRITICAL VG:    no</span><br><span class="line">FS SYNC OPTION:     no                       CRITICAL PVs:   no</span><br><span class="line">ENCRYPTION:         no                                        </span><br></pre></td></tr></table></figure>
+
+<p>执行lg_dumplv扩容，之后再查看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]extendlv lg_dumplv 2</span><br><span class="line">[root@hisdb01:/]lslv lg_dumplv</span><br><span class="line">LOGICAL VOLUME:     lg_dumplv              VOLUME GROUP:   rootvg</span><br><span class="line">LV IDENTIFIER:      00cb47b000004b0000000189e0b21f89.12 PERMISSION:     read/write</span><br><span class="line">VG STATE:           active/complete        LV STATE:       opened/syncd</span><br><span class="line">TYPE:               sysdump                WRITE VERIFY:   off</span><br><span class="line">MAX LPs:            512                    PP SIZE:        1024 megabyte(s)</span><br><span class="line">COPIES:             1                      SCHED POLICY:   parallel</span><br><span class="line">LPs:                6                      PPs:            6</span><br><span class="line">STALE PPs:          0                      BB POLICY:      relocatable</span><br><span class="line">INTER-POLICY:       minimum                RELOCATABLE:    yes</span><br><span class="line">INTRA-POLICY:       middle                 UPPER BOUND:    32</span><br><span class="line">MOUNT POINT:        N/A                    LABEL:          None</span><br><span class="line">MIRROR WRITE CONSISTENCY: on/ACTIVE                              </span><br><span class="line">EACH LP COPY ON A SEPARATE PV ?: yes                                    </span><br><span class="line">Serialize IO ?:     NO                                     </span><br><span class="line">INFINITE RETRY:     no                     PREFERRED READ: 0</span><br><span class="line">ENCRYPTION:         no             </span><br></pre></td></tr></table></figure>
+
+<p>这时再查看，可以看到rootvg的FREE PPS少了2个。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]lsvg rootvg</span><br><span class="line">VOLUME GROUP:       rootvg                   VG IDENTIFIER:  00cb47b000004b0000000189e0b21f89</span><br><span class="line">VG STATE:           active                   PP SIZE:        1024 megabyte(s)</span><br><span class="line">VG PERMISSION:      read/write               TOTAL PPs:      1064 (1089536 megabytes)</span><br><span class="line">MAX LVs:            256                      FREE PPs:       396 (405504 megabytes)</span><br><span class="line">LVs:                15                       USED PPs:       668 (684032 megabytes)</span><br><span class="line">OPEN LVs:           14                       QUORUM:         1 (Disabled)</span><br><span class="line">TOTAL PVs:          2                        VG DESCRIPTORS: 3</span><br><span class="line">STALE PVs:          0                        STALE PPs:      0</span><br><span class="line">ACTIVE PVs:         2                        AUTO ON:        yes</span><br><span class="line">MAX PPs per VG:     32512                                     </span><br><span class="line">MAX PPs per PV:     1016                     MAX PVs:        32</span><br><span class="line">LTG size (Dynamic): 256 kilobyte(s)          AUTO SYNC:      no</span><br><span class="line">HOT SPARE:          no                       BB POLICY:      relocatable </span><br><span class="line">PV RESTRICTION:     none                     INFINITE RETRY: no</span><br><span class="line">DISK BLOCK SIZE:    512                      CRITICAL VG:    no</span><br><span class="line">FS SYNC OPTION:     no                       CRITICAL PVs:   no</span><br><span class="line">ENCRYPTION:         no                                        </span><br></pre></td></tr></table></figure>
+
+<p>由于这台服务器再没有别的报错，那么我们手动清空下报错，再手动check一下。确认无报错产生，问题解决完毕。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]errclear 0</span><br><span class="line">[root@hisdb01:/]errpt</span><br><span class="line">[root@hisdb01:/]/usr/lib/ras/dumpcheck</span><br><span class="line">[root@hisdb01:/]errpt</span><br></pre></td></tr></table></figure>
+
+<h2 id="此问题产生的原因"><a href="#此问题产生的原因" class="headerlink" title="此问题产生的原因"></a>此问题产生的原因</h2><p><strong>默认的lg_dumplv大小</strong></p>
+<p>在AIX 系统中的lg_dumplv 逻辑卷是用于存放系统dump 的区域。 在安装系统时是否创建该逻辑卷与服务器的内存配置有关。 若服务器的内存小于4GB时, 那么在安装 AIX 5.2 或 5.3时，系统就不会自动创建它。而缺省将系统dump 存放在hd6上。 当服务器的内存大于4GB时，在安装AIX时，就会为系统 dump 创建一专用区域，该逻辑卷名就是 lg_dumplv. 其缺省大小是按以下规则分配的： . 4GB &lt; &#x3D; 服务器的内存 〈 12GB lg_dump 的大小为 1GB . 12GB &lt; &#x3D; 服务器的内存 〈 24GB lg_dump 的大小为 2GB . 24GB &lt; &#x3D; 服务器的内存 〈 48GB lg_dump 的大小为 3GB . 48GB &lt; &#x3D; 服务器的内存 lg_dump 的大小为 4GB</p>
+<p>我这台服务器是128G内存的，因此默认的lg_dumplv大小为4G也符合。</p>
+<p><strong>关于dumpcheck</strong></p>
+<p><strong>&#x2F;usr&#x2F;lib&#x2F;ras&#x2F;dumpcheck</strong> 命令用来检查系统转储使用的磁盘资源。 如果最大转储设备不足以接收转储，或者转储调页空间时，在拷贝目录中空间不够，该命令就记录一个错误。</p>
+<p><strong>dumpcheck</strong> 通常是每天在当地时间下午 3 点由守护程序运行。 当使用 <strong>-r</strong> 标志从根目录的 <strong>crontab</strong> 中删除或者使用 <strong>-t</strong> <em>TimeParameters</em>，更改转储检查的运行时间时，这可能有所变化。 也可以从 SMIT 进行配置。 安装服务辅助时， <strong>dumpcheck</strong> 会自动添加到 root 用户的 <strong>crontab</strong> 。</p>
+<p>要取得最大效力，应该是在系统负载最大时运行 <strong>dumpcheck</strong>。 这些时候，系统的转储最有可能是它的最大值。 同样，即使使用 <strong>dumpcheck</strong> 观察转储的大小，仍然可能发生转储在转储装置或者是发生时在拷贝目录中不合适。 如果在转储时间刚好有一个系统负载高峰，这也可能发生。</p>
+<p>然而默认转储设备通常不够大，无法进行完整转储，因此会有这个定时任务定时检查，并在不足的时候报错提示进行扩展。</p>
+<p>这里提供一些参考</p>
+<p>[管理系统转储设备]:</p>
+<p><a href="https://www.ibm.com/support/pages/managing-system-dump-devices">https://www.ibm.com/support/pages/managing-system-dump-devices</a></p>
+<p>[dumpcheck 命令 - IBM 文档]:</p>
+<p><a href="https://www.ibm.com/docs/zh/aix/7.3?topic=d-dumpcheck-command">https://www.ibm.com/docs/zh/aix/7.3?topic=d-dumpcheck-command</a></p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
+      <categories>
+        <category>操作系统_aix</category>
+      </categories>
+      <tags>
+        <tag>aix</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Centos7_x86一键更新openssh10.1p1</title>
     <url>/2025/10/10/Centos7_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.1p1/</url>
     <content><![CDATA[<h2 id="如何完成一键更新OPENSSH"><a href="#如何完成一键更新OPENSSH" class="headerlink" title="如何完成一键更新OPENSSH"></a>如何完成一键更新OPENSSH</h2><p>我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8</p>
@@ -187,78 +259,6 @@
       </tags>
   </entry>
   <entry>
-    <title>AIX系统The largest dump device is too small问题</title>
-    <url>/2025/10/13/AIX%E7%B3%BB%E7%BB%9FThe%20largest%20dump%20device%20is%20too%20small%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="问题报错"><a href="#问题报错" class="headerlink" title="问题报错"></a>问题报错</h2><p>今天巡检HIS的数据库服务器，发现小机AIX系统有大量的报错：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]errpt</span><br><span class="line">IDENTIFIER TIMESTAMP  T C RESOURCE_NAME  DESCRIPTION</span><br><span class="line">E87EF1BE   0207150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0206150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0205150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0204150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0203150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0202150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0201150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0131150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0130150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0129150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0128150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0127150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0126150025 P O dumpcheck      The largest dump device is too small.</span><br></pre></td></tr></table></figure>
-
-<p>关于AIX报错errpt有具体含义如下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">这里的输出分为六列依次为：</span><br><span class="line"></span><br><span class="line">1．错误标示符IDENTIFIER：并不唯一，由它来确定使用的错误模板，显然同一种错误的IDENTIFIER是相同的。</span><br><span class="line"></span><br><span class="line">2．时间戳TIMESTAMP：错误发生的时间，MMDDhhmmYY,依次表示月日时分年。</span><br><span class="line"></span><br><span class="line">3．类型TYPE：错误的类型，或者说严重的程度，共分为6种：</span><br><span class="line">PEND 设备或功能组件可能丢失 简写P</span><br><span class="line">PERF 性能严重下降 P</span><br><span class="line">PERM 硬件设备或软件模块损坏，确诊了的 P</span><br><span class="line">TEMP 临时性错误，经过重试后已经恢复正常 T</span><br><span class="line">INFO 一般消息，不是错误 I</span><br><span class="line">UNKN 不能确定错误的严重性 U</span><br><span class="line"></span><br><span class="line">4．种类CLASS c:指出错误源</span><br><span class="line">H 硬件故障 Hardware</span><br><span class="line">S 软件故障 Software</span><br><span class="line">O 人为操作 Operation</span><br><span class="line">U 不能确定 Unknown</span><br><span class="line"></span><br><span class="line">5． 资源名RESOURCE_NAME</span><br><span class="line">最初检测到错误的资源名软件或者硬件，并不代表这个资源有问题，而只是最先在它发现的。</span><br><span class="line"></span><br><span class="line">6．描述</span><br><span class="line">具体的错误代表的意义可以打IBM的支持热线寻求帮助。</span><br></pre></td></tr></table></figure>
-
-<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>那么让我们查看一下报错的具体内容是什么，使用errpt -aj E87EF1BE |more进行分页查看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">---------------------------------------------------------------------------</span><br><span class="line">LABEL:          DMPCHK_TOOSMALL</span><br><span class="line">IDENTIFIER:     E87EF1BE</span><br><span class="line"></span><br><span class="line">Date/Time:       Fri Feb  7 15:00:00 CST 2025</span><br><span class="line">Sequence Number: 498</span><br><span class="line">Machine Id:      00CB4D104B00</span><br><span class="line">Node Id:         hisdb02</span><br><span class="line">Class:           O</span><br><span class="line">Type:            PEND</span><br><span class="line">WPAR:            Global</span><br><span class="line">Resource Name:   dumpcheck       </span><br><span class="line"></span><br><span class="line">Description</span><br><span class="line">The largest dump device is too small.</span><br><span class="line"></span><br><span class="line">Probable Causes</span><br><span class="line">Neither dump device is large enough to accommodate a system dump at this time.</span><br><span class="line"></span><br><span class="line">        Recommended Actions</span><br><span class="line">        Increase the size of one or both dump devices.</span><br><span class="line"></span><br><span class="line">Detail Data</span><br><span class="line">Largest dump device</span><br><span class="line">lg_dumplv                                                                                                                       </span><br><span class="line">Largest dump device size in kb</span><br><span class="line">     4194304</span><br><span class="line">Current estimated dump size in kb</span><br><span class="line">     4637388</span><br><span class="line">---------------------------------------------------------------------------</span><br><span class="line">LABEL:          DMPCHK_TOOSMALL</span><br><span class="line">IDENTIFIER:     E87EF1BE</span><br></pre></td></tr></table></figure>
-
-<p>根据上述的内容可以看出Probable Causes的原因是lg_dumplv空间不足导致的，设置的大小是4194304，实际的大小是</p>
-<p>4637388，因此报错。关于<strong>dump devices</strong> IBM的描述如下：</p>
-<blockquote>
-<p>When an unexpected system halt occurs, the system dump facility automatically copies selected areas of kernel data to the primary dump device. These areas include kernel segment 0, and other areas registered in the Master Dump Table by kernel modules or kernel extensions.</p>
-<p>当系统意外停止时，系统转储工具会自动将内核数据的选定区域复制到主转储设备。这些区域包括内核段 0 以及内核模块或内核扩展在 Master Dump Table 中注册的其他区域。</p>
-</blockquote>
-<p>可以通过命令查看当前大小</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]sysdumpdev -e</span><br><span class="line">0453-041 Estimated dump size in bytes: 4505080954</span><br></pre></td></tr></table></figure>
-
-<p>比较有意思的就是这个报错总在每天的15点报错，这是为啥呢。其实是系统的默认定时任务</p>
-<p>通过crontab -l可以看到每天15：00有个默认的任务执行&#x2F;usr&#x2F;lib&#x2F;ras&#x2F;dumpcheck</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]crontab -l</span><br><span class="line"># @(#)08        1.15.1.3  src/bos/usr/sbin/cron/root, cmdcntl, bos720 2/11/94 17:19:47</span><br><span class="line"># IBM_PROLOG_BEGIN_TAG </span><br><span class="line"># This is an automatically generated prolog. </span><br><span class="line">#  </span><br><span class="line"># bos720 src/bos/usr/sbin/cron/root 1.15.1.3 </span><br><span class="line">#  </span><br><span class="line"># Licensed Materials - Property of IBM </span><br><span class="line">#  </span><br><span class="line"># COPYRIGHT International Business Machines Corp. 1989,1994 </span><br><span class="line"># All Rights Reserved </span><br><span class="line">#  </span><br><span class="line"># US Government Users Restricted Rights - Use, duplication or </span><br><span class="line"># disclosure restricted by GSA ADP Schedule Contract with IBM Corp. </span><br><span class="line">#  </span><br><span class="line"># IBM_PROLOG_END_TAG </span><br><span class="line">#</span><br><span class="line"># COMPONENT_NAME: (CMDCNTL) commands needed for basic system needs</span><br><span class="line">#</span><br><span class="line"># FUNCTIONS: </span><br><span class="line">#</span><br><span class="line"># ORIGINS: 27</span><br><span class="line">#</span><br><span class="line"># (C) COPYRIGHT International Business Machines Corp. 1989,1994</span><br><span class="line"># All Rights Reserved</span><br><span class="line"># Licensed Materials - Property of IBM</span><br><span class="line">#</span><br><span class="line"># US Government Users Restricted Rights - Use, duplication or</span><br><span class="line"># disclosure restricted by GSA ADP Schedule Contract with IBM Corp.</span><br><span class="line">#</span><br><span class="line">#0 3 * * * /usr/sbin/skulker</span><br><span class="line">#45 2 * * 0 /usr/lib/spell/compress</span><br><span class="line">#45 23 * * * ulimit 5000; /usr/lib/smdemon.cleanu &gt; /dev/null</span><br><span class="line">0 11 * * * /usr/bin/errclear -d S,O 30</span><br><span class="line">0 12 * * * /usr/bin/errclear -d H 90</span><br><span class="line">0,5,10,15,20,25,30,35,40,45,50,55 * * * * /usr/sbin/dumpctrl -k &gt;/dev/null 2&gt;/dev/null</span><br><span class="line">0 15 * * *  /usr/lib/ras/dumpcheck &gt;/dev/null 2&gt;&amp;1</span><br><span class="line">30 23 * * * /usr/sbin/ntpdate 192.168.50.250</span><br><span class="line">0 0 * * * /usr/bin/nmon -f -N -m /nmon -s 30 -c 2880</span><br></pre></td></tr></table></figure>
-
-<p>我们来简单看一下这个命令的作用</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]/usr/lib/ras/dumpcheck -h</span><br><span class="line">getopt: Not a recognized flag: h</span><br><span class="line">Usage:</span><br><span class="line">dumpcheck [[-l] [-p ] [-t time-parameters] [-P ]]</span><br><span class="line">dumpcheck [-r ]</span><br><span class="line"></span><br><span class="line">Checks to see that the dump device and copy directory </span><br><span class="line">are able to receive the system dump.</span><br><span class="line"></span><br><span class="line">-l                      Log any warnings to the error log. </span><br><span class="line">-p                      Print any warnings produced to stdout.</span><br><span class="line">-r                      Remove the crontab entry for this function.</span><br><span class="line">-P                      Indicates that the changes are to be made permenently.</span><br><span class="line">-t time-parameters      Change the time when dumpcheck is executed.</span><br><span class="line"></span><br><span class="line">The -r parameter must be specified alone, </span><br><span class="line">(i.e.) it is not valid with any other parameters. </span><br></pre></td></tr></table></figure>
-
-<p>执行一下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]/usr/lib/ras/dumpcheck -p</span><br><span class="line">The largest dump device is too small.</span><br><span class="line"></span><br><span class="line">Largest dump device</span><br><span class="line">         lg_dumplv</span><br><span class="line">Largest dump device size in kb</span><br><span class="line">         4194304</span><br><span class="line">Current estimated dump size in kb</span><br><span class="line">         4637388</span><br></pre></td></tr></table></figure>
-
-<h2 id="问题处理"><a href="#问题处理" class="headerlink" title="问题处理"></a>问题处理</h2><p>即然确定了问题哪里来的，下面进行一下问题fix，先确认一下lg_dumplv分配的大小，默认分配的是4G（PPS&#x3D;4，PP SIZE&#x3D;1024M）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]lslv lg_dumplv</span><br><span class="line">LOGICAL VOLUME:     lg_dumplv              VOLUME GROUP:   rootvg</span><br><span class="line">LV IDENTIFIER:      00cb47b000004b0000000189e0b21f89.12 PERMISSION:     read/write</span><br><span class="line">VG STATE:           active/complete        LV STATE:       opened/syncd</span><br><span class="line">TYPE:               sysdump                WRITE VERIFY:   off</span><br><span class="line">MAX LPs:            512                    PP SIZE:        1024 megabyte(s)</span><br><span class="line">COPIES:             1                      SCHED POLICY:   parallel</span><br><span class="line">LPs:                4                      PPs:            4</span><br><span class="line">STALE PPs:          0                      BB POLICY:      relocatable</span><br><span class="line">INTER-POLICY:       minimum                RELOCATABLE:    yes</span><br><span class="line">INTRA-POLICY:       middle                 UPPER BOUND:    32</span><br><span class="line">MOUNT POINT:        N/A                    LABEL:          None</span><br><span class="line">MIRROR WRITE CONSISTENCY: on/ACTIVE                              </span><br><span class="line">EACH LP COPY ON A SEPARATE PV ?: yes                                    </span><br><span class="line">Serialize IO ?:     NO                                     </span><br><span class="line">INFINITE RETRY:     no                     PREFERRED READ: 0</span><br><span class="line">ENCRYPTION:         no                                     </span><br></pre></td></tr></table></figure>
-
-<p>lg_dumplv来自于系统rootvg，该LV为非mirror lv，可以看到lg_dumplov来自于hdisk0磁盘上。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]lsvg -l rootvg</span><br><span class="line">rootvg:</span><br><span class="line">LV NAME             TYPE       LPs     PPs     PVs  LV STATE      MOUNT POINT</span><br><span class="line">hd5                 boot       1       2       2    closed/syncd  N/A</span><br><span class="line">hd6                 paging     33      66      2    open/syncd    N/A</span><br><span class="line">hd8                 jfs2log    1       2       2    open/syncd    N/A</span><br><span class="line">hd4                 jfs2       50      100     2    open/syncd    /</span><br><span class="line">hd2                 jfs2       10      20      2    open/syncd    /usr</span><br><span class="line">hd9var              jfs2       10      20      2    open/syncd    /var</span><br><span class="line">hd3                 jfs2       10      20      2    open/syncd    /tmp</span><br><span class="line">hd1                 jfs2       1       2       2    open/syncd    /home</span><br><span class="line">hd10opt             jfs2       10      20      2    open/syncd    /opt</span><br><span class="line">hd11admin           jfs2       1       2       2    open/syncd    /admin</span><br><span class="line">fwdump              jfs2       3       6       2    open/syncd    /var/adm/ras/platform</span><br><span class="line">lg_dumplv           sysdump    6       6       1    open/syncd    N/A</span><br><span class="line">livedump            jfs2       1       2       2    open/syncd    /var/adm/ras/livedump</span><br><span class="line">fslv00              jfs2       100     200     2    open/syncd    /u01</span><br><span class="line">fslv01              jfs2       100     200     2    open/syncd    /g01</span><br><span class="line">[root@hisdb01:/]lspv -l hdisk0</span><br><span class="line">hdisk0:</span><br><span class="line">LV NAME               LPs     PPs     DISTRIBUTION          MOUNT POINT</span><br><span class="line">fwdump                3       3       00..03..00..00..00    /var/adm/ras/platform</span><br><span class="line">hd11admin             1       1       00..00..01..00..00    /admin</span><br><span class="line">livedump              1       1       00..01..00..00..00    /var/adm/ras/livedump</span><br><span class="line">lg_dumplv             6       6       00..06..00..00..00    N/A</span><br><span class="line">fslv01                100     100     00..00..43..57..00    /g01</span><br><span class="line">fslv00                100     100     100..00..00..00..00   /u01</span><br><span class="line">hd5                   1       1       01..00..00..00..00    N/A</span><br><span class="line">hd6                   33      33      00..33..00..00..00    N/A</span><br><span class="line">hd8                   1       1       00..00..01..00..00    N/A</span><br><span class="line">hd4                   50      50      00..30..20..00..00    /</span><br><span class="line">hd2                   10      10      00..00..10..00..00    /usr</span><br><span class="line">hd9var                10      10      00..00..10..00..00    /var</span><br><span class="line">hd3                   10      10      00..00..10..00..00    /tmp</span><br><span class="line">hd1                   1       1       00..00..01..00..00    /home</span><br><span class="line">hd10opt               10      10      00..00..10..00..00    /opt</span><br><span class="line">[root@hisdb01:/]lspv -l hdisk1</span><br><span class="line">hdisk1:</span><br><span class="line">LV NAME               LPs     PPs     DISTRIBUTION          MOUNT POINT</span><br><span class="line">fwdump                3       3       00..03..00..00..00    /var/adm/ras/platform</span><br><span class="line">hd11admin             1       1       00..00..01..00..00    /admin</span><br><span class="line">livedump              1       1       00..01..00..00..00    /var/adm/ras/livedump</span><br><span class="line">fslv01                100     100     00..00..43..57..00    /g01</span><br><span class="line">fslv00                100     100     100..00..00..00..00   /u01</span><br><span class="line">hd5                   1       1       01..00..00..00..00    N/A</span><br><span class="line">hd6                   33      33      00..33..00..00..00    N/A</span><br><span class="line">hd8                   1       1       00..00..01..00..00    N/A</span><br><span class="line">hd4                   50      50      00..30..20..00..00    /</span><br><span class="line">hd2                   10      10      00..00..10..00..00    /usr</span><br><span class="line">hd9var                10      10      00..00..10..00..00    /var</span><br><span class="line">hd3                   10      10      00..00..10..00..00    /tmp</span><br><span class="line">hd1                   1       1       00..00..01..00..00    /home</span><br><span class="line">hd10opt               10      10      00..00..10..00..00    /opt</span><br></pre></td></tr></table></figure>
-
-<p>检查一下rootvg是否有可用空间</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]lsvg rootvg</span><br><span class="line">VOLUME GROUP:       rootvg                   VG IDENTIFIER:  00cb47b000004b0000000189e0b21f89</span><br><span class="line">VG STATE:           active                   PP SIZE:        1024 megabyte(s)</span><br><span class="line">VG PERMISSION:      read/write               TOTAL PPs:      1064 (1089536 megabytes)</span><br><span class="line">MAX LVs:            256                      FREE PPs:       398 (407552 megabytes)</span><br><span class="line">LVs:                15                       USED PPs:       666 (681984 megabytes)</span><br><span class="line">OPEN LVs:           14                       QUORUM:         1 (Disabled)</span><br><span class="line">TOTAL PVs:          2                        VG DESCRIPTORS: 3</span><br><span class="line">STALE PVs:          0                        STALE PPs:      0</span><br><span class="line">ACTIVE PVs:         2                        AUTO ON:        yes</span><br><span class="line">MAX PPs per VG:     32512                                     </span><br><span class="line">MAX PPs per PV:     1016                     MAX PVs:        32</span><br><span class="line">LTG size (Dynamic): 256 kilobyte(s)          AUTO SYNC:      no</span><br><span class="line">HOT SPARE:          no                       BB POLICY:      relocatable </span><br><span class="line">PV RESTRICTION:     none                     INFINITE RETRY: no</span><br><span class="line">DISK BLOCK SIZE:    512                      CRITICAL VG:    no</span><br><span class="line">FS SYNC OPTION:     no                       CRITICAL PVs:   no</span><br><span class="line">ENCRYPTION:         no                                        </span><br></pre></td></tr></table></figure>
-
-<p>执行lg_dumplv扩容，之后再查看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]extendlv lg_dumplv 2</span><br><span class="line">[root@hisdb01:/]lslv lg_dumplv</span><br><span class="line">LOGICAL VOLUME:     lg_dumplv              VOLUME GROUP:   rootvg</span><br><span class="line">LV IDENTIFIER:      00cb47b000004b0000000189e0b21f89.12 PERMISSION:     read/write</span><br><span class="line">VG STATE:           active/complete        LV STATE:       opened/syncd</span><br><span class="line">TYPE:               sysdump                WRITE VERIFY:   off</span><br><span class="line">MAX LPs:            512                    PP SIZE:        1024 megabyte(s)</span><br><span class="line">COPIES:             1                      SCHED POLICY:   parallel</span><br><span class="line">LPs:                6                      PPs:            6</span><br><span class="line">STALE PPs:          0                      BB POLICY:      relocatable</span><br><span class="line">INTER-POLICY:       minimum                RELOCATABLE:    yes</span><br><span class="line">INTRA-POLICY:       middle                 UPPER BOUND:    32</span><br><span class="line">MOUNT POINT:        N/A                    LABEL:          None</span><br><span class="line">MIRROR WRITE CONSISTENCY: on/ACTIVE                              </span><br><span class="line">EACH LP COPY ON A SEPARATE PV ?: yes                                    </span><br><span class="line">Serialize IO ?:     NO                                     </span><br><span class="line">INFINITE RETRY:     no                     PREFERRED READ: 0</span><br><span class="line">ENCRYPTION:         no             </span><br></pre></td></tr></table></figure>
-
-<p>这时再查看，可以看到rootvg的FREE PPS少了2个。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]lsvg rootvg</span><br><span class="line">VOLUME GROUP:       rootvg                   VG IDENTIFIER:  00cb47b000004b0000000189e0b21f89</span><br><span class="line">VG STATE:           active                   PP SIZE:        1024 megabyte(s)</span><br><span class="line">VG PERMISSION:      read/write               TOTAL PPs:      1064 (1089536 megabytes)</span><br><span class="line">MAX LVs:            256                      FREE PPs:       396 (405504 megabytes)</span><br><span class="line">LVs:                15                       USED PPs:       668 (684032 megabytes)</span><br><span class="line">OPEN LVs:           14                       QUORUM:         1 (Disabled)</span><br><span class="line">TOTAL PVs:          2                        VG DESCRIPTORS: 3</span><br><span class="line">STALE PVs:          0                        STALE PPs:      0</span><br><span class="line">ACTIVE PVs:         2                        AUTO ON:        yes</span><br><span class="line">MAX PPs per VG:     32512                                     </span><br><span class="line">MAX PPs per PV:     1016                     MAX PVs:        32</span><br><span class="line">LTG size (Dynamic): 256 kilobyte(s)          AUTO SYNC:      no</span><br><span class="line">HOT SPARE:          no                       BB POLICY:      relocatable </span><br><span class="line">PV RESTRICTION:     none                     INFINITE RETRY: no</span><br><span class="line">DISK BLOCK SIZE:    512                      CRITICAL VG:    no</span><br><span class="line">FS SYNC OPTION:     no                       CRITICAL PVs:   no</span><br><span class="line">ENCRYPTION:         no                                        </span><br></pre></td></tr></table></figure>
-
-<p>由于这台服务器再没有别的报错，那么我们手动清空下报错，再手动check一下。确认无报错产生，问题解决完毕。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]errclear 0</span><br><span class="line">[root@hisdb01:/]errpt</span><br><span class="line">[root@hisdb01:/]/usr/lib/ras/dumpcheck</span><br><span class="line">[root@hisdb01:/]errpt</span><br></pre></td></tr></table></figure>
-
-<h2 id="此问题产生的原因"><a href="#此问题产生的原因" class="headerlink" title="此问题产生的原因"></a>此问题产生的原因</h2><p><strong>默认的lg_dumplv大小</strong></p>
-<p>在AIX 系统中的lg_dumplv 逻辑卷是用于存放系统dump 的区域。 在安装系统时是否创建该逻辑卷与服务器的内存配置有关。 若服务器的内存小于4GB时, 那么在安装 AIX 5.2 或 5.3时，系统就不会自动创建它。而缺省将系统dump 存放在hd6上。 当服务器的内存大于4GB时，在安装AIX时，就会为系统 dump 创建一专用区域，该逻辑卷名就是 lg_dumplv. 其缺省大小是按以下规则分配的： . 4GB &lt; &#x3D; 服务器的内存 〈 12GB lg_dump 的大小为 1GB . 12GB &lt; &#x3D; 服务器的内存 〈 24GB lg_dump 的大小为 2GB . 24GB &lt; &#x3D; 服务器的内存 〈 48GB lg_dump 的大小为 3GB . 48GB &lt; &#x3D; 服务器的内存 lg_dump 的大小为 4GB</p>
-<p>我这台服务器是128G内存的，因此默认的lg_dumplv大小为4G也符合。</p>
-<p><strong>关于dumpcheck</strong></p>
-<p><strong>&#x2F;usr&#x2F;lib&#x2F;ras&#x2F;dumpcheck</strong> 命令用来检查系统转储使用的磁盘资源。 如果最大转储设备不足以接收转储，或者转储调页空间时，在拷贝目录中空间不够，该命令就记录一个错误。</p>
-<p><strong>dumpcheck</strong> 通常是每天在当地时间下午 3 点由守护程序运行。 当使用 <strong>-r</strong> 标志从根目录的 <strong>crontab</strong> 中删除或者使用 <strong>-t</strong> <em>TimeParameters</em>，更改转储检查的运行时间时，这可能有所变化。 也可以从 SMIT 进行配置。 安装服务辅助时， <strong>dumpcheck</strong> 会自动添加到 root 用户的 <strong>crontab</strong> 。</p>
-<p>要取得最大效力，应该是在系统负载最大时运行 <strong>dumpcheck</strong>。 这些时候，系统的转储最有可能是它的最大值。 同样，即使使用 <strong>dumpcheck</strong> 观察转储的大小，仍然可能发生转储在转储装置或者是发生时在拷贝目录中不合适。 如果在转储时间刚好有一个系统负载高峰，这也可能发生。</p>
-<p>然而默认转储设备通常不够大，无法进行完整转储，因此会有这个定时任务定时检查，并在不足的时候报错提示进行扩展。</p>
-<p>这里提供一些参考</p>
-<p>[管理系统转储设备]:</p>
-<p><a href="https://www.ibm.com/support/pages/managing-system-dump-devices">https://www.ibm.com/support/pages/managing-system-dump-devices</a></p>
-<p>[dumpcheck 命令 - IBM 文档]:</p>
-<p><a href="https://www.ibm.com/docs/zh/aix/7.3?topic=d-dumpcheck-command">https://www.ibm.com/docs/zh/aix/7.3?topic=d-dumpcheck-command</a></p>
-<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
-<p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
-      <categories>
-        <category>操作系统_aix</category>
-      </categories>
-      <tags>
-        <tag>aix</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>DBA必掌握的小技巧-分区满了如何处理1-删除home扩容根分区</title>
     <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%861-%E5%88%A0%E9%99%A4home%E6%89%A9%E5%AE%B9%E6%A0%B9%E5%88%86%E5%8C%BA/</url>
     <content><![CDATA[<h2 id="故障发生了！"><a href="#故障发生了！" class="headerlink" title="故障发生了！"></a>故障发生了！</h2><p>今天DBA小倩接到一个客户紧急任务，客户说自己的业务数据库突然不好使了，连接也出现了问题，开发人员连库就报这个错</p>
@@ -365,78 +365,6 @@
       </tags>
   </entry>
   <entry>
-    <title>OracleLinux快速配置多路径multipath</title>
-    <url>/2025/10/16/Linux%E5%BF%AB%E9%80%9F%E9%85%8D%E7%BD%AE%E5%A4%9A%E8%B7%AF%E5%BE%84multipath/</url>
-    <content><![CDATA[<h2 id="1、多路径multipath作用"><a href="#1、多路径multipath作用" class="headerlink" title="1、多路径multipath作用"></a>1、多路径multipath作用</h2><p>使用设备映射器多路径（DM Multipath），您可以将服务器节点和存储阵列间的多个 I&#x2F;O 路径配置为单一设备。这些 I&#x2F;O 路径是可包含独立电缆、交换机和控制器的物理 SAN 连接。多路径聚合了 I&#x2F;O 路径并生成由聚合路径组成的新设备。</p>
-<p>比如按下图所示：</p>
-<img alt="2.png" src="https://i-blog.csdnimg.cn/img_convert/958b28f9b7c953df748bf3861d5bf786.png" referrerpolicy="no-referrer"/>
-
-<p>server主机通过2个hba卡分别接到2台SAN交换机，2台SAN交换机又分别接了存储的控制器1和2.</p>
-<p>此时从存储1映射给主机的1个LUN就会识别到多个路径，变成4块磁盘。为了达到高可用冗余的效果，就需要把多个磁盘聚合成一个设备来使用，这样任何一条路径发生故障，都不会影响业务运行。</p>
-<p>多路径软件分为Linux操作系统自带的multipath和存储厂商提供的专用多路径软件。</p>
-<p>常见的比如华为的UltraPath、EMC的power path、ibm存储的SDDPCM（AIX下特有）、Veritas的StorageFoundation</p>
-<p>用存储厂商的好处就是能针对自家的存储做负载链路优化，可以自动屏蔽质量有问题的链路（这点multipathd不具备，经常会出现一条链路有问题，导致存储卡顿的情况）</p>
-<p>当然也是有缺点的，就是一台主机只能安装一个厂商的多路径软件，这样的话，你一台服务器要是连多个厂家的存储就会出现问题。</p>
-<p>此时multipath的高兼容性就体现出来了，用它可以配置同时连接多个厂家的存储。</p>
-<p><strong>我次就遇到了坑，华为的存储多路径软件最新居然只支持到oracle linux 7.6不支持7.9，真是让人大跌眼镜！oracle linux7.9都出了多少年了，居然没有人适配（估计改一下install.sh安装脚本里的版本校验就能安上。。。研发懒得改了），我一定要给他们提需求🤣。</strong></p>
-<p>我下面的示例就是用华为的OceanStor Dorado 2000连接Oracle linux7.9为例（这里的device配置和以前的V2&#x2F;V3&#x2F;V5完全不一样，因为dorado存储又做了改动）</p>
-<h2 id="2、安装multipath"><a href="#2、安装multipath" class="headerlink" title="2、安装multipath"></a>2、安装multipath</h2><p>首先先要检查、安装multipath</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--检查是否安装了该软件包</span><br><span class="line">rpm -q device-mapper-multipath</span><br></pre></td></tr></table></figure>
-
-<p>配置YUM安装</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--增加本地YUM配置文件</span><br><span class="line">cat &gt;/etc/yum.repos.d/local.repo&lt;&lt;EOF</span><br><span class="line">[local]</span><br><span class="line">name=local</span><br><span class="line">baseurl=file:///media/os</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">EOF</span><br><span class="line">--手动执行挂载系统ISO文件</span><br><span class="line">mount /mnt/*.iso /medis/os</span><br><span class="line">yum cleanmetadata</span><br><span class="line">yum makecache</span><br><span class="line">--执行安装</span><br><span class="line">yum install device-mapper-multipath</span><br></pre></td></tr></table></figure>
-
-<h2 id="3、配置multipathd服务"><a href="#3、配置multipathd服务" class="headerlink" title="3、配置multipathd服务"></a>3、配置multipathd服务</h2><p>安装之后，需要启用multipath，执行如下命令初始化多路径配置文件。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mpathconf --enable</span><br></pre></td></tr></table></figure>
-
-<p>此时会生成默认的&#x2F;etc&#x2F;multipath.conf文件，配置multipath开机启动</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">systemctl enable multipathd.service</span><br></pre></td></tr></table></figure>
-
-<p>需要注意的是一定要配置多路径忽略本地磁盘，因为系统盘很有可能在下次重启的时候不是sda了，可以参考之前我写的文章《<a href="https://mp.weixin.qq.com/s?__biz=MzU0NTU1MzI5MQ==&mid=2247484657&idx=1&sn=f7ca8c3158e62258644d3203c117370c&scene=21#wechat_redirect">Linux解决multipath多路径磁盘盘符与系统盘盘符重叠问题</a>》。这里我再说一下基本操作，需要先获取系统盘的WWID</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">====LINUX 5.0====</span><br><span class="line">/sbin/scsi_id -g -u -s  /dev/sda</span><br><span class="line">====Linux 6.0====</span><br><span class="line">/sbin/scsi_id -g -u -d  /dev/sda </span><br><span class="line">====Linux 7.0/8.0/9.0====</span><br><span class="line">/usr/lib/udev/scsi_id -g -u -d  /dev/sda</span><br></pre></td></tr></table></figure>
-
-<p>然后下一步就是要编辑多路径配置文件了，这里先把原来的配置备份，再按我配置好的模板新建一下。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--备份配置</span><br><span class="line">mv /etc/multipath.conf /etc/multipath.conf.bak</span><br><span class="line">--创建新的配置文件</span><br><span class="line">touch /etc/multipath.conf</span><br><span class="line">粘贴内容如下</span><br><span class="line"></span><br><span class="line">defaults &#123;</span><br><span class="line"> user_friendly_names yes</span><br><span class="line">  &#125;</span><br><span class="line">blacklist &#123;</span><br><span class="line"> wwid &lt;这里写刚才获取的SDA磁盘WWID&gt;</span><br><span class="line">  &#125;</span><br><span class="line">multipaths &#123;</span><br><span class="line"> multipath &#123;</span><br><span class="line">   wwid  3624974510092e319011e66c200000000</span><br><span class="line">   alias crs01</span><br><span class="line">   &#125; </span><br><span class="line">  &#125;</span><br><span class="line">devices &#123;</span><br><span class="line">      device &#123;</span><br><span class="line">               vendor                  &quot;HUAWEI&quot;</span><br><span class="line">               product                 &quot;XSG1&quot;</span><br><span class="line">               path_grouping_policy    multibus</span><br><span class="line">               path_checker            tur</span><br><span class="line">               prio                    const</span><br><span class="line">               path_selector           &quot;round-robin 0&quot;</span><br><span class="line">               failback                immediate</span><br><span class="line">               dev_loss_tmo            30</span><br><span class="line">               fast_io_fail_tmo        5</span><br><span class="line">               no_path_retry           6</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<p>简单说一下multipath.conf的配置文件分为几个部分</p>
-<ul>
-<li><p>blacklist</p>
-<p>不视为多路径的特定设备列表。</p>
-</li>
-<li><p>defaults</p>
-<p>DM 多路径的常规默认设置。</p>
-</li>
-<li><p>devices</p>
-<p>各个存储控制器的设置。这些值覆盖了在 配置文件的 <code>defaults</code> 部分中指定的内容。如果您使用默认不支持的存储阵列，您可能需要为阵列创建 <code>devices</code> 子部分。</p>
-</li>
-<li><p>multipaths</p>
-<p>各个多路径设备特性的设置。这些值会覆盖在配置文件中的 <code>overrides</code>, <code>devices</code>, 和 <code>defaults</code> 部分指定的值。</p>
-</li>
-</ul>
-<p>具体各个部分的参数我就不详细说了，大家直接看红帽官方文档就行，我就不在这里水篇幅了。我只说我这个配置模板里的重要参数：</p>
-<p>1、defaults里标注使用user_friendly_names，否则的话生成的设备文件就是WWID看起来不是很友好，这里对应下面multipahs里的alias标出设备别名</p>
-<p>2、blacklist的WWID代表本地磁盘或都你想要屏蔽掉的磁盘WWID</p>
-<p>3、multipaths里每个multipath{}代表一个生成的存储设备，按实际情况填写，具体磁盘的WWID可以用multipath -ll找到或者用scsi_id命令获取，这个建议是存储侧LUN的名称和要生成的多路径设备的名称对应，这样既避免用错盘，也方便日后排错。磁盘的WWID也可以在存储的管理界面匹配上LUN的WWID</p>
-<p>4、devices里的每个device{}代表一个存储型号。这块可以直接找存储厂家要，不要自己瞎配置，会影响使用效果（比如多路径磁盘用来做oracle asm磁盘，你要不用厂商的配置自己瞎写可能就识别有问题）</p>
-<p>最后配置完毕最后重新load multipathd服务配置文件即可，执行systemctl reloal multipathd。最后就是去&#x2F;dev&#x2F;mapper下直接使用生成的别名设备就行了。</p>
-<h2 id="4、关于更多配置"><a href="#4、关于更多配置" class="headerlink" title="4、关于更多配置"></a>4、关于更多配置</h2><p>关于多路径常用的命令也是建议直接看红帽的官方文档就行，有中文</p>
-<p>具体参考:</p>
-<p><a href="https://docs.redhat.com/zh-cn/documentation/red_hat_enterprise_linux/9/html-single/configuring_device_mapper_multipath/index#ignoring-local-disks-when-generating-multipath-devices_configuring-dm-multipath">https://docs.redhat.com/zh-cn/documentation/red_hat_enterprise_linux/9/html-single/configuring_device_mapper_multipath/index#ignoring-local-disks-when-generating-multipath-devices_configuring-dm-multipath</a></p>
-<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
-<p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
-      <categories>
-        <category>操作系统_linux</category>
-      </categories>
-      <tags>
-        <tag>oracle</tag>
-        <tag>linux</tag>
-        <tag>multipath</tag>
-        <tag>huawei</tag>
-        <tag>Dorado2000</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>IBM_AIX平台搭建GPFS集群演示</title>
     <url>/2025/10/14/IBM_AIX%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BAGPFS%E9%9B%86%E7%BE%A4/</url>
     <content><![CDATA[<p>早年间的实施记录，重新排版了一下：</p>
@@ -518,6 +446,78 @@
       </tags>
   </entry>
   <entry>
+    <title>OracleLinux快速配置多路径multipath</title>
+    <url>/2025/10/16/Linux%E5%BF%AB%E9%80%9F%E9%85%8D%E7%BD%AE%E5%A4%9A%E8%B7%AF%E5%BE%84multipath/</url>
+    <content><![CDATA[<h2 id="多路径multipath作用"><a href="#多路径multipath作用" class="headerlink" title="多路径multipath作用"></a>多路径multipath作用</h2><p>使用设备映射器多路径（DM Multipath），您可以将服务器节点和存储阵列间的多个 I&#x2F;O 路径配置为单一设备。这些 I&#x2F;O 路径是可包含独立电缆、交换机和控制器的物理 SAN 连接。多路径聚合了 I&#x2F;O 路径并生成由聚合路径组成的新设备。</p>
+<p>比如按下图所示：</p>
+<img alt="2.png" src="https://i-blog.csdnimg.cn/img_convert/958b28f9b7c953df748bf3861d5bf786.png" referrerpolicy="no-referrer"/>
+
+<p>server主机通过2个hba卡分别接到2台SAN交换机，2台SAN交换机又分别接了存储的控制器1和2.</p>
+<p>此时从存储1映射给主机的1个LUN就会识别到多个路径，变成4块磁盘。为了达到高可用冗余的效果，就需要把多个磁盘聚合成一个设备来使用，这样任何一条路径发生故障，都不会影响业务运行。</p>
+<p>多路径软件分为Linux操作系统自带的multipath和存储厂商提供的专用多路径软件。</p>
+<p>常见的比如华为的UltraPath、EMC的power path、ibm存储的SDDPCM（AIX下特有）、Veritas的StorageFoundation</p>
+<p>用存储厂商的好处就是能针对自家的存储做负载链路优化，可以自动屏蔽质量有问题的链路（这点multipathd不具备，经常会出现一条链路有问题，导致存储卡顿的情况）</p>
+<p>当然也是有缺点的，就是一台主机只能安装一个厂商的多路径软件，这样的话，你一台服务器要是连多个厂家的存储就会出现问题。</p>
+<p>此时multipath的高兼容性就体现出来了，用它可以配置同时连接多个厂家的存储。</p>
+<p><strong>我次就遇到了坑，华为的存储多路径软件最新居然只支持到oracle linux 7.6不支持7.9，真是让人大跌眼镜！oracle linux7.9都出了多少年了，居然没有人适配（估计改一下install.sh安装脚本里的版本校验就能安上。。。研发懒得改了），我一定要给他们提需求🤣。</strong></p>
+<p>我下面的示例就是用华为的OceanStor Dorado 2000连接Oracle linux7.9为例（这里的device配置和以前的V2&#x2F;V3&#x2F;V5完全不一样，因为dorado存储又做了改动）</p>
+<h2 id="安装multipath"><a href="#安装multipath" class="headerlink" title="安装multipath"></a>安装multipath</h2><p>首先先要检查、安装multipath</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--检查是否安装了该软件包</span><br><span class="line">rpm -q device-mapper-multipath</span><br></pre></td></tr></table></figure>
+
+<p>配置YUM安装</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--增加本地YUM配置文件</span><br><span class="line">cat &gt;/etc/yum.repos.d/local.repo&lt;&lt;EOF</span><br><span class="line">[local]</span><br><span class="line">name=local</span><br><span class="line">baseurl=file:///media/os</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">EOF</span><br><span class="line">--手动执行挂载系统ISO文件</span><br><span class="line">mount /mnt/*.iso /medis/os</span><br><span class="line">yum cleanmetadata</span><br><span class="line">yum makecache</span><br><span class="line">--执行安装</span><br><span class="line">yum install device-mapper-multipath</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置multipathd服务"><a href="#配置multipathd服务" class="headerlink" title="配置multipathd服务"></a>配置multipathd服务</h2><p>安装之后，需要启用multipath，执行如下命令初始化多路径配置文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mpathconf --enable</span><br></pre></td></tr></table></figure>
+
+<p>此时会生成默认的&#x2F;etc&#x2F;multipath.conf文件，配置multipath开机启动</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">systemctl enable multipathd.service</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是一定要配置多路径忽略本地磁盘，因为系统盘很有可能在下次重启的时候不是sda了，可以参考之前我写的文章《<a href="https://mp.weixin.qq.com/s?__biz=MzU0NTU1MzI5MQ==&mid=2247484657&idx=1&sn=f7ca8c3158e62258644d3203c117370c&scene=21#wechat_redirect">Linux解决multipath多路径磁盘盘符与系统盘盘符重叠问题</a>》。这里我再说一下基本操作，需要先获取系统盘的WWID</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">====LINUX 5.0====</span><br><span class="line">/sbin/scsi_id -g -u -s  /dev/sda</span><br><span class="line">====Linux 6.0====</span><br><span class="line">/sbin/scsi_id -g -u -d  /dev/sda </span><br><span class="line">====Linux 7.0/8.0/9.0====</span><br><span class="line">/usr/lib/udev/scsi_id -g -u -d  /dev/sda</span><br></pre></td></tr></table></figure>
+
+<p>然后下一步就是要编辑多路径配置文件了，这里先把原来的配置备份，再按我配置好的模板新建一下。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--备份配置</span><br><span class="line">mv /etc/multipath.conf /etc/multipath.conf.bak</span><br><span class="line">--创建新的配置文件</span><br><span class="line">touch /etc/multipath.conf</span><br><span class="line">粘贴内容如下</span><br><span class="line"></span><br><span class="line">defaults &#123;</span><br><span class="line"> user_friendly_names yes</span><br><span class="line">  &#125;</span><br><span class="line">blacklist &#123;</span><br><span class="line"> wwid &lt;这里写刚才获取的SDA磁盘WWID&gt;</span><br><span class="line">  &#125;</span><br><span class="line">multipaths &#123;</span><br><span class="line"> multipath &#123;</span><br><span class="line">   wwid  3624974510092e319011e66c200000000</span><br><span class="line">   alias crs01</span><br><span class="line">   &#125; </span><br><span class="line">  &#125;</span><br><span class="line">devices &#123;</span><br><span class="line">      device &#123;</span><br><span class="line">               vendor                  &quot;HUAWEI&quot;</span><br><span class="line">               product                 &quot;XSG1&quot;</span><br><span class="line">               path_grouping_policy    multibus</span><br><span class="line">               path_checker            tur</span><br><span class="line">               prio                    const</span><br><span class="line">               path_selector           &quot;round-robin 0&quot;</span><br><span class="line">               failback                immediate</span><br><span class="line">               dev_loss_tmo            30</span><br><span class="line">               fast_io_fail_tmo        5</span><br><span class="line">               no_path_retry           6</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>简单说一下multipath.conf的配置文件分为几个部分</p>
+<ul>
+<li><p>blacklist</p>
+<p>不视为多路径的特定设备列表。</p>
+</li>
+<li><p>defaults</p>
+<p>DM 多路径的常规默认设置。</p>
+</li>
+<li><p>devices</p>
+<p>各个存储控制器的设置。这些值覆盖了在 配置文件的 <code>defaults</code> 部分中指定的内容。如果您使用默认不支持的存储阵列，您可能需要为阵列创建 <code>devices</code> 子部分。</p>
+</li>
+<li><p>multipaths</p>
+<p>各个多路径设备特性的设置。这些值会覆盖在配置文件中的 <code>overrides</code>, <code>devices</code>, 和 <code>defaults</code> 部分指定的值。</p>
+</li>
+</ul>
+<p>具体各个部分的参数我就不详细说了，大家直接看红帽官方文档就行，我就不在这里水篇幅了。我只说我这个配置模板里的重要参数：</p>
+<p>1、defaults里标注使用user_friendly_names，否则的话生成的设备文件就是WWID看起来不是很友好，这里对应下面multipahs里的alias标出设备别名</p>
+<p>2、blacklist的WWID代表本地磁盘或都你想要屏蔽掉的磁盘WWID</p>
+<p>3、multipaths里每个multipath{}代表一个生成的存储设备，按实际情况填写，具体磁盘的WWID可以用multipath -ll找到或者用scsi_id命令获取，这个建议是存储侧LUN的名称和要生成的多路径设备的名称对应，这样既避免用错盘，也方便日后排错。磁盘的WWID也可以在存储的管理界面匹配上LUN的WWID</p>
+<p>4、devices里的每个device{}代表一个存储型号。这块可以直接找存储厂家要，不要自己瞎配置，会影响使用效果（比如多路径磁盘用来做oracle asm磁盘，你要不用厂商的配置自己瞎写可能就识别有问题）</p>
+<p>最后配置完毕最后重新load multipathd服务配置文件即可，执行systemctl reloal multipathd。最后就是去&#x2F;dev&#x2F;mapper下直接使用生成的别名设备就行了。</p>
+<h2 id="关于更多配置"><a href="#关于更多配置" class="headerlink" title="关于更多配置"></a>关于更多配置</h2><p>关于多路径常用的命令也是建议直接看红帽的官方文档就行，有中文</p>
+<p>具体参考:</p>
+<p><a href="https://docs.redhat.com/zh-cn/documentation/red_hat_enterprise_linux/9/html-single/configuring_device_mapper_multipath/index#ignoring-local-disks-when-generating-multipath-devices_configuring-dm-multipath">https://docs.redhat.com/zh-cn/documentation/red_hat_enterprise_linux/9/html-single/configuring_device_mapper_multipath/index#ignoring-local-disks-when-generating-multipath-devices_configuring-dm-multipath</a></p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
+      <categories>
+        <category>操作系统_linux</category>
+      </categories>
+      <tags>
+        <tag>oracle</tag>
+        <tag>linux</tag>
+        <tag>multipath</tag>
+        <tag>huawei</tag>
+        <tag>Dorado2000</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>OEL7挂载ISCSI存储配置示例</title>
     <url>/2025/10/14/OEL7%E6%8C%82%E8%BD%BDISCSI%E5%AD%98%E5%82%A8%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B/</url>
     <content><![CDATA[<p>客户让帮忙挂载个ISCSI存储，大概结构如下图所示：</p>
@@ -595,43 +595,68 @@
       </tags>
   </entry>
   <entry>
-    <title>推荐一些学习数据库的BLOG</title>
-    <url>/2025/10/13/%E6%8E%A8%E8%8D%90%E4%B8%80%E4%BA%9B%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84BLOG/</url>
-    <content><![CDATA[<p>这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。</p>
-<p><strong>Oracle top 100-blog排名</strong></p>
-<p><a href="https://developer.feedspot.com/oracle_blogs/">https://developer.feedspot.com/oracle_blogs/</a></p>
-<p><strong>英国老牌ACE  Tim Hall的BLOG，几乎涵盖了所有版本Oracle的安装配置，写的非常的详细，入门必看</strong></p>
-<p><a href="https://oracle-base.com/">https://oracle-base.com/</a></p>
-<p><strong>徐小强的blog，都是详解万字长文！</strong></p>
-<p><a href="https://blog.csdn.net/JiekeXu">https://blog.csdn.net/JiekeXu</a></p>
-<p><strong>尹总监的blog，19c全系列实战干货</strong></p>
-<p><a href="https://blog.csdn.net/yhw1809">https://blog.csdn.net/yhw1809</a></p>
-<p><strong>陈举超大佬的文章也是十分的详细🔎的实验</strong></p>
-<p><a href="https://www.modb.pro/u/4703">https://www.modb.pro/u/4703</a></p>
-<p><strong>三哥的自动化安装脚本可谓是全网第一，还有各种干货。</strong></p>
-<p><a href="https://luciferliu.blog.csdn.net/">https://luciferliu.blog.csdn.net/</a></p>
-<p><strong>云和恩墨的专家张维照，内容很全，可以通篇看一遍</strong></p>
-<p><a href="https://www.anbob.com/aboutme-page">https://www.anbob.com/aboutme-page</a></p>
-<p><strong>墨天轮知识图谱，涵盖大部分数据库，己经按照相应的学习路线整理好文章。</strong></p>
-<p><a href="https://www.modb.pro/graph">https://www.modb.pro/graph</a></p>
-<p><strong>墨天轮高分技术文档分享——Oracle升级迁移篇（共96个）</strong></p>
-<p><a href="https://www.modb.pro/db/406311">https://www.modb.pro/db/406311</a></p>
-<p><strong>来自大名顶顶存储公司Pure Storage的Oracle ACE专家Ro****n</strong></p>
-<p><a href="https://ronekins.com/">https://ronekins.com/</a></p>
-<p><strong>具体是谁这个没看明白，不过blog写的内容十分具有参考价值</strong></p>
-<p><a href="https://www.howtosop.com/">https://www.howtosop.com/</a></p>
-<p><strong>来自印度大佬的BLOG，内容也很全面</strong></p>
-<p><a href="https://oracledbwr.com/">https://oracledbwr.com/</a></p>
-<p><strong>还有一个或取知识的好办法，就是直接登陆oracle ace directory网站，找到任意ACE的链接进入，看看ACE大佬们的BLOG，哈哈！</strong></p>
-<p><a href="https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory">https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory</a></p>
+    <title>在Centos7.9上安装netbackup 9.1服务器端</title>
+    <url>/2025/10/17/%E5%9C%A8Centos7.9%E4%B8%8A%E5%AE%89%E8%A3%85netbackup%209.1%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF/</url>
+    <content><![CDATA[<h2 id="安装环境"><a href="#安装环境" class="headerlink" title="安装环境"></a>安装环境</h2><p>Centos 7.6 x86_64</p>
+<p>netbackup 9.1 服务端</p>
+<h2 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">groupadd nbwebgrp</span><br><span class="line">mkdir -p /usr/openv/wmc</span><br><span class="line">useradd -g nbwebgrp -c &#x27;NetBackup Web Services account&#x27; -d /usr/openv/wmc nbwebsvc</span><br><span class="line">useradd -c &#x27;NetBackup Services account&#x27; -d /usr/openv/ nbusvc</span><br><span class="line">usermod -a -G nbwebgrp nbusvc</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置系统参数"><a href="#配置系统参数" class="headerlink" title="配置系统参数"></a>配置系统参数</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo &quot;kernel.sem = 300 307200 32 1024&quot; &gt;&gt; /etc/sysctl.conf </span><br><span class="line">sysctl -p</span><br><span class="line">echo &quot;*    soft    nofile         8192&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    hard    nofile        65536&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    soft    nproc         65536&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    hard    nproc         65536&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    soft    fsize     unlimited&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    hard    fsize     unlimited&quot; &gt;&gt; /etc/security/limits.conf</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改主名"><a href="#修改主名" class="headerlink" title="修改主名"></a>修改主名</h2><p>配置主机名</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hostnamectl set-hostname nbuserver</span><br><span class="line">echo &quot;192.168.31.160 nbuserver&quot; &gt;&gt; /etc/hosts</span><br></pre></td></tr></table></figure>
+
+<h2 id="关闭SELINUX"><a href="#关闭SELINUX" class="headerlink" title="关闭SELINUX"></a>关闭SELINUX</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sed -i &#x27;s/enforcing/disabled/g&#x27; /etc/selinux/config</span><br><span class="line">setenforce 0</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改系统环境变量"><a href="#修改系统环境变量" class="headerlink" title="修改系统环境变量"></a>修改系统环境变量</h2><p>vi &#x2F;etc&#x2F;profile<br>添加如下行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">PATH=$PATH:$HOME/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/goodies:/usr/openv/volmgr/bin</span><br><span class="line">export PATH</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装备必软件包"><a href="#安装备必软件包" class="headerlink" title="安装备必软件包"></a>安装备必软件包</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如何配置YUM源我就不写了，大家应该都会</span><br><span class="line">yum install net-tools unzip gzip bzip* libnsl.so* insserv-compat* libXtst compat* -y</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装master-server-media-server"><a href="#安装master-server-media-server" class="headerlink" title="安装master-server&amp;&amp; media server"></a>安装master-server&amp;&amp; media server</h2><p>veritas_customer_registration_key.json需要提前准备，购买了许可之后可以通过控制台下载（从netbackup 8.0变回veritas商标之后，安装都需要许可。还是symantec时代的版本安装时不需要许可，）</p>
+<p>1.查看准备的软包</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@netbackup ~]# ls</span><br><span class="line">anaconda-ks.cfg  License.txt   NetBackup_9.1.0.1_LinuxR_x86_64.tar.gz  veritas_customer_registration_key.json</span><br></pre></td></tr></table></figure>
+
+<p>使用tar解压软件包</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">tar -zxvf NetBackup_9.1.0.1_LinuxR_x86_64.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>进到安装目录里查看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@netbackup ~]# cd NetBackup_9.1.0.1_LinuxR_x86_64</span><br><span class="line">[root@netbackup NetBackup_9.1.0.1_LinuxR_x86_64]# ls</span><br><span class="line">Doc  install  LICENSE  linuxR_x86  NBInstallAnswer-client.template  NBInstallAnswer-master.template  NBInstallAnswer-media.template</span><br></pre></td></tr></table></figure>
+
+<p>开始安装，这里由于输出太长，我只列出关键位置，大家安装的时候可以参考。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@netbackup NetBackup_9.1.0.1_LinuxR_x86_64]# ./install </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Veritas Installation Script</span><br><span class="line">Copyright (c) 2021 Veritas Technologies LLC. All rights reserved.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	Installing NetBackup Server Software</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Please review the VERITAS SOFTWARE LICENSE AGREEMENT located on</span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line"></span><br><span class="line">ATTENTION!  To help ensure a successful upgrade to NetBackup 9.1.0.1,</span><br><span class="line">please visit the NetBackup 9.x Upgrade Portal:</span><br><span class="line">https://www.veritas.com/content/support/en_US/article.100048493.</span><br><span class="line"></span><br><span class="line">Do you wish to continue? [y,n] (y)      ---------输入Y继续</span><br><span class="line">Starting NetBackup Deduplication installer</span><br><span class="line">testing: /tmp/pdde_pkg_dir_16149</span><br><span class="line">NetBackup Deduplication preinstall check passed</span><br><span class="line">Running install analysis tool.</span><br><span class="line"></span><br><span class="line">Is this host the master server? [y,n] (y)   ---------输入Y继续</span><br><span class="line">Are you currently performing a disaster recovery of a master server? [y,n] (n)   ---------输入N，这里是全新安装，不是恢复安装</span><br><span class="line"></span><br><span class="line">Using nbwebsvc and nbwebgrp for the</span><br><span class="line">NetBackup web service user and group.</span><br><span class="line"></span><br><span class="line">ATTENTION! Provide the name of the service user account to be used to start</span><br><span class="line">most of the daemons.</span><br><span class="line"></span><br><span class="line">- It is not recommended to use the root user as the service user.</span><br><span class="line">- The length of the service user name must be less than 32 characters.</span><br><span class="line">- The service user name must contain only English characters.</span><br><span class="line">- The nbwebsvc user should not be used as the service user.</span><br><span class="line">- nbwebgrp must be a secondary group of the service user.</span><br><span class="line">  For more details, see the article: https://www.veritas.com/docs/100048220.</span><br><span class="line"></span><br><span class="line">Enter the name of the service user account to be used to start most of the daemons: nbusvc</span><br><span class="line"></span><br><span class="line">The private_tmp value is /tmp/nbcheck_dir.16107</span><br><span class="line"></span><br><span class="line">Checking for critical system conditions...</span><br><span class="line"></span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line">A customer registration key is required to proceed with the installation of this</span><br><span class="line">master server.</span><br><span class="line">Log into Veritas NetInsights Console (https://netinsights.veritas.com) and go </span><br><span class="line">to the &quot;Registration Keys&quot; page and download the appropriate customer registration</span><br><span class="line">key for this master server.  If you need help with customer registration keys to </span><br><span class="line">proceed with the installation or upgrade of this master server, please refer to the </span><br><span class="line">NetBackup Release Notes or contact Veritas Support.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Please enter the fully qualified path containing your customer registration key </span><br><span class="line">file, or enter q to quit the install script.   -------这里会提示让你输入密钥文件的位置</span><br><span class="line">/root/veritas_customer_registration_key.json</span><br><span class="line"></span><br><span class="line">The NetBackup and Media Manager software is built for use on LINUX_RH_X86 hardware.</span><br><span class="line">Do you want to install NetBackup and Media Manager files? [y,n] (y)    --------回复Y继续</span><br><span class="line"></span><br><span class="line">NetBackup and Media Manager are normally installed in /usr/openv.</span><br><span class="line">The existing /usr/openv directory will be used for NetBackup and Media Manager.</span><br><span class="line">No existing NetBackup server files to save.</span><br><span class="line">Client folder [/usr/openv/netbackup/client] does not exist.  No work to do.</span><br><span class="line"></span><br><span class="line">Reading NetBackup files from /root/NetBackup_9.1.0.1_LinuxR_x86_64/linuxR_x86/anb</span><br><span class="line"></span><br><span class="line">Checking for pre-existing SYMCnetbp package.</span><br><span class="line">package SYMCnetbp is not installed</span><br><span class="line">Successfully copied VRTSpddes.rpm into staging area.</span><br><span class="line">Successfully copied VRTSpddei.rpm into staging area.</span><br><span class="line"></span><br><span class="line">x openv/netbackup/client/Linux/</span><br><span class="line">x openv/netbackup/client/Linux/SuSE4.4.73/</span><br><span class="line">x openv/netbackup/client/Linux/SuSE4.4.73/VRTSpddea.rpm</span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line">A NetBackup Server or Enterprise Server license key is needed</span><br><span class="line">for installation to continue.</span><br><span class="line"></span><br><span class="line">Enter license key: XXXX-XXXX-XXXX-XXXX-XXX-XXXX           -----------这里让你输入密钥，我就脱敏一下</span><br><span class="line"></span><br><span class="line">XXXX-XXXX-XXXX-XXXX-XXX-XXXX :  </span><br><span class="line">	NetBackup Enterprise Server Base product with all the features enabled</span><br><span class="line">	has been registered.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">All additional keys should be added at this time.</span><br><span class="line">Do you want to add additional license keys now? [y,n] (y) n     ----------问是否还有其它密钥需要继续输入，没有回复N</span><br><span class="line"></span><br><span class="line">Use /usr/openv/netbackup/bin/admincmd/get_license_key</span><br><span class="line">to add, delete or list license keys at a later time.</span><br><span class="line"></span><br><span class="line">Installing NetBackup Enterprise Server version: 9.1.0.1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">If this machine will be using a different network interface than the</span><br><span class="line">default (netbackup), the name of the preferred interface should be used</span><br><span class="line">as the configured server name.  If this machine will be part of a</span><br><span class="line">cluster, the virtual name should be used as the configured server name.</span><br><span class="line"></span><br><span class="line">Would you like to use &quot;netbackup&quot; as the configured</span><br><span class="line">NetBackup server name of this machine? [y,n] (y)         -----------回复Y</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Media servers can be added during this installation or</span><br><span class="line">to a NetBackup environment after installation completes.</span><br><span class="line">Refer to the NetBackup Administrator&#x27;s Guide, Volume I for</span><br><span class="line">more information.</span><br><span class="line"></span><br><span class="line">Do you want to add any media servers now? [y,n] (n)    -----------问是你是否要加其它的media servers这里N就行</span><br><span class="line"></span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line"></span><br><span class="line">Do you want to start the job-related NetBackup daemons</span><br><span class="line">so backups and restores can be initiated? [y,n] (y)     ------------回复Y，开始启动服务</span><br><span class="line">Starting the NetBackup request daemon process (bprd).</span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line">Starting the NetBackup Bare Metal Restore Boot Server daemon.</span><br><span class="line"></span><br><span class="line">Checking the current NetBackup KMS configuration.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">OpsCenter is the monitoring, reporting and administrative</span><br><span class="line">solution designed to centrally manage one or more NetBackup</span><br><span class="line">installations from a web browser.</span><br><span class="line"></span><br><span class="line">If an OpsCenter server already exists in your environment</span><br><span class="line">or you plan to install one, enter the real hostname of that</span><br><span class="line">OpsCenter server here.  Do not use a virtual name.  If you</span><br><span class="line">do not want this local machine to be an OpsCenter server,</span><br><span class="line">enter NONE.</span><br><span class="line"></span><br><span class="line">Enter the OpsCenter server (default: NONE):         -----这里没有OPSCENTER就回车就行（是veritas的一套管理平台）</span><br><span class="line">WARNING: Catalog backups fail if the disaster recovery passphrase is not set.</span><br><span class="line">NetBackup server installation complete.</span><br><span class="line">Running install analysis tool.</span><br><span class="line">File /usr/openv/tmp/install_trace.16107 contains a trace of this install.</span><br></pre></td></tr></table></figure>
+
+<h2 id="解决安装后WEB控制台无法打开"><a href="#解决安装后WEB控制台无法打开" class="headerlink" title="解决安装后WEB控制台无法打开"></a>解决安装后WEB控制台无法打开</h2><p>netbackup提供了WEB控制台，也可以用来配置备份（当然也是JAVA控制台可以使用）</p>
+<p>创建如下文件，并赋予权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">touch /usr/openv/var/global/wsl/config/allowedlist.properties</span><br><span class="line">chmod a+r /usr/openv/var/global/wsl/config/allowedlist.properties</span><br><span class="line">chown nbwebsvc:nbwebgrp /usr/openv/var/global/wsl/config/allowedlist.properties</span><br></pre></td></tr></table></figure>
+
+<p>编辑 allowedlist.properties文件，输入如下内容</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@nbmaster2 config]# cat allowedlist.properties</span><br><span class="line">#Properties file to allow additional valid HOST and X-FORWARDED-HOST header values</span><br><span class="line">#Tue Jan 25 2022</span><br><span class="line">host.headers=192.168.31.160</span><br><span class="line">x.forwarded.host.headers=192.168.31.160</span><br></pre></td></tr></table></figure>
+
+<p>如果netbackup安装在windows平台，需要重启Web Management Console service </p>
+<p>我这里是LINUX平台，需要按如下方法重启服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/usr/openv/netbackup/bin/nbwmc stop &amp;&amp; /usr/openv/netbackup/bin/nbwmc start.</span><br></pre></td></tr></table></figure>
+
+<h2 id="给备份存储目录赋予权限"><a href="#给备份存储目录赋予权限" class="headerlink" title="给备份存储目录赋予权限"></a>给备份存储目录赋予权限</h2><p>我这里以&#x2F;mnt&#x2F;remotedr为例，如不赋予权限，备份的时候会提示目录没有写入权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chown -R nbsvcusr /mnt/remotedr</span><br><span class="line">chmod -R 755 /mnt/remotedr</span><br></pre></td></tr></table></figure>
+
+<h2 id="客户端JAVA-CONSOLE不是中文"><a href="#客户端JAVA-CONSOLE不是中文" class="headerlink" title="客户端JAVA CONSOLE不是中文"></a>客户端JAVA CONSOLE不是中文</h2><p>可以在windows平台安装netbackup管理控制台，但是默认是英文的，这时候可以去官网下载语言包，或者去服务端的安装包里找到语言包文件<br>拷贝ZH、i18n_zh.properties、dbexti18n_zh.properties至客户端如下目录<br>C:\Program Files\Veritas\Java\vrts\nbvsm_l10n</p>
+<p>之后再打开客户端就是中文了</p>
+<h2 id="linux服务器端如何打开控制台"><a href="#linux服务器端如何打开控制台" class="headerlink" title="linux服务器端如何打开控制台"></a>linux服务器端如何打开控制台</h2><p>&#x2F;usr&#x2F;open&#x2F;netbackup&#x2F;bin&#x2F;jnbSA启动控制台</p>
+<p>就先写到这里，后面的有空再写………………</p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
 ]]></content>
       <categories>
-        <category>学习推荐</category>
+        <category>备份软件nbu</category>
       </categories>
       <tags>
-        <tag>oracle</tag>
-        <tag>database</tag>
         <tag>linux</tag>
+        <tag>netbackup</tag>
+        <tag>veritas</tag>
+        <tag>centos</tag>
       </tags>
   </entry>
   <entry>
@@ -677,6 +702,46 @@
 ]]></content>
       <categories>
         <category>oracle_tuning</category>
+      </categories>
+      <tags>
+        <tag>oracle</tag>
+        <tag>database</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>推荐一些学习数据库的BLOG</title>
+    <url>/2025/10/13/%E6%8E%A8%E8%8D%90%E4%B8%80%E4%BA%9B%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84BLOG/</url>
+    <content><![CDATA[<p>这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。</p>
+<p><strong>Oracle top 100-blog排名</strong></p>
+<p><a href="https://developer.feedspot.com/oracle_blogs/">https://developer.feedspot.com/oracle_blogs/</a></p>
+<p><strong>英国老牌ACE  Tim Hall的BLOG，几乎涵盖了所有版本Oracle的安装配置，写的非常的详细，入门必看</strong></p>
+<p><a href="https://oracle-base.com/">https://oracle-base.com/</a></p>
+<p><strong>徐小强的blog，都是详解万字长文！</strong></p>
+<p><a href="https://blog.csdn.net/JiekeXu">https://blog.csdn.net/JiekeXu</a></p>
+<p><strong>尹总监的blog，19c全系列实战干货</strong></p>
+<p><a href="https://blog.csdn.net/yhw1809">https://blog.csdn.net/yhw1809</a></p>
+<p><strong>陈举超大佬的文章也是十分的详细🔎的实验</strong></p>
+<p><a href="https://www.modb.pro/u/4703">https://www.modb.pro/u/4703</a></p>
+<p><strong>三哥的自动化安装脚本可谓是全网第一，还有各种干货。</strong></p>
+<p><a href="https://luciferliu.blog.csdn.net/">https://luciferliu.blog.csdn.net/</a></p>
+<p><strong>云和恩墨的专家张维照，内容很全，可以通篇看一遍</strong></p>
+<p><a href="https://www.anbob.com/aboutme-page">https://www.anbob.com/aboutme-page</a></p>
+<p><strong>墨天轮知识图谱，涵盖大部分数据库，己经按照相应的学习路线整理好文章。</strong></p>
+<p><a href="https://www.modb.pro/graph">https://www.modb.pro/graph</a></p>
+<p><strong>墨天轮高分技术文档分享——Oracle升级迁移篇（共96个）</strong></p>
+<p><a href="https://www.modb.pro/db/406311">https://www.modb.pro/db/406311</a></p>
+<p><strong>来自大名顶顶存储公司Pure Storage的Oracle ACE专家Ro****n</strong></p>
+<p><a href="https://ronekins.com/">https://ronekins.com/</a></p>
+<p><strong>具体是谁这个没看明白，不过blog写的内容十分具有参考价值</strong></p>
+<p><a href="https://www.howtosop.com/">https://www.howtosop.com/</a></p>
+<p><strong>来自印度大佬的BLOG，内容也很全面</strong></p>
+<p><a href="https://oracledbwr.com/">https://oracledbwr.com/</a></p>
+<p><strong>还有一个或取知识的好办法，就是直接登陆oracle ace directory网站，找到任意ACE的链接进入，看看ACE大佬们的BLOG，哈哈！</strong></p>
+<p><a href="https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory">https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory</a></p>
+]]></content>
+      <categories>
+        <category>学习推荐</category>
       </categories>
       <tags>
         <tag>oracle</tag>
