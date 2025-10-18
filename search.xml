@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>AIX平台下Oracle 11g RAC修改PUBLIC/VIP/SCAN</title>
-    <url>/2025/10/13/AIX%E5%B9%B3%E5%8F%B0%E4%B8%8BOracle%2011g%20RAC%E4%BF%AE%E6%94%B9PUBLIC+VIP+SCAN/</url>
+    <url>/post/4358307c.html</url>
     <content><![CDATA[<h2 id="当前环境"><a href="#当前环境" class="headerlink" title="当前环境"></a>当前环境</h2><p>由于机房网络变更，客户要修改现在RAC的public&#x2F;vip&#x2F;scan地址，这里记录一下。</p>
 <p>主机操作系统：AIX 7.2</p>
 <p>数据库版本：11.2.0.4 rac</p>
@@ -55,7 +55,7 @@
   </entry>
   <entry>
     <title>AIX系统The largest dump device is too small问题</title>
-    <url>/2025/10/13/AIX%E7%B3%BB%E7%BB%9FThe%20largest%20dump%20device%20is%20too%20small%E9%97%AE%E9%A2%98/</url>
+    <url>/post/e2e5d7ab.html</url>
     <content><![CDATA[<h2 id="问题报错"><a href="#问题报错" class="headerlink" title="问题报错"></a>问题报错</h2><p>今天巡检HIS的数据库服务器，发现小机AIX系统有大量的报错：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@hisdb01:/]errpt</span><br><span class="line">IDENTIFIER TIMESTAMP  T C RESOURCE_NAME  DESCRIPTION</span><br><span class="line">E87EF1BE   0207150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0206150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0205150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0204150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0203150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0202150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0201150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0131150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0130150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0129150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0128150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0127150025 P O dumpcheck      The largest dump device is too small.</span><br><span class="line">E87EF1BE   0126150025 P O dumpcheck      The largest dump device is too small.</span><br></pre></td></tr></table></figure>
 
@@ -127,7 +127,7 @@
   </entry>
   <entry>
     <title>Centos7_x86一键更新openssh10.1p1</title>
-    <url>/2025/10/10/Centos7_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.1p1/</url>
+    <url>/post/a7c8ab66.html</url>
     <content><![CDATA[<h2 id="如何完成一键更新OPENSSH"><a href="#如何完成一键更新OPENSSH" class="headerlink" title="如何完成一键更新OPENSSH"></a>如何完成一键更新OPENSSH</h2><p>我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8</p>
 <div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115344299528429&bvid=BV1mHxCz7EYK&cid=32946720040;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
 
@@ -260,7 +260,7 @@
   </entry>
   <entry>
     <title>DBA必掌握的小技巧-分区满了如何处理1-删除home扩容根分区</title>
-    <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%861-%E5%88%A0%E9%99%A4home%E6%89%A9%E5%AE%B9%E6%A0%B9%E5%88%86%E5%8C%BA/</url>
+    <url>/post/b6e27480.html</url>
     <content><![CDATA[<h2 id="故障发生了！"><a href="#故障发生了！" class="headerlink" title="故障发生了！"></a>故障发生了！</h2><p>今天DBA小倩接到一个客户紧急任务，客户说自己的业务数据库突然不好使了，连接也出现了问题，开发人员连库就报这个错</p>
 <p>小倩要来了系统的登录用户名密码，登录到了数据库服务器一看</p>
 <p>好家伙！根目录满了。</p>
@@ -306,7 +306,7 @@
   </entry>
   <entry>
     <title>DBA必掌握的小技巧-分区满了如何处理2-迁移到新存储</title>
-    <url>/2025/10/11/DBA%E5%BF%85%E6%8E%8C%E6%8F%A1%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7-%E5%88%86%E5%8C%BA%E6%BB%A1%E4%BA%86%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%862-%E8%BF%81%E7%A7%BB%E5%88%B0%E6%96%B0%E5%AD%98%E5%82%A8/</url>
+    <url>/post/b6b44e86.html</url>
     <content><![CDATA[<h2 id="前情提要"><a href="#前情提要" class="headerlink" title="前情提要"></a>前情提要</h2><p>话说上次DBA小倩通过删除home lv，把空间扩给了&#x2F;分区，问题暂时得到了解决。</p>
 <p>没过几天，领导找到小倩下达任务，客户说数据库在本地磁盘空间太小了又快要满了，由于之前用的服务器本地磁盘，性能也比较差，现在不想扩展服务器本地硬盘了。正好这台服务器有HBA卡，客户从别的高端存储上划了个2TB的LUN过来，映射给这台数据库服务器，想让DBA小倩来做一下数据迁移，当然停机时间己经客户己经安排好了，就差小倩上线了。</p>
 <h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>正式停机之前还有一些准备工作要作，比如先把存储空间挂载到服务器上（后做也可以，用不了多久）。</p>
@@ -366,7 +366,7 @@
   </entry>
   <entry>
     <title>IBM_AIX平台搭建GPFS集群演示</title>
-    <url>/2025/10/14/IBM_AIX%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BAGPFS%E9%9B%86%E7%BE%A4/</url>
+    <url>/post/d543d14a.html</url>
     <content><![CDATA[<p>早年间的实施记录，重新排版了一下：</p>
 <h2 id="基础环境"><a href="#基础环境" class="headerlink" title="基础环境"></a>基础环境</h2><p>当年是计划做一套10G的rac：</p>
 <p>1、用的主机是两台IBM P740；</p>
@@ -447,7 +447,7 @@
   </entry>
   <entry>
     <title>OracleLinux快速配置多路径multipath</title>
-    <url>/2025/10/16/Linux%E5%BF%AB%E9%80%9F%E9%85%8D%E7%BD%AE%E5%A4%9A%E8%B7%AF%E5%BE%84multipath/</url>
+    <url>/post/b6540e26.html</url>
     <content><![CDATA[<h2 id="多路径multipath作用"><a href="#多路径multipath作用" class="headerlink" title="多路径multipath作用"></a>多路径multipath作用</h2><p>使用设备映射器多路径（DM Multipath），您可以将服务器节点和存储阵列间的多个 I&#x2F;O 路径配置为单一设备。这些 I&#x2F;O 路径是可包含独立电缆、交换机和控制器的物理 SAN 连接。多路径聚合了 I&#x2F;O 路径并生成由聚合路径组成的新设备。</p>
 <p>比如按下图所示：</p>
 <img alt="2.png" src="https://i-blog.csdnimg.cn/img_convert/958b28f9b7c953df748bf3861d5bf786.png" referrerpolicy="no-referrer"/>
@@ -519,7 +519,7 @@
   </entry>
   <entry>
     <title>OEL7挂载ISCSI存储配置示例</title>
-    <url>/2025/10/14/OEL7%E6%8C%82%E8%BD%BDISCSI%E5%AD%98%E5%82%A8%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B/</url>
+    <url>/post/d477c414.html</url>
     <content><![CDATA[<p>客户让帮忙挂载个ISCSI存储，大概结构如下图所示：</p>
 <img alt="1.png" src="https://i-blog.csdnimg.cn/img_convert/887a5b3d496dbdef664ab1a3373e9048.png" referrerpolicy="no-referrer"/>
 
@@ -565,7 +565,7 @@
   </entry>
   <entry>
     <title>使用Oracle oswatcher工具监控服务器性能并生成图形报告</title>
-    <url>/2025/10/17/%E4%BD%BF%E7%94%A8Oracle%20oswatcher%E5%B7%A5%E5%85%B7%E7%9B%91%E6%8E%A7%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%80%A7%E8%83%BD%E5%B9%B6%E7%94%9F%E6%88%90%E5%9B%BE%E5%BD%A2%E6%8A%A5%E5%91%8A/</url>
+    <url>/post/709b78ae.html</url>
     <content><![CDATA[<h2 id="关于-OSW"><a href="#关于-OSW" class="headerlink" title="关于  OSW"></a>关于  OSW</h2><p>OSWatcher 的使用符合 Oracle 的标准许可条款，并且不需要额外的许可即可使用！！！！</p>
 <p><strong>关注本人微信公众号，后台回复“oswatcher”获取安装包!!</strong></p>
 <p>OSWatcher (oswbb) 是一种 UNIX shell 脚本的集合，主要用于收集和归档操作系统和网络的度量，以便为诊断性能问题提供支持。作为最佳实践，用户应当在所有运行着 Oracle 实例的节点安装和运行 OSWatcher。当诊断性能问题的时候， Oracle support 可以采用 OSWatcher 数据来诊断那些可能已经超出数据库之外的性能问题。OSWatcher 可以从 MOS Note 301137.1 下载</p>
@@ -639,7 +639,7 @@
   </entry>
   <entry>
     <title>使用expdp按条件导出oracle逻辑备份</title>
-    <url>/2025/10/13/%E4%BD%BF%E7%94%A8expdp%E6%8C%89%E6%9D%A1%E4%BB%B6%E5%AF%BC%E5%87%BAoracle%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/</url>
+    <url>/post/d1734970.html</url>
     <content><![CDATA[<p>今天遇到一个客户找我处理一个小问题，主要是按条件导出数据表报错，这里记录一下如何处理的。</p>
 <h2 id="expdp-直接带查询条件语句可能出现的情况"><a href="#expdp-直接带查询条件语句可能出现的情况" class="headerlink" title="expdp 直接带查询条件语句可能出现的情况"></a>expdp 直接带查询条件语句可能出现的情况</h2><p>直接在导出命令里写QUERY&#x3D;&lt;查询SQL&gt;来按条件导出数据表可能会报这些错误</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--错误1</span><br><span class="line">LRM-00101: unknown parameter name &#x27;empno&#x27;</span><br><span class="line">--错误2</span><br><span class="line">ORA-39001: invalid argument value</span><br><span class="line">ORA-39035: Data filter SUBQUERY has already been specified</span><br><span class="line">--错误3</span><br><span class="line">ORA-31693: Table data object &quot;SCOTT&quot;.&quot;DEPT&quot; failed to load/unload and is being skipped due to error:</span><br><span class="line">ORA-00933: SQL command not properly ended</span><br><span class="line">--错误4</span><br><span class="line">LRM-00111: no closing quote for value &#x27;&#x27;</span><br><span class="line">EXP-19: failed to process parameters, type &#x27;EXP HELP=Y&#x27; for help</span><br><span class="line">EXP-0: Export terminated unsuccessfully</span><br><span class="line">--错误5</span><br><span class="line">ORA-31693: Table data object &quot;SCOTT&quot;.&quot;DEPT&quot; failed to load/unload and is being skipped due to error:</span><br><span class="line">ORA-06502: PL/SQL: numeric or value error</span><br><span class="line">ORA-31605: the following was returned from LpxXSLSetTextVar in routine kuxslSetParam:</span><br><span class="line">LPX-314: an internal failure occurred</span><br><span class="line">--错误6</span><br><span class="line">...</span><br><span class="line">Processing object type TABLE_EXPORT/TABLE/TABLE</span><br><span class="line">ORA-31693: Table data object &quot;&lt;SCHEMA_NAME&gt;&quot;.&quot;&lt;TABLE_NAME&gt;&quot; failed to load/unload and is being skipped due</span><br><span class="line">to error:</span><br><span class="line">ORA-00911: invalid character</span><br></pre></td></tr></table></figure>
@@ -670,7 +670,7 @@
   </entry>
   <entry>
     <title>在Centos7.9上安装netbackup 9.1服务器端</title>
-    <url>/2025/10/17/%E5%9C%A8Centos7.9%E4%B8%8A%E5%AE%89%E8%A3%85netbackup%209.1%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF/</url>
+    <url>/post/2b862cbb.html</url>
     <content><![CDATA[<h2 id="安装环境"><a href="#安装环境" class="headerlink" title="安装环境"></a>安装环境</h2><p>Centos 7.6 x86_64</p>
 <p>netbackup 9.1 服务端</p>
 <h2 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">groupadd nbwebgrp</span><br><span class="line">mkdir -p /usr/openv/wmc</span><br><span class="line">useradd -g nbwebgrp -c &#x27;NetBackup Web Services account&#x27; -d /usr/openv/wmc nbwebsvc</span><br><span class="line">useradd -c &#x27;NetBackup Services account&#x27; -d /usr/openv/ nbusvc</span><br><span class="line">usermod -a -G nbwebgrp nbusvc</span><br></pre></td></tr></table></figure>
@@ -735,7 +735,7 @@
   </entry>
   <entry>
     <title>处理一则Oracle未能完全引用大页问题</title>
-    <url>/2025/10/09/%E5%A4%84%E7%90%86%E4%B8%80%E5%88%99Oracle%E6%9C%AA%E8%83%BD%E5%AE%8C%E5%85%A8%E5%BC%95%E7%94%A8%E5%A4%A7%E9%A1%B5%E9%97%AE%E9%A2%98/</url>
+    <url>/post/b2a8ff3d.html</url>
     <content><![CDATA[<h2 id="关于配置大页"><a href="#关于配置大页" class="headerlink" title="关于配置大页"></a>关于配置大页</h2><p>大页是啥我就不具体介绍了，网上介绍的文章很多，大多安装数据库的文章都有这么一步告诉大家配置大页，我只想说说错误的使用情况：</p>
 <p>那就是大页内存配置成功了，但是数据库却有正确使用大页，等数据库启动后就只能用少得可怜的普通内存，导致内存不足影响性能，如果数据库服务器上再跑个ETL进程或者其它应用，那么可能会导致数据库性能严重下降。</p>
 <p>在数据库交流群里也遇到过好几次这类的问题，非常的典型，配置完大页记得检查下有没有使用，避免此类问题。</p>
@@ -785,7 +785,7 @@
   </entry>
   <entry>
     <title>推荐一些学习数据库的BLOG</title>
-    <url>/2025/10/13/%E6%8E%A8%E8%8D%90%E4%B8%80%E4%BA%9B%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84BLOG/</url>
+    <url>/post/443887d3.html</url>
     <content><![CDATA[<p>这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。</p>
 <p><strong>Oracle top 100-blog排名</strong></p>
 <p><a href="https://developer.feedspot.com/oracle_blogs/">https://developer.feedspot.com/oracle_blogs/</a></p>
@@ -825,7 +825,7 @@
   </entry>
   <entry>
     <title>简易异地保留RMAN备份的方案</title>
-    <url>/2025/10/13/%E7%AE%80%E6%98%93%E5%BC%82%E5%9C%B0%E4%BF%9D%E7%95%99RMAN%E5%A4%87%E4%BB%BD%E7%9A%84%E6%96%B9%E6%A1%88/</url>
+    <url>/post/dca58675.html</url>
     <content><![CDATA[<h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><p>客户原有个中心机房A，里面有台windows 服务器运行oracle 11g</p>
 <p>在不远的机房B里有台XXG备份一体机对这个oracle进行定时备份，但是由于XXG备份一本体过保且备份故障无法继续了。</p>
 <p>客户想要实现一个简易的备份，并能存储到B机房的服务器中，以防止数据丢失。</p>
@@ -877,7 +877,7 @@
   </entry>
   <entry>
     <title>记一次NetApp FAS2554更换故障硬盘</title>
-    <url>/2025/10/11/%E8%AE%B0%E4%B8%80%E6%AC%A1NetApp%20FAS2554%E6%9B%B4%E6%8D%A2%E6%95%85%E9%9A%9C%E7%A1%AC%E7%9B%98/</url>
+    <url>/post/baf45ed4.html</url>
     <content><![CDATA[<h2 id="案例背景"><a href="#案例背景" class="headerlink" title="案例背景"></a>案例背景</h2><p>记一次某医院PACS存储NetApp FAS2554更换故障硬盘的过程。</p>
 <p>这个netapp设备以前从未调试过，据客户说该设备上线也有快9年了，头一次故障硬盘。因为己经过保了，客户只是采购的硬盘，我这来免费服务了。。。</p>
 <p>netapp调试基本全靠命令行，更换的过程中也遇到了一些麻烦，特此记录一下。</p>
@@ -935,7 +935,7 @@
   </entry>
   <entry>
     <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
-    <url>/2025/10/11/%E9%93%B6%E6%B2%B3%E9%BA%92%E9%BA%9FV10_x86%E4%B8%80%E9%94%AE%E6%9B%B4%E6%96%B0openssh10.2p1/</url>
+    <url>/post/b04c611b.html</url>
     <content><![CDATA[<p>昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。</p>
 <div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115350238665617&bvid=BV1dV4HzTEaq&cid=32972934127;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
 
