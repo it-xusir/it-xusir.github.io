@@ -126,6 +126,52 @@
       </tags>
   </entry>
   <entry>
+    <title>DBA必掌握的小技巧-分区满了如何处理1-删除home扩容根分区</title>
+    <url>/post/b6e27480.html</url>
+    <content><![CDATA[<h2 id="故障发生了！"><a href="#故障发生了！" class="headerlink" title="故障发生了！"></a>故障发生了！</h2><p>今天DBA小倩接到一个客户紧急任务，客户说自己的业务数据库突然不好使了，连接也出现了问题，开发人员连库就报这个错</p>
+<p>小倩要来了系统的登录用户名密码，登录到了数据库服务器一看</p>
+<p>好家伙！根目录满了。</p>
+<p>仔细检查发现，之前软件实施的人员把数据库直接装到了根目录下，最后导致根目录空间耗尽，数据库无法写入审计文件，无法登录了。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver /]# df -Th</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root xfs        50G   50G   33M 100% /</span><br><span class="line">/dev/mapper/centos-home xfs       445G   33M  445G   1% /home</span><br><span class="line">/dev/sda1               xfs      1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                   tmpfs     378M     0  378M   0% /run/user/0</span><br><span class="line">[root@dbserver /]# ls </span><br><span class="line">bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  u01  usr  var</span><br></pre></td></tr></table></figure>
+
+<p>根分区是没地方了，可是&#x2F;home分区却几乎没用。</p>
+<p>这就是之前的集成实施人员和软件实施人员没有对接好，两个人都是二把刀，导致这么个结果。</p>
+<h2 id="此时如何快速恢复业务呢？"><a href="#此时如何快速恢复业务呢？" class="headerlink" title="此时如何快速恢复业务呢？"></a>此时如何快速恢复业务呢？</h2><p>经过检查&#x2F;home分区下只有用户的默认文件夹，并无其它生产数据，与客户沟通后，小倩建议把&#x2F;home分区删除，扩容到根分区里，快速恢复业务。</p>
+<p>说干就干，首先，先去$ORACLE_BASE目录下释放一点文件，比如下面这些，都可以删除</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/alert   目录下的log_*.xml文件</span><br><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/trace   目录下的日志文件，alert_orcl.log如果不是很大，不建议删除。</span><br></pre></td></tr></table></figure>
+
+<p>备份一下home下的文件，检查了只有oracle目录。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver home]# ls -al</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x.  3 root   root  20 Sep  7 21:59 .</span><br><span class="line">dr-xr-xr-x. 18 root   root 255 Sep  7 22:00 ..</span><br><span class="line">drwx------   2 oracle dba   62 Sep  7 21:59 oracle</span><br></pre></td></tr></table></figure>
+
+<p>这里我们用cp 直接复制&#x2F;home目录下的文件到&#x2F;root目录下。r表示目录下所有子目录也复制，p表进带权限复制。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /home/</span><br><span class="line">cp * -rp /root/</span><br><span class="line">cd ~</span><br></pre></td></tr></table></figure>
+
+<p>下一步，我们要卸载&#x2F;home分区，把&#x2F;home分区对应的lv删除。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# umount  /home/</span><br><span class="line">[root@dbserver ~]# lvremove /dev/centos/home </span><br><span class="line">Do you really want to remove active logical volume centos/home? [y/n]: y</span><br><span class="line">  Logical volume &quot;home&quot; successfully removed</span><br></pre></td></tr></table></figure>
+
+<p>查看VG有空闲空间，这里我们再把剩余的空间扩容到根分区所属于的名为root的lv里。扩容lv后，在线直接扩容设备&#x2F;dev&#x2F;mapper&#x2F;centos-root对应的根文件系统。扩容成功后根分区空间立即够用了，业务立马恢复。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# vgs</span><br><span class="line">  VG     #PV #LV #SN Attr   VSize    VFree  </span><br><span class="line">  centos   1   2   0 wz--n- &lt;499.00g 445.12g</span><br><span class="line">[root@dbserver ~]# lvresize -l +100%FREE /dev/centos/root </span><br><span class="line">  Size of logical volume centos/root changed from 50.00 GiB (12800 extents) to 495.12 GiB (126751 extents).</span><br><span class="line">  Logical volume centos/root successfully resized.</span><br><span class="line">[root@dbserver ~]# lvs</span><br><span class="line">  LV   VG     Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  root centos -wi-ao---- 495.12g                                                    </span><br><span class="line">  swap centos -wi-ao----  &lt;3.88g </span><br><span class="line">[root@dbserver]# xfs_growfs /dev/mapper/centos-root </span><br><span class="line">meta-data=/dev/mapper/centos-root isize=512    agcount=4, agsize=3276800 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0 spinodes=0</span><br><span class="line">data     =                       bsize=4096   blocks=13107200, imaxpct=25</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal               bsize=4096   blocks=6400, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line">data blocks changed from 13107200 to 129793024</span><br><span class="line">[root@dbserver]# df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                    1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root  496G   50G  446G  11% /</span><br><span class="line">/dev/sda1               1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                    378M     0  378M   0% /run/user/0</span><br></pre></td></tr></table></figure>
+
+<p>最后别忘记了把备份走文件恢复到&#x2F;home目录下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# cp -rp oracle/ /home/</span><br></pre></td></tr></table></figure>
+
+<h2 id="完美收工了？"><a href="#完美收工了？" class="headerlink" title="完美收工了？"></a>完美收工了？</h2><p>你以为这样就完了么？</p>
+<p>没过1天，领导又找到了小倩，说数据库在本地磁盘空间太小了，性能也不能，我们又搞了个磁盘阵列，想把数据库整体迁移到存储上。</p>
+<p>下一期我们一起来看看小倩同学怎么操作。</p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+]]></content>
+      <categories>
+        <category>操作系统_linux</category>
+      </categories>
+      <tags>
+        <tag>oracle</tag>
+        <tag>linux</tag>
+        <tag>dba</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Centos7_x86一键更新openssh10.1p1</title>
     <url>/post/a7c8ab66.html</url>
     <content><![CDATA[<h2 id="如何完成一键更新OPENSSH"><a href="#如何完成一键更新OPENSSH" class="headerlink" title="如何完成一键更新OPENSSH"></a>如何完成一键更新OPENSSH</h2><p>我己经制作好了一键安装脚本和RPM软件包，完美适配centos7&#x2F;8</p>
@@ -256,112 +302,6 @@
       <tags>
         <tag>linux</tag>
         <tag>openssh</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>DBA必掌握的小技巧-分区满了如何处理1-删除home扩容根分区</title>
-    <url>/post/b6e27480.html</url>
-    <content><![CDATA[<h2 id="故障发生了！"><a href="#故障发生了！" class="headerlink" title="故障发生了！"></a>故障发生了！</h2><p>今天DBA小倩接到一个客户紧急任务，客户说自己的业务数据库突然不好使了，连接也出现了问题，开发人员连库就报这个错</p>
-<p>小倩要来了系统的登录用户名密码，登录到了数据库服务器一看</p>
-<p>好家伙！根目录满了。</p>
-<p>仔细检查发现，之前软件实施的人员把数据库直接装到了根目录下，最后导致根目录空间耗尽，数据库无法写入审计文件，无法登录了。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver /]# df -Th</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root xfs        50G   50G   33M 100% /</span><br><span class="line">/dev/mapper/centos-home xfs       445G   33M  445G   1% /home</span><br><span class="line">/dev/sda1               xfs      1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                   tmpfs     378M     0  378M   0% /run/user/0</span><br><span class="line">[root@dbserver /]# ls </span><br><span class="line">bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  u01  usr  var</span><br></pre></td></tr></table></figure>
-
-<p>根分区是没地方了，可是&#x2F;home分区却几乎没用。</p>
-<p>这就是之前的集成实施人员和软件实施人员没有对接好，两个人都是二把刀，导致这么个结果。</p>
-<h2 id="此时如何快速恢复业务呢？"><a href="#此时如何快速恢复业务呢？" class="headerlink" title="此时如何快速恢复业务呢？"></a>此时如何快速恢复业务呢？</h2><p>经过检查&#x2F;home分区下只有用户的默认文件夹，并无其它生产数据，与客户沟通后，小倩建议把&#x2F;home分区删除，扩容到根分区里，快速恢复业务。</p>
-<p>说干就干，首先，先去$ORACLE_BASE目录下释放一点文件，比如下面这些，都可以删除</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/alert   目录下的log_*.xml文件</span><br><span class="line">/u01/app/oracle/diag/rdbms/orcl/orcl/trace   目录下的日志文件，alert_orcl.log如果不是很大，不建议删除。</span><br></pre></td></tr></table></figure>
-
-<p>备份一下home下的文件，检查了只有oracle目录。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver home]# ls -al</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x.  3 root   root  20 Sep  7 21:59 .</span><br><span class="line">dr-xr-xr-x. 18 root   root 255 Sep  7 22:00 ..</span><br><span class="line">drwx------   2 oracle dba   62 Sep  7 21:59 oracle</span><br></pre></td></tr></table></figure>
-
-<p>这里我们用cp 直接复制&#x2F;home目录下的文件到&#x2F;root目录下。r表示目录下所有子目录也复制，p表进带权限复制。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /home/</span><br><span class="line">cp * -rp /root/</span><br><span class="line">cd ~</span><br></pre></td></tr></table></figure>
-
-<p>下一步，我们要卸载&#x2F;home分区，把&#x2F;home分区对应的lv删除。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# umount  /home/</span><br><span class="line">[root@dbserver ~]# lvremove /dev/centos/home </span><br><span class="line">Do you really want to remove active logical volume centos/home? [y/n]: y</span><br><span class="line">  Logical volume &quot;home&quot; successfully removed</span><br></pre></td></tr></table></figure>
-
-<p>查看VG有空闲空间，这里我们再把剩余的空间扩容到根分区所属于的名为root的lv里。扩容lv后，在线直接扩容设备&#x2F;dev&#x2F;mapper&#x2F;centos-root对应的根文件系统。扩容成功后根分区空间立即够用了，业务立马恢复。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# vgs</span><br><span class="line">  VG     #PV #LV #SN Attr   VSize    VFree  </span><br><span class="line">  centos   1   2   0 wz--n- &lt;499.00g 445.12g</span><br><span class="line">[root@dbserver ~]# lvresize -l +100%FREE /dev/centos/root </span><br><span class="line">  Size of logical volume centos/root changed from 50.00 GiB (12800 extents) to 495.12 GiB (126751 extents).</span><br><span class="line">  Logical volume centos/root successfully resized.</span><br><span class="line">[root@dbserver ~]# lvs</span><br><span class="line">  LV   VG     Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  root centos -wi-ao---- 495.12g                                                    </span><br><span class="line">  swap centos -wi-ao----  &lt;3.88g </span><br><span class="line">[root@dbserver]# xfs_growfs /dev/mapper/centos-root </span><br><span class="line">meta-data=/dev/mapper/centos-root isize=512    agcount=4, agsize=3276800 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0 spinodes=0</span><br><span class="line">data     =                       bsize=4096   blocks=13107200, imaxpct=25</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal               bsize=4096   blocks=6400, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line">data blocks changed from 13107200 to 129793024</span><br><span class="line">[root@dbserver]# df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                    1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                    1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root  496G   50G  446G  11% /</span><br><span class="line">/dev/sda1               1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                    378M     0  378M   0% /run/user/0</span><br></pre></td></tr></table></figure>
-
-<p>最后别忘记了把备份走文件恢复到&#x2F;home目录下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# cp -rp oracle/ /home/</span><br></pre></td></tr></table></figure>
-
-<h2 id="完美收工了？"><a href="#完美收工了？" class="headerlink" title="完美收工了？"></a>完美收工了？</h2><p>你以为这样就完了么？</p>
-<p>没过1天，领导又找到了小倩，说数据库在本地磁盘空间太小了，性能也不能，我们又搞了个磁盘阵列，想把数据库整体迁移到存储上。</p>
-<p>下一期我们一起来看看小倩同学怎么操作。</p>
-<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
-<p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-]]></content>
-      <categories>
-        <category>操作系统_linux</category>
-      </categories>
-      <tags>
-        <tag>oracle</tag>
-        <tag>linux</tag>
-        <tag>dba</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>DBA必掌握的小技巧-分区满了如何处理2-迁移到新存储</title>
-    <url>/post/b6b44e86.html</url>
-    <content><![CDATA[<h2 id="前情提要"><a href="#前情提要" class="headerlink" title="前情提要"></a>前情提要</h2><p>话说上次DBA小倩通过删除home lv，把空间扩给了&#x2F;分区，问题暂时得到了解决。</p>
-<p>没过几天，领导找到小倩下达任务，客户说数据库在本地磁盘空间太小了又快要满了，由于之前用的服务器本地磁盘，性能也比较差，现在不想扩展服务器本地硬盘了。正好这台服务器有HBA卡，客户从别的高端存储上划了个2TB的LUN过来，映射给这台数据库服务器，想让DBA小倩来做一下数据迁移，当然停机时间己经客户己经安排好了，就差小倩上线了。</p>
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>正式停机之前还有一些准备工作要作，比如先把存储空间挂载到服务器上（后做也可以，用不了多久）。</p>
-<p>检查一下当前磁盘空间情况，根目录满上要用光了。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# df -Th</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                   tmpfs     1.9G  259M  1.6G  14% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root xfs       496G  493G  2.8G 100% /</span><br><span class="line">/dev/sda1               xfs      1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                   tmpfs     378M     0  378M   0% /run/user/0</span><br></pre></td></tr></table></figure>
-
-<p>再看一下磁盘情况，目前只是识别到了一块磁盘</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0   500G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0   499G  0 part </span><br><span class="line">  ├─centos-root 253:0    0 495.1G  0 lvm  /</span><br><span class="line">  └─centos-swap 253:1    0   3.9G  0 lvm  [SWAP]</span><br><span class="line">sr0              11:0    1   4.4G  0 rom  </span><br></pre></td></tr></table></figure>
-
-<p>下面说一下怎么识别磁盘，正常这个操作是需要客户的系统管理员来操作（非必要DBA不要操作）。我这里用虚拟机给大家演示，就直接简化操作了（<strong>实际生产环境有可能还需要配置ISCSI、多路径，比较复杂，一般有专人处理，这个放在后面单独一章简单给大家做个知识补充</strong>）</p>
-<p><strong>我这里用虚拟机模拟，那么操作就是这样，扫描之后发现2T磁盘</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver scsi_host]# lsscsi</span><br><span class="line">[0:0:0:0]    disk    VMware,  VMware Virtual S 1.0   /dev/sda </span><br><span class="line">[2:0:0:0]    cd/dvd  NECVMWar VMware IDE CDR10 1.00  /dev/sr0 </span><br><span class="line">[root@dbserver scsi_host]# echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host0/scan </span><br><span class="line">[root@dbserver scsi_host]# </span><br><span class="line">[root@dbserver scsi_host]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0   500G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0   499G  0 part </span><br><span class="line">  ├─centos-root 253:0    0 495.1G  0 lvm  /</span><br><span class="line">  └─centos-swap 253:1    0   3.9G  0 lvm  [SWAP]</span><br><span class="line">sdb               8:16   0     2T  0 disk </span><br><span class="line">sr0              11:0    1   4.4G  0 rom  </span><br></pre></td></tr></table></figure>
-
-<p>下面对2T磁盘进行分区，并标记为LVM格式（划分区再标记这是标准做法，这样避免以后被别人当成空盘，直接给用了。当然也可以直接pvcreate &#x2F;dev&#x2F;sdb，但是这样就没有标记了。）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# parted -s /dev/sdb mklabel gpt</span><br><span class="line">[root@dbserver ~]# parted -s /dev/sdb mkpart primary 2048s 100%</span><br><span class="line">[root@dbserver ~]# parted -s /dev/sdb toggle 1 lvm</span><br><span class="line"></span><br><span class="line">[root@dbserver ~]# fdisk -l /dev/sdb</span><br><span class="line">WARNING: fdisk GPT support is currently new, and therefore in an experimental phase. Use at your own discretion.</span><br><span class="line"></span><br><span class="line">Disk /dev/sdb: 2199.0 GB, 2199023255552 bytes, 4294967296 sectors</span><br><span class="line">Units = sectors of 1 * 512 = 512 bytes</span><br><span class="line">Sector size (logical/physical): 512 bytes / 512 bytes</span><br><span class="line">I/O size (minimum/optimal): 512 bytes / 512 bytes</span><br><span class="line">Disk label type: gpt</span><br><span class="line">Disk identifier: 96DE5EB7-29A5-42AA-9651-03995AF95DEC</span><br><span class="line"></span><br><span class="line">#         Start          End    Size  Type            Name</span><br><span class="line"> 1         2048   4294965247      2T  Linux LVM       primary</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>下一步就是创建lvm，创建挂载点，挂载到操作系统上。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# pvcreate /dev/sdb1 </span><br><span class="line">  Physical volume &quot;/dev/sdb1&quot; successfully created.</span><br><span class="line">[root@dbserver ~]# vgcreate oradatavg /dev/sdb1 </span><br><span class="line">  Volume group &quot;oradatavg&quot; successfully created</span><br><span class="line">[root@dbserver ~]# lvcreate -l 100%FREE -n oralv oradatavg</span><br><span class="line">  Logical volume &quot;oralv&quot; created.</span><br><span class="line">[root@dbserver ~]# lvs</span><br><span class="line">  LV    VG        Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  root  centos    -wi-ao---- 495.12g                                                    </span><br><span class="line">  swap  centos    -wi-ao----  &lt;3.88g                                                    </span><br><span class="line">  oralv oradatavg -wi-a-----  &lt;2.00t                                                    </span><br><span class="line">[root@dbserver ~]# vgs</span><br><span class="line">  VG        #PV #LV #SN Attr   VSize    VFree</span><br><span class="line">  centos      1   2   0 wz--n- &lt;499.00g    0 </span><br><span class="line">  oradatavg   1   1   0 wz--n-   &lt;2.00t    0 </span><br><span class="line">[root@dbserver ~]# mkfs.xfs /dev/mapper/oradatavg-oralv </span><br><span class="line">meta-data=/dev/mapper/oradatavg-oralv isize=512    agcount=4, agsize=134217472 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0, sparse=0</span><br><span class="line">data     =                       bsize=4096   blocks=536869888, imaxpct=5</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal log           bsize=4096   blocks=262143, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br></pre></td></tr></table></figure>
-
-<h2 id="开始迁移"><a href="#开始迁移" class="headerlink" title="开始迁移"></a>开始迁移</h2><p>开始停机，先让客户结束业务办理，把应用系统都关了，然后建议是先把LOCAL&#x3D;NO进程全KILL，不然生产库一般很难正常shutdown immediate。操作步骤：先杀进程、关监听、关库、关EM</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ps -ef |grep LOCAL=NO|grep -v grep|cut -c 9-15|xargs kill -9</span><br><span class="line">[oracle@dbserver ~]$ lsnrctl stop</span><br><span class="line"></span><br><span class="line">LSNRCTL for Linux: Version 11.2.0.4.0 - Production on 11-SEP-2024 23:07:17</span><br><span class="line"></span><br><span class="line">Copyright (c) 1991, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))</span><br><span class="line">The command completed successfully</span><br><span class="line">[oracle@dbserver ~]$ sqlplus / as sysdba</span><br><span class="line"></span><br><span class="line">SQL*Plus: Release 11.2.0.4.0 Production on Wed Sep 11 23:07:00 2024</span><br><span class="line"></span><br><span class="line">Copyright (c) 1982, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Connected to:</span><br><span class="line">Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production</span><br><span class="line">With the Partitioning, OLAP, Data Mining and Real Application Testing options</span><br><span class="line"></span><br><span class="line">SQL&gt; shutdown immediate;</span><br><span class="line">Database closed.</span><br><span class="line">Database dismounted.</span><br><span class="line">ORACLE instance shut down.</span><br><span class="line">SQL&gt; exit</span><br><span class="line">Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production</span><br><span class="line">With the Partitioning, OLAP, Data Mining and Real Application Testing options</span><br><span class="line"></span><br><span class="line">[oracle@dbserver ~]$ emctl stop dbconsole</span><br><span class="line">OC4J Configuration issue. /u01/app/oracle/product/11.2.0/dbhome_1/oc4j/j2ee/OC4J_DBConsole_dbserver_oracle not found.</span><br></pre></td></tr></table></figure>
-
-<p>操作步骤是这样：</p>
-<p>1、先重命名&#x2F;u01目录为&#x2F;u01.old</p>
-<p>2、创建新的&#x2F;u01目录，然后挂载&#x2F;dev&#x2F;mapper&#x2F;oradatavg-oralv到&#x2F;u01</p>
-<p>3、给&#x2F;u01目录赋予oracle:oinstall权限</p>
-<p>4、使用rsync迁移&#x2F;u01.old目录里的文件到&#x2F;u01目录下（这里写成脚本用nohup运行，防止终端断开），这里注意rsync源目录后面要带&#x2F;，就是比如这样&#x2F;u01.old&#x2F;</p>
-<p>5、启动数据库恢复业务</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]#cd /</span><br><span class="line">[root@dbserver /]#mv /u01 /u01.old</span><br><span class="line">[root@dbserver /]# mkdir -p /u01</span><br><span class="line">[root@dbserver /]# echo &quot;/dev/mapper/oradatavg-oralv /u01 xfs defaults 0 0&quot; &gt;&gt; /etc/fstab </span><br><span class="line">[root@dbserver /]# mount -a</span><br><span class="line">[root@dbserver /]# df -h</span><br><span class="line">Filesystem                   Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                     1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                        1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                        1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                        1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root      496G  493G  2.8G 100% /</span><br><span class="line">/dev/sda1                   1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                        378M     0  378M   0% /run/user/0</span><br><span class="line">/dev/mapper/oradatavg-oralv  2.0T   33M  2.0T   1% /u01</span><br><span class="line">[root@dbserver /]# chown  oracle:oinstall /u01</span><br><span class="line">[root@dbserver /]# echo &quot;/usr/bin/rsync -av /u01.old/ /u01&quot; &gt;rsync.sh</span><br><span class="line">[root@dbserver /]# chmod +x rsync.sh </span><br><span class="line">[root@dbserver /]# nohup ./rsync.sh &amp;</span><br><span class="line">#如果需要查看同步情况,最后显示完成</span><br><span class="line">[root@dbserver /]# tail -f nohup.out </span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxus.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxus.msg</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxzhs.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxus.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxus.msg</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxzhs.msb</span><br><span class="line"></span><br><span class="line">sent 6,049,894,594 bytes  received 709,411 bytes  145,797,686.87 bytes/sec</span><br><span class="line">total size is 6,046,010,967  speedup is 1.00</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>最后启动数据库，成功运行后，确认无错误，就可以把&#x2F;u01.old目录删除释放空间了。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[oracle@dbserver ~]$ lsnrctl start</span><br><span class="line"></span><br><span class="line">LSNRCTL for Linux: Version 11.2.0.4.0 - Production on 11-SEP-2024 23:29:57</span><br><span class="line"></span><br><span class="line">Copyright (c) 1991, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Starting /u01/app/oracle/product/11.2.0/dbhome_1/bin/tnslsnr: please wait...</span><br><span class="line"></span><br><span class="line">TNSLSNR for Linux: Version 11.2.0.4.0 - Production</span><br><span class="line">System parameter file is /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/listener.ora</span><br><span class="line">Log messages written to /u01/app/oracle/diag/tnslsnr/dbserver/listener/alert/log.xml</span><br><span class="line">Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1521)))</span><br><span class="line">Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=dbserver)(PORT=1521)))</span><br><span class="line"></span><br><span class="line">Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))</span><br><span class="line">STATUS of the LISTENER</span><br><span class="line">------------------------</span><br><span class="line">Alias                     LISTENER</span><br><span class="line">Version                   TNSLSNR for Linux: Version 11.2.0.4.0 - Production</span><br><span class="line">Start Date                11-SEP-2024 23:29:57</span><br><span class="line">Uptime                    0 days 0 hr. 0 min. 0 sec</span><br><span class="line">Trace Level               off</span><br><span class="line">Security                  ON: Local OS Authentication</span><br><span class="line">SNMP                      OFF</span><br><span class="line">Listener Parameter File   /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/listener.ora</span><br><span class="line">Listener Log File         /u01/app/oracle/diag/tnslsnr/dbserver/listener/alert/log.xml</span><br><span class="line">Listening Endpoints Summary...</span><br><span class="line">  (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1521)))</span><br><span class="line">  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=dbserver)(PORT=1521)))</span><br><span class="line">The listener supports no services</span><br><span class="line">The command completed successfully</span><br><span class="line">[oracle@dbserver ~]$ sqlplus / as sysdba</span><br><span class="line"></span><br><span class="line">SQL*Plus: Release 11.2.0.4.0 Production on Wed Sep 11 23:30:03 2024</span><br><span class="line"></span><br><span class="line">Copyright (c) 1982, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Connected to an idle instance.</span><br><span class="line"></span><br><span class="line">SQL&gt; startup;</span><br><span class="line">ORACLE instance started.</span><br><span class="line"></span><br><span class="line">Total System Global Area 1586708480 bytes</span><br><span class="line">Fixed Size		    2253624 bytes</span><br><span class="line">Variable Size		  989859016 bytes</span><br><span class="line">Database Buffers	  587202560 bytes</span><br><span class="line">Redo Buffers		    7393280 bytes</span><br><span class="line">Database mounted.</span><br><span class="line">Database opened.</span><br><span class="line">SQL&gt; exit</span><br></pre></td></tr></table></figure>
-
-<h2 id="扩展知识"><a href="#扩展知识" class="headerlink" title="扩展知识"></a>扩展知识</h2><p>1、如果生产服务器用的是hba卡的话一般都2块卡，需要重新扫描一下hba卡就可以发现新硬盘了，我给大家看一下我这有一个生产环境样例是这样：主机有2块HBA卡为host1、host2。host0是本地的硬盘控制器。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@rac1]# cd /sys/class/fc_host/</span><br><span class="line">[root@rac1 fc_host]# ls -l</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host1 -&gt; ../../devices/pci0000:00/0000:00:03.0/0000:04:00.0/host1/fc_host/host1</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host2 -&gt; ../../devices/pci0000:40/0000:40:02.2/0000:47:00.0/host2/fc_host/host2</span><br><span class="line">[root@rac1 fc_host]# cd /sys/class/scsi_host/</span><br><span class="line">[root@rac1 scsi_host]# ls -l</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host0 -&gt; ../../devices/pci0000:00/0000:00:02.0/0000:02:00.0/host0/scsi_host/host0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host1 -&gt; ../../devices/pci0000:00/0000:00:03.0/0000:04:00.0/host1/scsi_host/host1</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host2 -&gt; ../../devices/pci0000:40/0000:40:02.2/0000:47:00.0/host2/scsi_host/host2</span><br><span class="line">[root@rac1 scsi_host]# lsscsi</span><br><span class="line">[0:0:0:0]    disk    HP       LOGICAL VOLUME   4.04  /dev/sda </span><br><span class="line">[0:3:0:0]    storage HP       P830i            4.04  -       </span><br><span class="line">[1:0:0:0]    disk    3PARdata VV               3315  /dev/sdb </span><br><span class="line">[1:0:0:1]    disk    3PARdata VV               3315  /dev/sdc </span><br><span class="line">[1:0:0:2]    disk    3PARdata VV               3315  /dev/sdd </span><br><span class="line">[1:0:0:3]    disk    3PARdata VV               3315  /dev/sde </span><br><span class="line">[1:0:0:4]    disk    3PARdata VV               3315  /dev/sdf </span><br><span class="line">[1:0:0:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[1:0:1:0]    disk    3PARdata VV               3315  /dev/sdg </span><br><span class="line">[1:0:1:1]    disk    3PARdata VV               3315  /dev/sdh </span><br><span class="line">[1:0:1:3]    disk    3PARdata VV               3315  /dev/sdi </span><br><span class="line">[1:0:1:4]    disk    3PARdata VV               3315  /dev/sdj </span><br><span class="line">[1:0:1:5]    disk    3PARdata VV               3315  /dev/sdk </span><br><span class="line">[1:0:1:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[2:0:0:0]    disk    3PARdata VV               3315  /dev/sdl </span><br><span class="line">[2:0:0:1]    disk    3PARdata VV               3315  /dev/sdm </span><br><span class="line">[2:0:0:3]    disk    3PARdata VV               3315  /dev/sdn </span><br><span class="line">[2:0:0:4]    disk    3PARdata VV               3315  /dev/sdo </span><br><span class="line">[2:0:0:5]    disk    3PARdata VV               3315  /dev/sdp </span><br><span class="line">[2:0:0:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[root@rac1 scsi_host]# </span><br></pre></td></tr></table></figure>
-
-<p>那么需要进行的操作就是扫描两块HBA卡。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host1/scan</span><br><span class="line">echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host2/scan</span><br></pre></td></tr></table></figure>
-
-<p>2、如果是用万兆ISCSI连接的存储，那么就需要配置ISCSI，主机需要安装iscsi-initiator。生产一般会接2个网卡做为冗余，假设主机这边对接ISCSI存储的IP是192.168.1.2，存储侧是192.168.1.101、192.168.1.102</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">iscsiadm -m discovery -t st -p 192.168.1.101</span><br><span class="line">iscsiadm -m node -p 192.168.1.101 -l</span><br><span class="line">iscsiadm -m discovery -t st -p 192.168.1.102</span><br><span class="line">iscsiadm -m node -p 192.168.1.102 -l</span><br><span class="line">systemctl enable iscsi.service</span><br><span class="line">iscsiadm -m node -o update -n node.startup -v automatic</span><br></pre></td></tr></table></figure>
-
-<p>3、上面无论是FC-HBA或是ISCSI连接完存储后，剩下需要做的就是配置多路径multipath或者直接安装存储厂商的多路径软件（如果客户现场没有多个存储要同时用的话，推荐使用存储厂商的多路径软件，这样几乎不用啥配置），此处略长，大家要有兴趣我回头再写一篇。</p>
-<h2 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h2><p>解决了这个问题，又来了一个棘手的活， 这回客户也是数据库装在根目录，然后根目录总满了，目前是一直手动清日志保证业务能用。但不一样的是，这次客户用的是虚拟机系统，而且虚拟机没用LVM装的系统，客户系统又不能停机，看看下期DBA小倩如何处理。</p>
-<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
-<p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-]]></content>
-      <categories>
-        <category>操作系统_linux</category>
-      </categories>
-      <tags>
-        <tag>oracle</tag>
-        <tag>linux</tag>
-        <tag>dba</tag>
       </tags>
   </entry>
   <entry>
@@ -518,6 +458,66 @@
       </tags>
   </entry>
   <entry>
+    <title>DBA必掌握的小技巧-分区满了如何处理2-迁移到新存储</title>
+    <url>/post/b6b44e86.html</url>
+    <content><![CDATA[<h2 id="前情提要"><a href="#前情提要" class="headerlink" title="前情提要"></a>前情提要</h2><p>话说上次DBA小倩通过删除home lv，把空间扩给了&#x2F;分区，问题暂时得到了解决。</p>
+<p>没过几天，领导找到小倩下达任务，客户说数据库在本地磁盘空间太小了又快要满了，由于之前用的服务器本地磁盘，性能也比较差，现在不想扩展服务器本地硬盘了。正好这台服务器有HBA卡，客户从别的高端存储上划了个2TB的LUN过来，映射给这台数据库服务器，想让DBA小倩来做一下数据迁移，当然停机时间己经客户己经安排好了，就差小倩上线了。</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>正式停机之前还有一些准备工作要作，比如先把存储空间挂载到服务器上（后做也可以，用不了多久）。</p>
+<p>检查一下当前磁盘空间情况，根目录满上要用光了。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# df -Th</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                   tmpfs     1.9G  259M  1.6G  14% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                   tmpfs     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root xfs       496G  493G  2.8G 100% /</span><br><span class="line">/dev/sda1               xfs      1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                   tmpfs     378M     0  378M   0% /run/user/0</span><br></pre></td></tr></table></figure>
+
+<p>再看一下磁盘情况，目前只是识别到了一块磁盘</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0   500G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0   499G  0 part </span><br><span class="line">  ├─centos-root 253:0    0 495.1G  0 lvm  /</span><br><span class="line">  └─centos-swap 253:1    0   3.9G  0 lvm  [SWAP]</span><br><span class="line">sr0              11:0    1   4.4G  0 rom  </span><br></pre></td></tr></table></figure>
+
+<p>下面说一下怎么识别磁盘，正常这个操作是需要客户的系统管理员来操作（非必要DBA不要操作）。我这里用虚拟机给大家演示，就直接简化操作了（<strong>实际生产环境有可能还需要配置ISCSI、多路径，比较复杂，一般有专人处理，这个放在后面单独一章简单给大家做个知识补充</strong>）</p>
+<p><strong>我这里用虚拟机模拟，那么操作就是这样，扫描之后发现2T磁盘</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver scsi_host]# lsscsi</span><br><span class="line">[0:0:0:0]    disk    VMware,  VMware Virtual S 1.0   /dev/sda </span><br><span class="line">[2:0:0:0]    cd/dvd  NECVMWar VMware IDE CDR10 1.00  /dev/sr0 </span><br><span class="line">[root@dbserver scsi_host]# echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host0/scan </span><br><span class="line">[root@dbserver scsi_host]# </span><br><span class="line">[root@dbserver scsi_host]# lsblk</span><br><span class="line">NAME            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0   500G  0 disk </span><br><span class="line">├─sda1            8:1    0     1G  0 part /boot</span><br><span class="line">└─sda2            8:2    0   499G  0 part </span><br><span class="line">  ├─centos-root 253:0    0 495.1G  0 lvm  /</span><br><span class="line">  └─centos-swap 253:1    0   3.9G  0 lvm  [SWAP]</span><br><span class="line">sdb               8:16   0     2T  0 disk </span><br><span class="line">sr0              11:0    1   4.4G  0 rom  </span><br></pre></td></tr></table></figure>
+
+<p>下面对2T磁盘进行分区，并标记为LVM格式（划分区再标记这是标准做法，这样避免以后被别人当成空盘，直接给用了。当然也可以直接pvcreate &#x2F;dev&#x2F;sdb，但是这样就没有标记了。）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# parted -s /dev/sdb mklabel gpt</span><br><span class="line">[root@dbserver ~]# parted -s /dev/sdb mkpart primary 2048s 100%</span><br><span class="line">[root@dbserver ~]# parted -s /dev/sdb toggle 1 lvm</span><br><span class="line"></span><br><span class="line">[root@dbserver ~]# fdisk -l /dev/sdb</span><br><span class="line">WARNING: fdisk GPT support is currently new, and therefore in an experimental phase. Use at your own discretion.</span><br><span class="line"></span><br><span class="line">Disk /dev/sdb: 2199.0 GB, 2199023255552 bytes, 4294967296 sectors</span><br><span class="line">Units = sectors of 1 * 512 = 512 bytes</span><br><span class="line">Sector size (logical/physical): 512 bytes / 512 bytes</span><br><span class="line">I/O size (minimum/optimal): 512 bytes / 512 bytes</span><br><span class="line">Disk label type: gpt</span><br><span class="line">Disk identifier: 96DE5EB7-29A5-42AA-9651-03995AF95DEC</span><br><span class="line"></span><br><span class="line">#         Start          End    Size  Type            Name</span><br><span class="line"> 1         2048   4294965247      2T  Linux LVM       primary</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>下一步就是创建lvm，创建挂载点，挂载到操作系统上。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]# pvcreate /dev/sdb1 </span><br><span class="line">  Physical volume &quot;/dev/sdb1&quot; successfully created.</span><br><span class="line">[root@dbserver ~]# vgcreate oradatavg /dev/sdb1 </span><br><span class="line">  Volume group &quot;oradatavg&quot; successfully created</span><br><span class="line">[root@dbserver ~]# lvcreate -l 100%FREE -n oralv oradatavg</span><br><span class="line">  Logical volume &quot;oralv&quot; created.</span><br><span class="line">[root@dbserver ~]# lvs</span><br><span class="line">  LV    VG        Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  root  centos    -wi-ao---- 495.12g                                                    </span><br><span class="line">  swap  centos    -wi-ao----  &lt;3.88g                                                    </span><br><span class="line">  oralv oradatavg -wi-a-----  &lt;2.00t                                                    </span><br><span class="line">[root@dbserver ~]# vgs</span><br><span class="line">  VG        #PV #LV #SN Attr   VSize    VFree</span><br><span class="line">  centos      1   2   0 wz--n- &lt;499.00g    0 </span><br><span class="line">  oradatavg   1   1   0 wz--n-   &lt;2.00t    0 </span><br><span class="line">[root@dbserver ~]# mkfs.xfs /dev/mapper/oradatavg-oralv </span><br><span class="line">meta-data=/dev/mapper/oradatavg-oralv isize=512    agcount=4, agsize=134217472 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=0, sparse=0</span><br><span class="line">data     =                       bsize=4096   blocks=536869888, imaxpct=5</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal log           bsize=4096   blocks=262143, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br></pre></td></tr></table></figure>
+
+<h2 id="开始迁移"><a href="#开始迁移" class="headerlink" title="开始迁移"></a>开始迁移</h2><p>开始停机，先让客户结束业务办理，把应用系统都关了，然后建议是先把LOCAL&#x3D;NO进程全KILL，不然生产库一般很难正常shutdown immediate。操作步骤：先杀进程、关监听、关库、关EM</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ps -ef |grep LOCAL=NO|grep -v grep|cut -c 9-15|xargs kill -9</span><br><span class="line">[oracle@dbserver ~]$ lsnrctl stop</span><br><span class="line"></span><br><span class="line">LSNRCTL for Linux: Version 11.2.0.4.0 - Production on 11-SEP-2024 23:07:17</span><br><span class="line"></span><br><span class="line">Copyright (c) 1991, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))</span><br><span class="line">The command completed successfully</span><br><span class="line">[oracle@dbserver ~]$ sqlplus / as sysdba</span><br><span class="line"></span><br><span class="line">SQL*Plus: Release 11.2.0.4.0 Production on Wed Sep 11 23:07:00 2024</span><br><span class="line"></span><br><span class="line">Copyright (c) 1982, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Connected to:</span><br><span class="line">Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production</span><br><span class="line">With the Partitioning, OLAP, Data Mining and Real Application Testing options</span><br><span class="line"></span><br><span class="line">SQL&gt; shutdown immediate;</span><br><span class="line">Database closed.</span><br><span class="line">Database dismounted.</span><br><span class="line">ORACLE instance shut down.</span><br><span class="line">SQL&gt; exit</span><br><span class="line">Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production</span><br><span class="line">With the Partitioning, OLAP, Data Mining and Real Application Testing options</span><br><span class="line"></span><br><span class="line">[oracle@dbserver ~]$ emctl stop dbconsole</span><br><span class="line">OC4J Configuration issue. /u01/app/oracle/product/11.2.0/dbhome_1/oc4j/j2ee/OC4J_DBConsole_dbserver_oracle not found.</span><br></pre></td></tr></table></figure>
+
+<p>操作步骤是这样：</p>
+<p>1、先重命名&#x2F;u01目录为&#x2F;u01.old</p>
+<p>2、创建新的&#x2F;u01目录，然后挂载&#x2F;dev&#x2F;mapper&#x2F;oradatavg-oralv到&#x2F;u01</p>
+<p>3、给&#x2F;u01目录赋予oracle:oinstall权限</p>
+<p>4、使用rsync迁移&#x2F;u01.old目录里的文件到&#x2F;u01目录下（这里写成脚本用nohup运行，防止终端断开），这里注意rsync源目录后面要带&#x2F;，就是比如这样&#x2F;u01.old&#x2F;</p>
+<p>5、启动数据库恢复业务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@dbserver ~]#cd /</span><br><span class="line">[root@dbserver /]#mv /u01 /u01.old</span><br><span class="line">[root@dbserver /]# mkdir -p /u01</span><br><span class="line">[root@dbserver /]# echo &quot;/dev/mapper/oradatavg-oralv /u01 xfs defaults 0 0&quot; &gt;&gt; /etc/fstab </span><br><span class="line">[root@dbserver /]# mount -a</span><br><span class="line">[root@dbserver /]# df -h</span><br><span class="line">Filesystem                   Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                     1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                        1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                        1.9G   12M  1.9G   1% /run</span><br><span class="line">tmpfs                        1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/centos-root      496G  493G  2.8G 100% /</span><br><span class="line">/dev/sda1                   1014M  151M  864M  15% /boot</span><br><span class="line">tmpfs                        378M     0  378M   0% /run/user/0</span><br><span class="line">/dev/mapper/oradatavg-oralv  2.0T   33M  2.0T   1% /u01</span><br><span class="line">[root@dbserver /]# chown  oracle:oinstall /u01</span><br><span class="line">[root@dbserver /]# echo &quot;/usr/bin/rsync -av /u01.old/ /u01&quot; &gt;rsync.sh</span><br><span class="line">[root@dbserver /]# chmod +x rsync.sh </span><br><span class="line">[root@dbserver /]# nohup ./rsync.sh &amp;</span><br><span class="line">#如果需要查看同步情况,最后显示完成</span><br><span class="line">[root@dbserver /]# tail -f nohup.out </span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxus.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxus.msg</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lpxzhs.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxus.msb</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxus.msg</span><br><span class="line">app/oracle/product/11.2.0/dbhome_1/xdk/mesg/lsxzhs.msb</span><br><span class="line"></span><br><span class="line">sent 6,049,894,594 bytes  received 709,411 bytes  145,797,686.87 bytes/sec</span><br><span class="line">total size is 6,046,010,967  speedup is 1.00</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>最后启动数据库，成功运行后，确认无错误，就可以把&#x2F;u01.old目录删除释放空间了。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[oracle@dbserver ~]$ lsnrctl start</span><br><span class="line"></span><br><span class="line">LSNRCTL for Linux: Version 11.2.0.4.0 - Production on 11-SEP-2024 23:29:57</span><br><span class="line"></span><br><span class="line">Copyright (c) 1991, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Starting /u01/app/oracle/product/11.2.0/dbhome_1/bin/tnslsnr: please wait...</span><br><span class="line"></span><br><span class="line">TNSLSNR for Linux: Version 11.2.0.4.0 - Production</span><br><span class="line">System parameter file is /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/listener.ora</span><br><span class="line">Log messages written to /u01/app/oracle/diag/tnslsnr/dbserver/listener/alert/log.xml</span><br><span class="line">Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1521)))</span><br><span class="line">Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=dbserver)(PORT=1521)))</span><br><span class="line"></span><br><span class="line">Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))</span><br><span class="line">STATUS of the LISTENER</span><br><span class="line">------------------------</span><br><span class="line">Alias                     LISTENER</span><br><span class="line">Version                   TNSLSNR for Linux: Version 11.2.0.4.0 - Production</span><br><span class="line">Start Date                11-SEP-2024 23:29:57</span><br><span class="line">Uptime                    0 days 0 hr. 0 min. 0 sec</span><br><span class="line">Trace Level               off</span><br><span class="line">Security                  ON: Local OS Authentication</span><br><span class="line">SNMP                      OFF</span><br><span class="line">Listener Parameter File   /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/listener.ora</span><br><span class="line">Listener Log File         /u01/app/oracle/diag/tnslsnr/dbserver/listener/alert/log.xml</span><br><span class="line">Listening Endpoints Summary...</span><br><span class="line">  (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1521)))</span><br><span class="line">  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=dbserver)(PORT=1521)))</span><br><span class="line">The listener supports no services</span><br><span class="line">The command completed successfully</span><br><span class="line">[oracle@dbserver ~]$ sqlplus / as sysdba</span><br><span class="line"></span><br><span class="line">SQL*Plus: Release 11.2.0.4.0 Production on Wed Sep 11 23:30:03 2024</span><br><span class="line"></span><br><span class="line">Copyright (c) 1982, 2013, Oracle.  All rights reserved.</span><br><span class="line"></span><br><span class="line">Connected to an idle instance.</span><br><span class="line"></span><br><span class="line">SQL&gt; startup;</span><br><span class="line">ORACLE instance started.</span><br><span class="line"></span><br><span class="line">Total System Global Area 1586708480 bytes</span><br><span class="line">Fixed Size		    2253624 bytes</span><br><span class="line">Variable Size		  989859016 bytes</span><br><span class="line">Database Buffers	  587202560 bytes</span><br><span class="line">Redo Buffers		    7393280 bytes</span><br><span class="line">Database mounted.</span><br><span class="line">Database opened.</span><br><span class="line">SQL&gt; exit</span><br></pre></td></tr></table></figure>
+
+<h2 id="扩展知识"><a href="#扩展知识" class="headerlink" title="扩展知识"></a>扩展知识</h2><p>1、如果生产服务器用的是hba卡的话一般都2块卡，需要重新扫描一下hba卡就可以发现新硬盘了，我给大家看一下我这有一个生产环境样例是这样：主机有2块HBA卡为host1、host2。host0是本地的硬盘控制器。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@rac1]# cd /sys/class/fc_host/</span><br><span class="line">[root@rac1 fc_host]# ls -l</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host1 -&gt; ../../devices/pci0000:00/0000:00:03.0/0000:04:00.0/host1/fc_host/host1</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host2 -&gt; ../../devices/pci0000:40/0000:40:02.2/0000:47:00.0/host2/fc_host/host2</span><br><span class="line">[root@rac1 fc_host]# cd /sys/class/scsi_host/</span><br><span class="line">[root@rac1 scsi_host]# ls -l</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host0 -&gt; ../../devices/pci0000:00/0000:00:02.0/0000:02:00.0/host0/scsi_host/host0</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host1 -&gt; ../../devices/pci0000:00/0000:00:03.0/0000:04:00.0/host1/scsi_host/host1</span><br><span class="line">lrwxrwxrwx 1 root root 0 Aug  6 03:02 host2 -&gt; ../../devices/pci0000:40/0000:40:02.2/0000:47:00.0/host2/scsi_host/host2</span><br><span class="line">[root@rac1 scsi_host]# lsscsi</span><br><span class="line">[0:0:0:0]    disk    HP       LOGICAL VOLUME   4.04  /dev/sda </span><br><span class="line">[0:3:0:0]    storage HP       P830i            4.04  -       </span><br><span class="line">[1:0:0:0]    disk    3PARdata VV               3315  /dev/sdb </span><br><span class="line">[1:0:0:1]    disk    3PARdata VV               3315  /dev/sdc </span><br><span class="line">[1:0:0:2]    disk    3PARdata VV               3315  /dev/sdd </span><br><span class="line">[1:0:0:3]    disk    3PARdata VV               3315  /dev/sde </span><br><span class="line">[1:0:0:4]    disk    3PARdata VV               3315  /dev/sdf </span><br><span class="line">[1:0:0:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[1:0:1:0]    disk    3PARdata VV               3315  /dev/sdg </span><br><span class="line">[1:0:1:1]    disk    3PARdata VV               3315  /dev/sdh </span><br><span class="line">[1:0:1:3]    disk    3PARdata VV               3315  /dev/sdi </span><br><span class="line">[1:0:1:4]    disk    3PARdata VV               3315  /dev/sdj </span><br><span class="line">[1:0:1:5]    disk    3PARdata VV               3315  /dev/sdk </span><br><span class="line">[1:0:1:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[2:0:0:0]    disk    3PARdata VV               3315  /dev/sdl </span><br><span class="line">[2:0:0:1]    disk    3PARdata VV               3315  /dev/sdm </span><br><span class="line">[2:0:0:3]    disk    3PARdata VV               3315  /dev/sdn </span><br><span class="line">[2:0:0:4]    disk    3PARdata VV               3315  /dev/sdo </span><br><span class="line">[2:0:0:5]    disk    3PARdata VV               3315  /dev/sdp </span><br><span class="line">[2:0:0:254]  enclosu 3PARdata SES              3315  -       </span><br><span class="line">[root@rac1 scsi_host]# </span><br></pre></td></tr></table></figure>
+
+<p>那么需要进行的操作就是扫描两块HBA卡。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host1/scan</span><br><span class="line">echo &quot;- - -&quot; &gt;/sys/class/scsi_host/host2/scan</span><br></pre></td></tr></table></figure>
+
+<p>2、如果是用万兆ISCSI连接的存储，那么就需要配置ISCSI，主机需要安装iscsi-initiator。生产一般会接2个网卡做为冗余，假设主机这边对接ISCSI存储的IP是192.168.1.2，存储侧是192.168.1.101、192.168.1.102</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">iscsiadm -m discovery -t st -p 192.168.1.101</span><br><span class="line">iscsiadm -m node -p 192.168.1.101 -l</span><br><span class="line">iscsiadm -m discovery -t st -p 192.168.1.102</span><br><span class="line">iscsiadm -m node -p 192.168.1.102 -l</span><br><span class="line">systemctl enable iscsi.service</span><br><span class="line">iscsiadm -m node -o update -n node.startup -v automatic</span><br></pre></td></tr></table></figure>
+
+<p>3、上面无论是FC-HBA或是ISCSI连接完存储后，剩下需要做的就是配置多路径multipath或者直接安装存储厂商的多路径软件（如果客户现场没有多个存储要同时用的话，推荐使用存储厂商的多路径软件，这样几乎不用啥配置），此处略长，大家要有兴趣我回头再写一篇。</p>
+<h2 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h2><p>解决了这个问题，又来了一个棘手的活， 这回客户也是数据库装在根目录，然后根目录总满了，目前是一直手动清日志保证业务能用。但不一样的是，这次客户用的是虚拟机系统，而且虚拟机没用LVM装的系统，客户系统又不能停机，看看下期DBA小倩如何处理。</p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+]]></content>
+      <categories>
+        <category>操作系统_linux</category>
+      </categories>
+      <tags>
+        <tag>oracle</tag>
+        <tag>linux</tag>
+        <tag>dba</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>OEL7挂载ISCSI存储配置示例</title>
     <url>/post/d477c414.html</url>
     <content><![CDATA[<p>客户让帮忙挂载个ISCSI存储，大概结构如下图所示：</p>
@@ -561,6 +561,71 @@
         <tag>linux</tag>
         <tag>iscsi</tag>
         <tag>parted</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>在Centos7.9上安装netbackup 9.1服务器端</title>
+    <url>/post/2b862cbb.html</url>
+    <content><![CDATA[<h2 id="安装环境"><a href="#安装环境" class="headerlink" title="安装环境"></a>安装环境</h2><p>Centos 7.6 x86_64</p>
+<p>netbackup 9.1 服务端</p>
+<h2 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">groupadd nbwebgrp</span><br><span class="line">mkdir -p /usr/openv/wmc</span><br><span class="line">useradd -g nbwebgrp -c &#x27;NetBackup Web Services account&#x27; -d /usr/openv/wmc nbwebsvc</span><br><span class="line">useradd -c &#x27;NetBackup Services account&#x27; -d /usr/openv/ nbusvc</span><br><span class="line">usermod -a -G nbwebgrp nbusvc</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置系统参数"><a href="#配置系统参数" class="headerlink" title="配置系统参数"></a>配置系统参数</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo &quot;kernel.sem = 300 307200 32 1024&quot; &gt;&gt; /etc/sysctl.conf </span><br><span class="line">sysctl -p</span><br><span class="line">echo &quot;*    soft    nofile         8192&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    hard    nofile        65536&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    soft    nproc         65536&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    hard    nproc         65536&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    soft    fsize     unlimited&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    hard    fsize     unlimited&quot; &gt;&gt; /etc/security/limits.conf</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改主名"><a href="#修改主名" class="headerlink" title="修改主名"></a>修改主名</h2><p>配置主机名</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hostnamectl set-hostname nbuserver</span><br><span class="line">echo &quot;192.168.31.160 nbuserver&quot; &gt;&gt; /etc/hosts</span><br></pre></td></tr></table></figure>
+
+<h2 id="关闭SELINUX"><a href="#关闭SELINUX" class="headerlink" title="关闭SELINUX"></a>关闭SELINUX</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sed -i &#x27;s/enforcing/disabled/g&#x27; /etc/selinux/config</span><br><span class="line">setenforce 0</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改系统环境变量"><a href="#修改系统环境变量" class="headerlink" title="修改系统环境变量"></a>修改系统环境变量</h2><p>vi &#x2F;etc&#x2F;profile<br>添加如下行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">PATH=$PATH:$HOME/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/goodies:/usr/openv/volmgr/bin</span><br><span class="line">export PATH</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装备必软件包"><a href="#安装备必软件包" class="headerlink" title="安装备必软件包"></a>安装备必软件包</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如何配置YUM源我就不写了，大家应该都会</span><br><span class="line">yum install net-tools unzip gzip bzip* libnsl.so* insserv-compat* libXtst compat* -y</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装master-server-media-server"><a href="#安装master-server-media-server" class="headerlink" title="安装master-server&amp;&amp; media server"></a>安装master-server&amp;&amp; media server</h2><p>veritas_customer_registration_key.json需要提前准备，购买了许可之后可以通过控制台下载（从netbackup 8.0变回veritas商标之后，安装都需要许可。还是symantec时代的版本安装时不需要许可，）</p>
+<p>1.查看准备的软包</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@netbackup ~]# ls</span><br><span class="line">anaconda-ks.cfg  License.txt   NetBackup_9.1.0.1_LinuxR_x86_64.tar.gz  veritas_customer_registration_key.json</span><br></pre></td></tr></table></figure>
+
+<p>使用tar解压软件包</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">tar -zxvf NetBackup_9.1.0.1_LinuxR_x86_64.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>进到安装目录里查看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@netbackup ~]# cd NetBackup_9.1.0.1_LinuxR_x86_64</span><br><span class="line">[root@netbackup NetBackup_9.1.0.1_LinuxR_x86_64]# ls</span><br><span class="line">Doc  install  LICENSE  linuxR_x86  NBInstallAnswer-client.template  NBInstallAnswer-master.template  NBInstallAnswer-media.template</span><br></pre></td></tr></table></figure>
+
+<p>开始安装，这里由于输出太长，我只列出关键位置，大家安装的时候可以参考。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@netbackup NetBackup_9.1.0.1_LinuxR_x86_64]# ./install </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Veritas Installation Script</span><br><span class="line">Copyright (c) 2021 Veritas Technologies LLC. All rights reserved.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	Installing NetBackup Server Software</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Please review the VERITAS SOFTWARE LICENSE AGREEMENT located on</span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line"></span><br><span class="line">ATTENTION!  To help ensure a successful upgrade to NetBackup 9.1.0.1,</span><br><span class="line">please visit the NetBackup 9.x Upgrade Portal:</span><br><span class="line">https://www.veritas.com/content/support/en_US/article.100048493.</span><br><span class="line"></span><br><span class="line">Do you wish to continue? [y,n] (y)      ---------输入Y继续</span><br><span class="line">Starting NetBackup Deduplication installer</span><br><span class="line">testing: /tmp/pdde_pkg_dir_16149</span><br><span class="line">NetBackup Deduplication preinstall check passed</span><br><span class="line">Running install analysis tool.</span><br><span class="line"></span><br><span class="line">Is this host the master server? [y,n] (y)   ---------输入Y继续</span><br><span class="line">Are you currently performing a disaster recovery of a master server? [y,n] (n)   ---------输入N，这里是全新安装，不是恢复安装</span><br><span class="line"></span><br><span class="line">Using nbwebsvc and nbwebgrp for the</span><br><span class="line">NetBackup web service user and group.</span><br><span class="line"></span><br><span class="line">ATTENTION! Provide the name of the service user account to be used to start</span><br><span class="line">most of the daemons.</span><br><span class="line"></span><br><span class="line">- It is not recommended to use the root user as the service user.</span><br><span class="line">- The length of the service user name must be less than 32 characters.</span><br><span class="line">- The service user name must contain only English characters.</span><br><span class="line">- The nbwebsvc user should not be used as the service user.</span><br><span class="line">- nbwebgrp must be a secondary group of the service user.</span><br><span class="line">  For more details, see the article: https://www.veritas.com/docs/100048220.</span><br><span class="line"></span><br><span class="line">Enter the name of the service user account to be used to start most of the daemons: nbusvc</span><br><span class="line"></span><br><span class="line">The private_tmp value is /tmp/nbcheck_dir.16107</span><br><span class="line"></span><br><span class="line">Checking for critical system conditions...</span><br><span class="line"></span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line">A customer registration key is required to proceed with the installation of this</span><br><span class="line">master server.</span><br><span class="line">Log into Veritas NetInsights Console (https://netinsights.veritas.com) and go </span><br><span class="line">to the &quot;Registration Keys&quot; page and download the appropriate customer registration</span><br><span class="line">key for this master server.  If you need help with customer registration keys to </span><br><span class="line">proceed with the installation or upgrade of this master server, please refer to the </span><br><span class="line">NetBackup Release Notes or contact Veritas Support.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Please enter the fully qualified path containing your customer registration key </span><br><span class="line">file, or enter q to quit the install script.   -------这里会提示让你输入密钥文件的位置</span><br><span class="line">/root/veritas_customer_registration_key.json</span><br><span class="line"></span><br><span class="line">The NetBackup and Media Manager software is built for use on LINUX_RH_X86 hardware.</span><br><span class="line">Do you want to install NetBackup and Media Manager files? [y,n] (y)    --------回复Y继续</span><br><span class="line"></span><br><span class="line">NetBackup and Media Manager are normally installed in /usr/openv.</span><br><span class="line">The existing /usr/openv directory will be used for NetBackup and Media Manager.</span><br><span class="line">No existing NetBackup server files to save.</span><br><span class="line">Client folder [/usr/openv/netbackup/client] does not exist.  No work to do.</span><br><span class="line"></span><br><span class="line">Reading NetBackup files from /root/NetBackup_9.1.0.1_LinuxR_x86_64/linuxR_x86/anb</span><br><span class="line"></span><br><span class="line">Checking for pre-existing SYMCnetbp package.</span><br><span class="line">package SYMCnetbp is not installed</span><br><span class="line">Successfully copied VRTSpddes.rpm into staging area.</span><br><span class="line">Successfully copied VRTSpddei.rpm into staging area.</span><br><span class="line"></span><br><span class="line">x openv/netbackup/client/Linux/</span><br><span class="line">x openv/netbackup/client/Linux/SuSE4.4.73/</span><br><span class="line">x openv/netbackup/client/Linux/SuSE4.4.73/VRTSpddea.rpm</span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line">A NetBackup Server or Enterprise Server license key is needed</span><br><span class="line">for installation to continue.</span><br><span class="line"></span><br><span class="line">Enter license key: XXXX-XXXX-XXXX-XXXX-XXX-XXXX           -----------这里让你输入密钥，我就脱敏一下</span><br><span class="line"></span><br><span class="line">XXXX-XXXX-XXXX-XXXX-XXX-XXXX :  </span><br><span class="line">	NetBackup Enterprise Server Base product with all the features enabled</span><br><span class="line">	has been registered.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">All additional keys should be added at this time.</span><br><span class="line">Do you want to add additional license keys now? [y,n] (y) n     ----------问是否还有其它密钥需要继续输入，没有回复N</span><br><span class="line"></span><br><span class="line">Use /usr/openv/netbackup/bin/admincmd/get_license_key</span><br><span class="line">to add, delete or list license keys at a later time.</span><br><span class="line"></span><br><span class="line">Installing NetBackup Enterprise Server version: 9.1.0.1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">If this machine will be using a different network interface than the</span><br><span class="line">default (netbackup), the name of the preferred interface should be used</span><br><span class="line">as the configured server name.  If this machine will be part of a</span><br><span class="line">cluster, the virtual name should be used as the configured server name.</span><br><span class="line"></span><br><span class="line">Would you like to use &quot;netbackup&quot; as the configured</span><br><span class="line">NetBackup server name of this machine? [y,n] (y)         -----------回复Y</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Media servers can be added during this installation or</span><br><span class="line">to a NetBackup environment after installation completes.</span><br><span class="line">Refer to the NetBackup Administrator&#x27;s Guide, Volume I for</span><br><span class="line">more information.</span><br><span class="line"></span><br><span class="line">Do you want to add any media servers now? [y,n] (n)    -----------问是你是否要加其它的media servers这里N就行</span><br><span class="line"></span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line"></span><br><span class="line">Do you want to start the job-related NetBackup daemons</span><br><span class="line">so backups and restores can be initiated? [y,n] (y)     ------------回复Y，开始启动服务</span><br><span class="line">Starting the NetBackup request daemon process (bprd).</span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line">Starting the NetBackup Bare Metal Restore Boot Server daemon.</span><br><span class="line"></span><br><span class="line">Checking the current NetBackup KMS configuration.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">OpsCenter is the monitoring, reporting and administrative</span><br><span class="line">solution designed to centrally manage one or more NetBackup</span><br><span class="line">installations from a web browser.</span><br><span class="line"></span><br><span class="line">If an OpsCenter server already exists in your environment</span><br><span class="line">or you plan to install one, enter the real hostname of that</span><br><span class="line">OpsCenter server here.  Do not use a virtual name.  If you</span><br><span class="line">do not want this local machine to be an OpsCenter server,</span><br><span class="line">enter NONE.</span><br><span class="line"></span><br><span class="line">Enter the OpsCenter server (default: NONE):         -----这里没有OPSCENTER就回车就行（是veritas的一套管理平台）</span><br><span class="line">WARNING: Catalog backups fail if the disaster recovery passphrase is not set.</span><br><span class="line">NetBackup server installation complete.</span><br><span class="line">Running install analysis tool.</span><br><span class="line">File /usr/openv/tmp/install_trace.16107 contains a trace of this install.</span><br></pre></td></tr></table></figure>
+
+<h2 id="解决安装后WEB控制台无法打开"><a href="#解决安装后WEB控制台无法打开" class="headerlink" title="解决安装后WEB控制台无法打开"></a>解决安装后WEB控制台无法打开</h2><p>netbackup提供了WEB控制台，也可以用来配置备份（当然也是JAVA控制台可以使用）</p>
+<p>创建如下文件，并赋予权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">touch /usr/openv/var/global/wsl/config/allowedlist.properties</span><br><span class="line">chmod a+r /usr/openv/var/global/wsl/config/allowedlist.properties</span><br><span class="line">chown nbwebsvc:nbwebgrp /usr/openv/var/global/wsl/config/allowedlist.properties</span><br></pre></td></tr></table></figure>
+
+<p>编辑 allowedlist.properties文件，输入如下内容</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@nbmaster2 config]# cat allowedlist.properties</span><br><span class="line">#Properties file to allow additional valid HOST and X-FORWARDED-HOST header values</span><br><span class="line">#Tue Jan 25 2022</span><br><span class="line">host.headers=192.168.31.160</span><br><span class="line">x.forwarded.host.headers=192.168.31.160</span><br></pre></td></tr></table></figure>
+
+<p>如果netbackup安装在windows平台，需要重启Web Management Console service </p>
+<p>我这里是LINUX平台，需要按如下方法重启服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/usr/openv/netbackup/bin/nbwmc stop &amp;&amp; /usr/openv/netbackup/bin/nbwmc start.</span><br></pre></td></tr></table></figure>
+
+<h2 id="给备份存储目录赋予权限"><a href="#给备份存储目录赋予权限" class="headerlink" title="给备份存储目录赋予权限"></a>给备份存储目录赋予权限</h2><p>我这里以&#x2F;mnt&#x2F;remotedr为例，如不赋予权限，备份的时候会提示目录没有写入权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chown -R nbsvcusr /mnt/remotedr</span><br><span class="line">chmod -R 755 /mnt/remotedr</span><br></pre></td></tr></table></figure>
+
+<h2 id="客户端JAVA-CONSOLE不是中文"><a href="#客户端JAVA-CONSOLE不是中文" class="headerlink" title="客户端JAVA CONSOLE不是中文"></a>客户端JAVA CONSOLE不是中文</h2><p>可以在windows平台安装netbackup管理控制台，但是默认是英文的，这时候可以去官网下载语言包，或者去服务端的安装包里找到语言包文件<br>拷贝ZH、i18n_zh.properties、dbexti18n_zh.properties至客户端如下目录<br>C:\Program Files\Veritas\Java\vrts\nbvsm_l10n</p>
+<p>之后再打开客户端就是中文了</p>
+<h2 id="linux服务器端如何打开控制台"><a href="#linux服务器端如何打开控制台" class="headerlink" title="linux服务器端如何打开控制台"></a>linux服务器端如何打开控制台</h2><p>&#x2F;usr&#x2F;open&#x2F;netbackup&#x2F;bin&#x2F;jnbSA启动控制台</p>
+<p>就先写到这里，后面的有空再写………………</p>
+<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
+<p>也欢迎关注我的公众号：</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
+]]></content>
+      <categories>
+        <category>备份软件nbu</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+        <tag>netbackup</tag>
+        <tag>veritas</tag>
+        <tag>centos</tag>
       </tags>
   </entry>
   <entry>
@@ -669,68 +734,43 @@
       </tags>
   </entry>
   <entry>
-    <title>在Centos7.9上安装netbackup 9.1服务器端</title>
-    <url>/post/2b862cbb.html</url>
-    <content><![CDATA[<h2 id="安装环境"><a href="#安装环境" class="headerlink" title="安装环境"></a>安装环境</h2><p>Centos 7.6 x86_64</p>
-<p>netbackup 9.1 服务端</p>
-<h2 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">groupadd nbwebgrp</span><br><span class="line">mkdir -p /usr/openv/wmc</span><br><span class="line">useradd -g nbwebgrp -c &#x27;NetBackup Web Services account&#x27; -d /usr/openv/wmc nbwebsvc</span><br><span class="line">useradd -c &#x27;NetBackup Services account&#x27; -d /usr/openv/ nbusvc</span><br><span class="line">usermod -a -G nbwebgrp nbusvc</span><br></pre></td></tr></table></figure>
-
-<h2 id="配置系统参数"><a href="#配置系统参数" class="headerlink" title="配置系统参数"></a>配置系统参数</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">echo &quot;kernel.sem = 300 307200 32 1024&quot; &gt;&gt; /etc/sysctl.conf </span><br><span class="line">sysctl -p</span><br><span class="line">echo &quot;*    soft    nofile         8192&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    hard    nofile        65536&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    soft    nproc         65536&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    hard    nproc         65536&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    soft    fsize     unlimited&quot; &gt;&gt; /etc/security/limits.conf</span><br><span class="line">echo &quot;*    hard    fsize     unlimited&quot; &gt;&gt; /etc/security/limits.conf</span><br></pre></td></tr></table></figure>
-
-<h2 id="修改主名"><a href="#修改主名" class="headerlink" title="修改主名"></a>修改主名</h2><p>配置主机名</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hostnamectl set-hostname nbuserver</span><br><span class="line">echo &quot;192.168.31.160 nbuserver&quot; &gt;&gt; /etc/hosts</span><br></pre></td></tr></table></figure>
-
-<h2 id="关闭SELINUX"><a href="#关闭SELINUX" class="headerlink" title="关闭SELINUX"></a>关闭SELINUX</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sed -i &#x27;s/enforcing/disabled/g&#x27; /etc/selinux/config</span><br><span class="line">setenforce 0</span><br></pre></td></tr></table></figure>
-
-<h2 id="修改系统环境变量"><a href="#修改系统环境变量" class="headerlink" title="修改系统环境变量"></a>修改系统环境变量</h2><p>vi &#x2F;etc&#x2F;profile<br>添加如下行</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">PATH=$PATH:$HOME/bin:/usr/openv/netbackup/bin/admincmd:/usr/openv/netbackup/bin:/usr/openv/netbackup/bin/goodies:/usr/openv/volmgr/bin</span><br><span class="line">export PATH</span><br></pre></td></tr></table></figure>
-
-<h2 id="安装备必软件包"><a href="#安装备必软件包" class="headerlink" title="安装备必软件包"></a>安装备必软件包</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如何配置YUM源我就不写了，大家应该都会</span><br><span class="line">yum install net-tools unzip gzip bzip* libnsl.so* insserv-compat* libXtst compat* -y</span><br></pre></td></tr></table></figure>
-
-<h2 id="安装master-server-media-server"><a href="#安装master-server-media-server" class="headerlink" title="安装master-server&amp;&amp; media server"></a>安装master-server&amp;&amp; media server</h2><p>veritas_customer_registration_key.json需要提前准备，购买了许可之后可以通过控制台下载（从netbackup 8.0变回veritas商标之后，安装都需要许可。还是symantec时代的版本安装时不需要许可，）</p>
-<p>1.查看准备的软包</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@netbackup ~]# ls</span><br><span class="line">anaconda-ks.cfg  License.txt   NetBackup_9.1.0.1_LinuxR_x86_64.tar.gz  veritas_customer_registration_key.json</span><br></pre></td></tr></table></figure>
-
-<p>使用tar解压软件包</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">tar -zxvf NetBackup_9.1.0.1_LinuxR_x86_64.tar.gz</span><br></pre></td></tr></table></figure>
-
-<p>进到安装目录里查看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@netbackup ~]# cd NetBackup_9.1.0.1_LinuxR_x86_64</span><br><span class="line">[root@netbackup NetBackup_9.1.0.1_LinuxR_x86_64]# ls</span><br><span class="line">Doc  install  LICENSE  linuxR_x86  NBInstallAnswer-client.template  NBInstallAnswer-master.template  NBInstallAnswer-media.template</span><br></pre></td></tr></table></figure>
-
-<p>开始安装，这里由于输出太长，我只列出关键位置，大家安装的时候可以参考。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@netbackup NetBackup_9.1.0.1_LinuxR_x86_64]# ./install </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Veritas Installation Script</span><br><span class="line">Copyright (c) 2021 Veritas Technologies LLC. All rights reserved.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	Installing NetBackup Server Software</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Please review the VERITAS SOFTWARE LICENSE AGREEMENT located on</span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line"></span><br><span class="line">ATTENTION!  To help ensure a successful upgrade to NetBackup 9.1.0.1,</span><br><span class="line">please visit the NetBackup 9.x Upgrade Portal:</span><br><span class="line">https://www.veritas.com/content/support/en_US/article.100048493.</span><br><span class="line"></span><br><span class="line">Do you wish to continue? [y,n] (y)      ---------输入Y继续</span><br><span class="line">Starting NetBackup Deduplication installer</span><br><span class="line">testing: /tmp/pdde_pkg_dir_16149</span><br><span class="line">NetBackup Deduplication preinstall check passed</span><br><span class="line">Running install analysis tool.</span><br><span class="line"></span><br><span class="line">Is this host the master server? [y,n] (y)   ---------输入Y继续</span><br><span class="line">Are you currently performing a disaster recovery of a master server? [y,n] (n)   ---------输入N，这里是全新安装，不是恢复安装</span><br><span class="line"></span><br><span class="line">Using nbwebsvc and nbwebgrp for the</span><br><span class="line">NetBackup web service user and group.</span><br><span class="line"></span><br><span class="line">ATTENTION! Provide the name of the service user account to be used to start</span><br><span class="line">most of the daemons.</span><br><span class="line"></span><br><span class="line">- It is not recommended to use the root user as the service user.</span><br><span class="line">- The length of the service user name must be less than 32 characters.</span><br><span class="line">- The service user name must contain only English characters.</span><br><span class="line">- The nbwebsvc user should not be used as the service user.</span><br><span class="line">- nbwebgrp must be a secondary group of the service user.</span><br><span class="line">  For more details, see the article: https://www.veritas.com/docs/100048220.</span><br><span class="line"></span><br><span class="line">Enter the name of the service user account to be used to start most of the daemons: nbusvc</span><br><span class="line"></span><br><span class="line">The private_tmp value is /tmp/nbcheck_dir.16107</span><br><span class="line"></span><br><span class="line">Checking for critical system conditions...</span><br><span class="line"></span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line">A customer registration key is required to proceed with the installation of this</span><br><span class="line">master server.</span><br><span class="line">Log into Veritas NetInsights Console (https://netinsights.veritas.com) and go </span><br><span class="line">to the &quot;Registration Keys&quot; page and download the appropriate customer registration</span><br><span class="line">key for this master server.  If you need help with customer registration keys to </span><br><span class="line">proceed with the installation or upgrade of this master server, please refer to the </span><br><span class="line">NetBackup Release Notes or contact Veritas Support.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Please enter the fully qualified path containing your customer registration key </span><br><span class="line">file, or enter q to quit the install script.   -------这里会提示让你输入密钥文件的位置</span><br><span class="line">/root/veritas_customer_registration_key.json</span><br><span class="line"></span><br><span class="line">The NetBackup and Media Manager software is built for use on LINUX_RH_X86 hardware.</span><br><span class="line">Do you want to install NetBackup and Media Manager files? [y,n] (y)    --------回复Y继续</span><br><span class="line"></span><br><span class="line">NetBackup and Media Manager are normally installed in /usr/openv.</span><br><span class="line">The existing /usr/openv directory will be used for NetBackup and Media Manager.</span><br><span class="line">No existing NetBackup server files to save.</span><br><span class="line">Client folder [/usr/openv/netbackup/client] does not exist.  No work to do.</span><br><span class="line"></span><br><span class="line">Reading NetBackup files from /root/NetBackup_9.1.0.1_LinuxR_x86_64/linuxR_x86/anb</span><br><span class="line"></span><br><span class="line">Checking for pre-existing SYMCnetbp package.</span><br><span class="line">package SYMCnetbp is not installed</span><br><span class="line">Successfully copied VRTSpddes.rpm into staging area.</span><br><span class="line">Successfully copied VRTSpddei.rpm into staging area.</span><br><span class="line"></span><br><span class="line">x openv/netbackup/client/Linux/</span><br><span class="line">x openv/netbackup/client/Linux/SuSE4.4.73/</span><br><span class="line">x openv/netbackup/client/Linux/SuSE4.4.73/VRTSpddea.rpm</span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line">A NetBackup Server or Enterprise Server license key is needed</span><br><span class="line">for installation to continue.</span><br><span class="line"></span><br><span class="line">Enter license key: XXXX-XXXX-XXXX-XXXX-XXX-XXXX           -----------这里让你输入密钥，我就脱敏一下</span><br><span class="line"></span><br><span class="line">XXXX-XXXX-XXXX-XXXX-XXX-XXXX :  </span><br><span class="line">	NetBackup Enterprise Server Base product with all the features enabled</span><br><span class="line">	has been registered.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">All additional keys should be added at this time.</span><br><span class="line">Do you want to add additional license keys now? [y,n] (y) n     ----------问是否还有其它密钥需要继续输入，没有回复N</span><br><span class="line"></span><br><span class="line">Use /usr/openv/netbackup/bin/admincmd/get_license_key</span><br><span class="line">to add, delete or list license keys at a later time.</span><br><span class="line"></span><br><span class="line">Installing NetBackup Enterprise Server version: 9.1.0.1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">If this machine will be using a different network interface than the</span><br><span class="line">default (netbackup), the name of the preferred interface should be used</span><br><span class="line">as the configured server name.  If this machine will be part of a</span><br><span class="line">cluster, the virtual name should be used as the configured server name.</span><br><span class="line"></span><br><span class="line">Would you like to use &quot;netbackup&quot; as the configured</span><br><span class="line">NetBackup server name of this machine? [y,n] (y)         -----------回复Y</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Media servers can be added during this installation or</span><br><span class="line">to a NetBackup environment after installation completes.</span><br><span class="line">Refer to the NetBackup Administrator&#x27;s Guide, Volume I for</span><br><span class="line">more information.</span><br><span class="line"></span><br><span class="line">Do you want to add any media servers now? [y,n] (n)    -----------问是你是否要加其它的media servers这里N就行</span><br><span class="line"></span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line"></span><br><span class="line">Do you want to start the job-related NetBackup daemons</span><br><span class="line">so backups and restores can be initiated? [y,n] (y)     ------------回复Y，开始启动服务</span><br><span class="line">Starting the NetBackup request daemon process (bprd).</span><br><span class="line">………………</span><br><span class="line">中间太长，少略一下。</span><br><span class="line">………………</span><br><span class="line">Starting the NetBackup Bare Metal Restore Boot Server daemon.</span><br><span class="line"></span><br><span class="line">Checking the current NetBackup KMS configuration.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">OpsCenter is the monitoring, reporting and administrative</span><br><span class="line">solution designed to centrally manage one or more NetBackup</span><br><span class="line">installations from a web browser.</span><br><span class="line"></span><br><span class="line">If an OpsCenter server already exists in your environment</span><br><span class="line">or you plan to install one, enter the real hostname of that</span><br><span class="line">OpsCenter server here.  Do not use a virtual name.  If you</span><br><span class="line">do not want this local machine to be an OpsCenter server,</span><br><span class="line">enter NONE.</span><br><span class="line"></span><br><span class="line">Enter the OpsCenter server (default: NONE):         -----这里没有OPSCENTER就回车就行（是veritas的一套管理平台）</span><br><span class="line">WARNING: Catalog backups fail if the disaster recovery passphrase is not set.</span><br><span class="line">NetBackup server installation complete.</span><br><span class="line">Running install analysis tool.</span><br><span class="line">File /usr/openv/tmp/install_trace.16107 contains a trace of this install.</span><br></pre></td></tr></table></figure>
-
-<h2 id="解决安装后WEB控制台无法打开"><a href="#解决安装后WEB控制台无法打开" class="headerlink" title="解决安装后WEB控制台无法打开"></a>解决安装后WEB控制台无法打开</h2><p>netbackup提供了WEB控制台，也可以用来配置备份（当然也是JAVA控制台可以使用）</p>
-<p>创建如下文件，并赋予权限</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">touch /usr/openv/var/global/wsl/config/allowedlist.properties</span><br><span class="line">chmod a+r /usr/openv/var/global/wsl/config/allowedlist.properties</span><br><span class="line">chown nbwebsvc:nbwebgrp /usr/openv/var/global/wsl/config/allowedlist.properties</span><br></pre></td></tr></table></figure>
-
-<p>编辑 allowedlist.properties文件，输入如下内容</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@nbmaster2 config]# cat allowedlist.properties</span><br><span class="line">#Properties file to allow additional valid HOST and X-FORWARDED-HOST header values</span><br><span class="line">#Tue Jan 25 2022</span><br><span class="line">host.headers=192.168.31.160</span><br><span class="line">x.forwarded.host.headers=192.168.31.160</span><br></pre></td></tr></table></figure>
-
-<p>如果netbackup安装在windows平台，需要重启Web Management Console service </p>
-<p>我这里是LINUX平台，需要按如下方法重启服务</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/usr/openv/netbackup/bin/nbwmc stop &amp;&amp; /usr/openv/netbackup/bin/nbwmc start.</span><br></pre></td></tr></table></figure>
-
-<h2 id="给备份存储目录赋予权限"><a href="#给备份存储目录赋予权限" class="headerlink" title="给备份存储目录赋予权限"></a>给备份存储目录赋予权限</h2><p>我这里以&#x2F;mnt&#x2F;remotedr为例，如不赋予权限，备份的时候会提示目录没有写入权限</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chown -R nbsvcusr /mnt/remotedr</span><br><span class="line">chmod -R 755 /mnt/remotedr</span><br></pre></td></tr></table></figure>
-
-<h2 id="客户端JAVA-CONSOLE不是中文"><a href="#客户端JAVA-CONSOLE不是中文" class="headerlink" title="客户端JAVA CONSOLE不是中文"></a>客户端JAVA CONSOLE不是中文</h2><p>可以在windows平台安装netbackup管理控制台，但是默认是英文的，这时候可以去官网下载语言包，或者去服务端的安装包里找到语言包文件<br>拷贝ZH、i18n_zh.properties、dbexti18n_zh.properties至客户端如下目录<br>C:\Program Files\Veritas\Java\vrts\nbvsm_l10n</p>
-<p>之后再打开客户端就是中文了</p>
-<h2 id="linux服务器端如何打开控制台"><a href="#linux服务器端如何打开控制台" class="headerlink" title="linux服务器端如何打开控制台"></a>linux服务器端如何打开控制台</h2><p>&#x2F;usr&#x2F;open&#x2F;netbackup&#x2F;bin&#x2F;jnbSA启动控制台</p>
-<p>就先写到这里，后面的有空再写………………</p>
-<p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p>
-<p>也欢迎关注我的公众号：</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-
+    <title>推荐一些学习数据库的BLOG</title>
+    <url>/post/443887d3.html</url>
+    <content><![CDATA[<p>这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。</p>
+<p><strong>Oracle top 100-blog排名</strong></p>
+<p><a href="https://developer.feedspot.com/oracle_blogs/">https://developer.feedspot.com/oracle_blogs/</a></p>
+<p><strong>英国老牌ACE  Tim Hall的BLOG，几乎涵盖了所有版本Oracle的安装配置，写的非常的详细，入门必看</strong></p>
+<p><a href="https://oracle-base.com/">https://oracle-base.com/</a></p>
+<p><strong>徐小强的blog，都是详解万字长文！</strong></p>
+<p><a href="https://blog.csdn.net/JiekeXu">https://blog.csdn.net/JiekeXu</a></p>
+<p><strong>尹总监的blog，19c全系列实战干货</strong></p>
+<p><a href="https://blog.csdn.net/yhw1809">https://blog.csdn.net/yhw1809</a></p>
+<p><strong>陈举超大佬的文章也是十分的详细🔎的实验</strong></p>
+<p><a href="https://www.modb.pro/u/4703">https://www.modb.pro/u/4703</a></p>
+<p><strong>三哥的自动化安装脚本可谓是全网第一，还有各种干货。</strong></p>
+<p><a href="https://luciferliu.blog.csdn.net/">https://luciferliu.blog.csdn.net/</a></p>
+<p><strong>云和恩墨的专家张维照，内容很全，可以通篇看一遍</strong></p>
+<p><a href="https://www.anbob.com/aboutme-page">https://www.anbob.com/aboutme-page</a></p>
+<p><strong>墨天轮知识图谱，涵盖大部分数据库，己经按照相应的学习路线整理好文章。</strong></p>
+<p><a href="https://www.modb.pro/graph">https://www.modb.pro/graph</a></p>
+<p><strong>墨天轮高分技术文档分享——Oracle升级迁移篇（共96个）</strong></p>
+<p><a href="https://www.modb.pro/db/406311">https://www.modb.pro/db/406311</a></p>
+<p><strong>来自大名顶顶存储公司Pure Storage的Oracle ACE专家Ro****n</strong></p>
+<p><a href="https://ronekins.com/">https://ronekins.com/</a></p>
+<p><strong>具体是谁这个没看明白，不过blog写的内容十分具有参考价值</strong></p>
+<p><a href="https://www.howtosop.com/">https://www.howtosop.com/</a></p>
+<p><strong>来自印度大佬的BLOG，内容也很全面</strong></p>
+<p><a href="https://oracledbwr.com/">https://oracledbwr.com/</a></p>
+<p><strong>还有一个或取知识的好办法，就是直接登陆oracle ace directory网站，找到任意ACE的链接进入，看看ACE大佬们的BLOG，哈哈！</strong></p>
+<p><a href="https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory">https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory</a></p>
 ]]></content>
       <categories>
-        <category>备份软件nbu</category>
+        <category>学习推荐</category>
       </categories>
       <tags>
+        <tag>oracle</tag>
+        <tag>database</tag>
         <tag>linux</tag>
-        <tag>netbackup</tag>
-        <tag>veritas</tag>
-        <tag>centos</tag>
       </tags>
   </entry>
   <entry>
@@ -776,46 +816,6 @@
 ]]></content>
       <categories>
         <category>oracle_tuning</category>
-      </categories>
-      <tags>
-        <tag>oracle</tag>
-        <tag>database</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>推荐一些学习数据库的BLOG</title>
-    <url>/post/443887d3.html</url>
-    <content><![CDATA[<p>这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。</p>
-<p><strong>Oracle top 100-blog排名</strong></p>
-<p><a href="https://developer.feedspot.com/oracle_blogs/">https://developer.feedspot.com/oracle_blogs/</a></p>
-<p><strong>英国老牌ACE  Tim Hall的BLOG，几乎涵盖了所有版本Oracle的安装配置，写的非常的详细，入门必看</strong></p>
-<p><a href="https://oracle-base.com/">https://oracle-base.com/</a></p>
-<p><strong>徐小强的blog，都是详解万字长文！</strong></p>
-<p><a href="https://blog.csdn.net/JiekeXu">https://blog.csdn.net/JiekeXu</a></p>
-<p><strong>尹总监的blog，19c全系列实战干货</strong></p>
-<p><a href="https://blog.csdn.net/yhw1809">https://blog.csdn.net/yhw1809</a></p>
-<p><strong>陈举超大佬的文章也是十分的详细🔎的实验</strong></p>
-<p><a href="https://www.modb.pro/u/4703">https://www.modb.pro/u/4703</a></p>
-<p><strong>三哥的自动化安装脚本可谓是全网第一，还有各种干货。</strong></p>
-<p><a href="https://luciferliu.blog.csdn.net/">https://luciferliu.blog.csdn.net/</a></p>
-<p><strong>云和恩墨的专家张维照，内容很全，可以通篇看一遍</strong></p>
-<p><a href="https://www.anbob.com/aboutme-page">https://www.anbob.com/aboutme-page</a></p>
-<p><strong>墨天轮知识图谱，涵盖大部分数据库，己经按照相应的学习路线整理好文章。</strong></p>
-<p><a href="https://www.modb.pro/graph">https://www.modb.pro/graph</a></p>
-<p><strong>墨天轮高分技术文档分享——Oracle升级迁移篇（共96个）</strong></p>
-<p><a href="https://www.modb.pro/db/406311">https://www.modb.pro/db/406311</a></p>
-<p><strong>来自大名顶顶存储公司Pure Storage的Oracle ACE专家Ro****n</strong></p>
-<p><a href="https://ronekins.com/">https://ronekins.com/</a></p>
-<p><strong>具体是谁这个没看明白，不过blog写的内容十分具有参考价值</strong></p>
-<p><a href="https://www.howtosop.com/">https://www.howtosop.com/</a></p>
-<p><strong>来自印度大佬的BLOG，内容也很全面</strong></p>
-<p><a href="https://oracledbwr.com/">https://oracledbwr.com/</a></p>
-<p><strong>还有一个或取知识的好办法，就是直接登陆oracle ace directory网站，找到任意ACE的链接进入，看看ACE大佬们的BLOG，哈哈！</strong></p>
-<p><a href="https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory">https://ace.oracle.com/pls/apex/r/ace_program/oracle-aces/directory</a></p>
-]]></content>
-      <categories>
-        <category>学习推荐</category>
       </categories>
       <tags>
         <tag>oracle</tag>
@@ -876,6 +876,56 @@
       </tags>
   </entry>
   <entry>
+    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
+    <url>/post/b04c611b.html</url>
+    <content><![CDATA[<p>昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。</p>
+<div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115350238665617&bvid=BV1dV4HzTEaq&cid=32972934127;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
+
+<p>想要获取一键安装包可以关注我的公众号联系我获取。</p>
+<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
+
+<p>今天主要说2个问题：</p>
+<p>1.这么快更新了openssh 10.2解决了啥问题？</p>
+<p>2.顺便说一下这次编译遇到的问题。具体如何编译RPM包，可以看我之前的文章介绍了。<a href="https://mp.weixin.qq.com/s/Uz5dDzvP7mSXNjuD1fxpMQ">手搓OPENSSH安装RPM包</a></p>
+<h2 id="更新openssh-10-2解决问题"><a href="#更新openssh-10-2解决问题" class="headerlink" title="更新openssh 10.2解决问题"></a>更新openssh 10.2解决问题</h2><p>本版本为漏洞修复版本，主要修复了 “启用 ControlPersist 后导致 <code>ssh(1)</code> 无法使用” 的问题。</p>
+<h3 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h3><ol>
+<li><strong><code>ssh(1)</code></strong>：修复了 “ControlPersist 处于活跃状态时，终端连接处理异常导致会话无法使用” 的问题（漏洞编号：bz3872）。</li>
+<li><strong><code>ssh-keygen(1)</code></strong>：修复了 “从 PKCS#11 令牌下载密钥” 的功能异常。</li>
+<li><strong><code>ssh-keygen(1)</code></strong>：修复了 “CA 密钥存储在 <code>ssh-agent(1)</code> 中时，CA 签名操作失败” 的问题（漏洞编号：bz3877）。</li>
+</ol>
+<h3 id="可移植性优化"><a href="#可移植性优化" class="headerlink" title="可移植性优化"></a>可移植性优化</h3><ul>
+<li><p><strong>全组件</strong>：支持无 <code>mmap(2)</code> 函数的平台，例如 WASM 构建版本（示例：<a href="https://hterm.org/">https://hterm.org</a>）。</p>
+</li>
+<li><p><strong>全组件</strong>：修复了 FreeBSD 系统上因缺少 <code>fnctl.h</code> 头文件导致的构建失败问题。</p>
+</li>
+<li><p><strong>全组件</strong>：修复了 MacOS 10.12（Sierra）以下版本因缺少 <code>clock_gettime(3)</code> 函数导致的构建失败问题。</p>
+</li>
+<li><p><strong><code>sshd(8)</code></strong>：若远程主机名为 “UNKNOWN” 占位符，将不执行 <code>PAM_RHOST</code> 操作。此优化可避免部分 PAM 模块尝试解析该主机名时可能出现的挂起问题。需注意，仅当连接不通过 IPv4 或 IPv6 套接字建立时，<code>sshd(8)</code> 才会使用 “UNKNOWN” 作为主机名。</p>
+</li>
+</ul>
+<h2 id="编译遇到的错误及解决办法"><a href="#编译遇到的错误及解决办法" class="headerlink" title="编译遇到的错误及解决办法"></a>编译遇到的错误及解决办法</h2><p>还是用脚本编译最新的安装包，遇到个错误</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">~/openssh-rpms-main/el7 ~/openssh-rpms-main</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssh-10.2p1.tar.gz’ -&gt; ‘./SOURCES/openssh-10.2p1.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssl-3.0.18.tar.gz’ -&gt; ‘./SOURCES/openssl-3.0.18.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/x11-ssh-askpass-1.2.4.1.tar.gz’ -&gt; ‘./SOURCES/x11-ssh-askpass-1.2.4.1.tar.gz’</span><br><span class="line">Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.CUAJLh</span><br><span class="line">+ umask 022</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ rm -rf openssh-10.2p1</span><br><span class="line">+ /usr/bin/gzip -dc /root/openssh-rpms-main/el7/SOURCES/openssh-10.2p1.tar.gz</span><br><span class="line">+ /usr/bin/tar -xf -</span><br><span class="line">+ STATUS=0</span><br><span class="line">+ &#x27;[&#x27; 0 -ne 0 &#x27;]&#x27;</span><br><span class="line">+ cd openssh-10.2p1</span><br><span class="line">+ /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .</span><br><span class="line">+ mkdir -p openssl</span><br><span class="line">+ tar xfz /root/openssh-rpms-main/el7/SOURCES/openssl-3.0.18.tar.gz --strip-components=1 -C openssl</span><br><span class="line">+ pushd openssl</span><br><span class="line">~/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl ~/openssh-rpms-main/el7/BUILD/openssh-10.2p1</span><br><span class="line">+ ./config shared zlib -fPIC</span><br><span class="line">Configuring OpenSSL version 3.0.18 for target linux-x86_64</span><br><span class="line">Using os-specific seed configuration</span><br><span class="line">Created configdata.pm</span><br><span class="line">Running configdata.pm</span><br><span class="line">Created Makefile.in</span><br><span class="line">Can&#x27;t locate Time/Piece.pm in @INC (@INC contains: . /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/Configurations /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/util/perl /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/external/perl/Text-Template-1.56/lib) at Makefile.in line 37.</span><br><span class="line">BEGIN failed--compilation aborted at Makefile.in line 37.</span><br><span class="line">error: Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RPM build errors:</span><br><span class="line">    Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br></pre></td></tr></table></figure>
+
+<p>错误的原因可能是当你在运行 Perl 脚本时遇到 <em>Can’t locate time&#x2F;piece.pm in @INC</em> 错误，这意味着 Perl 无法找到所需的模块 <em>Time::Piece</em>。这通常是因为该模块尚未安装。</p>
+<p>示例</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Can&amp;#39;t locate Time/Piece.pm in @INC (@INC contains: /etc/perl /usr/local/lib/perl5 /usr/local/share/perl5 /usr/lib/perl5 /usr/share/perl5 .) at script.pl line 1</span><br></pre></td></tr></table></figure>
+
+<p>解决的办法就是安装该模块</p>
+<p><strong>错误处理过程</strong></p>
+<p>确保你的机器连网，执行以下命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">perl -MCPAN -e &#x27;install Time::Piece&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>然后一路回车，开始安装，遇到提示就是回车，之后重新编译openssh安装包</p>
+]]></content>
+      <categories>
+        <category>操作系统_linux</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+        <tag>openssh</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>记一次NetApp FAS2554更换故障硬盘</title>
     <url>/post/baf45ed4.html</url>
     <content><![CDATA[<h2 id="案例背景"><a href="#案例背景" class="headerlink" title="案例背景"></a>案例背景</h2><p>记一次某医院PACS存储NetApp FAS2554更换故障硬盘的过程。</p>
@@ -931,56 +981,6 @@
         <tag>netapp</tag>
         <tag>存储</tag>
         <tag>硬件维护</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
-    <url>/post/b04c611b.html</url>
-    <content><![CDATA[<p>昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。</p>
-<div style="position:relative;padding-bottom:56.25%;width:100%;height:0;">     <iframe src="https://player.bilibili.com/player.html?isOutside=true&amp;aid=115350238665617&bvid=BV1dV4HzTEaq&cid=32972934127;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute;height:100%;width:100%;"></iframe></div>
-
-<p>想要获取一键安装包可以关注我的公众号联系我获取。</p>
-<img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>
-
-<p>今天主要说2个问题：</p>
-<p>1.这么快更新了openssh 10.2解决了啥问题？</p>
-<p>2.顺便说一下这次编译遇到的问题。具体如何编译RPM包，可以看我之前的文章介绍了。<a href="https://mp.weixin.qq.com/s/Uz5dDzvP7mSXNjuD1fxpMQ">手搓OPENSSH安装RPM包</a></p>
-<h2 id="更新openssh-10-2解决问题"><a href="#更新openssh-10-2解决问题" class="headerlink" title="更新openssh 10.2解决问题"></a>更新openssh 10.2解决问题</h2><p>本版本为漏洞修复版本，主要修复了 “启用 ControlPersist 后导致 <code>ssh(1)</code> 无法使用” 的问题。</p>
-<h3 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h3><ol>
-<li><strong><code>ssh(1)</code></strong>：修复了 “ControlPersist 处于活跃状态时，终端连接处理异常导致会话无法使用” 的问题（漏洞编号：bz3872）。</li>
-<li><strong><code>ssh-keygen(1)</code></strong>：修复了 “从 PKCS#11 令牌下载密钥” 的功能异常。</li>
-<li><strong><code>ssh-keygen(1)</code></strong>：修复了 “CA 密钥存储在 <code>ssh-agent(1)</code> 中时，CA 签名操作失败” 的问题（漏洞编号：bz3877）。</li>
-</ol>
-<h3 id="可移植性优化"><a href="#可移植性优化" class="headerlink" title="可移植性优化"></a>可移植性优化</h3><ul>
-<li><p><strong>全组件</strong>：支持无 <code>mmap(2)</code> 函数的平台，例如 WASM 构建版本（示例：<a href="https://hterm.org/">https://hterm.org</a>）。</p>
-</li>
-<li><p><strong>全组件</strong>：修复了 FreeBSD 系统上因缺少 <code>fnctl.h</code> 头文件导致的构建失败问题。</p>
-</li>
-<li><p><strong>全组件</strong>：修复了 MacOS 10.12（Sierra）以下版本因缺少 <code>clock_gettime(3)</code> 函数导致的构建失败问题。</p>
-</li>
-<li><p><strong><code>sshd(8)</code></strong>：若远程主机名为 “UNKNOWN” 占位符，将不执行 <code>PAM_RHOST</code> 操作。此优化可避免部分 PAM 模块尝试解析该主机名时可能出现的挂起问题。需注意，仅当连接不通过 IPv4 或 IPv6 套接字建立时，<code>sshd(8)</code> 才会使用 “UNKNOWN” 作为主机名。</p>
-</li>
-</ul>
-<h2 id="编译遇到的错误及解决办法"><a href="#编译遇到的错误及解决办法" class="headerlink" title="编译遇到的错误及解决办法"></a>编译遇到的错误及解决办法</h2><p>还是用脚本编译最新的安装包，遇到个错误</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">~/openssh-rpms-main/el7 ~/openssh-rpms-main</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssh-10.2p1.tar.gz’ -&gt; ‘./SOURCES/openssh-10.2p1.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/openssl-3.0.18.tar.gz’ -&gt; ‘./SOURCES/openssl-3.0.18.tar.gz’</span><br><span class="line">‘/root/openssh-rpms-main/downloads/x11-ssh-askpass-1.2.4.1.tar.gz’ -&gt; ‘./SOURCES/x11-ssh-askpass-1.2.4.1.tar.gz’</span><br><span class="line">Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.CUAJLh</span><br><span class="line">+ umask 022</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ cd /root/openssh-rpms-main/el7/BUILD</span><br><span class="line">+ rm -rf openssh-10.2p1</span><br><span class="line">+ /usr/bin/gzip -dc /root/openssh-rpms-main/el7/SOURCES/openssh-10.2p1.tar.gz</span><br><span class="line">+ /usr/bin/tar -xf -</span><br><span class="line">+ STATUS=0</span><br><span class="line">+ &#x27;[&#x27; 0 -ne 0 &#x27;]&#x27;</span><br><span class="line">+ cd openssh-10.2p1</span><br><span class="line">+ /usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .</span><br><span class="line">+ mkdir -p openssl</span><br><span class="line">+ tar xfz /root/openssh-rpms-main/el7/SOURCES/openssl-3.0.18.tar.gz --strip-components=1 -C openssl</span><br><span class="line">+ pushd openssl</span><br><span class="line">~/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl ~/openssh-rpms-main/el7/BUILD/openssh-10.2p1</span><br><span class="line">+ ./config shared zlib -fPIC</span><br><span class="line">Configuring OpenSSL version 3.0.18 for target linux-x86_64</span><br><span class="line">Using os-specific seed configuration</span><br><span class="line">Created configdata.pm</span><br><span class="line">Running configdata.pm</span><br><span class="line">Created Makefile.in</span><br><span class="line">Can&#x27;t locate Time/Piece.pm in @INC (@INC contains: . /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/Configurations /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/util/perl /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 /root/openssh-rpms-main/el7/BUILD/openssh-10.2p1/openssl/external/perl/Text-Template-1.56/lib) at Makefile.in line 37.</span><br><span class="line">BEGIN failed--compilation aborted at Makefile.in line 37.</span><br><span class="line">error: Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RPM build errors:</span><br><span class="line">    Bad exit status from /var/tmp/rpm-tmp.CUAJLh (%prep)</span><br></pre></td></tr></table></figure>
-
-<p>错误的原因可能是当你在运行 Perl 脚本时遇到 <em>Can’t locate time&#x2F;piece.pm in @INC</em> 错误，这意味着 Perl 无法找到所需的模块 <em>Time::Piece</em>。这通常是因为该模块尚未安装。</p>
-<p>示例</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Can&amp;#39;t locate Time/Piece.pm in @INC (@INC contains: /etc/perl /usr/local/lib/perl5 /usr/local/share/perl5 /usr/lib/perl5 /usr/share/perl5 .) at script.pl line 1</span><br></pre></td></tr></table></figure>
-
-<p>解决的办法就是安装该模块</p>
-<p><strong>错误处理过程</strong></p>
-<p>确保你的机器连网，执行以下命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">perl -MCPAN -e &#x27;install Time::Piece&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>然后一路回车，开始安装，遇到提示就是回车，之后重新编译openssh安装包</p>
-]]></content>
-      <categories>
-        <category>操作系统_linux</category>
-      </categories>
-      <tags>
-        <tag>linux</tag>
-        <tag>openssh</tag>
       </tags>
   </entry>
 </search>
