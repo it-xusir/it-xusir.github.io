@@ -13,7 +13,7 @@
       
       <categories>
           
-          <category> 操作系统_linux </category>
+          <category> linux os </category>
           
       </categories>
       
@@ -24,7 +24,7 @@
             
             <tag> linux </tag>
             
-            <tag> 性能监控 </tag>
+            <tag> monitor </tag>
             
             <tag> oswatcher </tag>
             
@@ -44,7 +44,7 @@
       
       <categories>
           
-          <category> 备份软件nbu </category>
+          <category> backup_nbu </category>
           
       </categories>
       
@@ -139,7 +139,7 @@
       
       <categories>
           
-          <category> 操作系统_aix </category>
+          <category> aix os </category>
           
       </categories>
       
@@ -166,7 +166,7 @@
       
       <categories>
           
-          <category> 操作系统_aix </category>
+          <category> aix os </category>
           
       </categories>
       
@@ -174,6 +174,8 @@
         <tags>
             
             <tag> aix </tag>
+            
+            <tag> dump </tag>
             
         </tags>
       
@@ -191,7 +193,7 @@
       
       <categories>
           
-          <category> oracle_rac_安装调试 </category>
+          <category> oracle_rac </category>
           
       </categories>
       
@@ -222,7 +224,7 @@
       
       <categories>
           
-          <category> 学习推荐 </category>
+          <category> Recommended Articles </category>
           
       </categories>
       
@@ -234,6 +236,8 @@
             <tag> database </tag>
             
             <tag> linux </tag>
+            
+            <tag> recommended </tag>
             
         </tags>
       
@@ -264,7 +268,9 @@
             
             <tag> linux </tag>
             
-            <tag> 逻辑备份 </tag>
+            <tag> backup </tag>
+            
+            <tag> logical </tag>
             
         </tags>
       
@@ -295,7 +301,9 @@
             
             <tag> linux </tag>
             
-            <tag> rman备份 </tag>
+            <tag> backup </tag>
+            
+            <tag> rman </tag>
             
         </tags>
       
@@ -371,7 +379,7 @@
       
       <categories>
           
-          <category> IT基础设施-存储 </category>
+          <category> IT Hardware Maintenance </category>
           
       </categories>
       
@@ -380,9 +388,9 @@
             
             <tag> netapp </tag>
             
-            <tag> 存储 </tag>
+            <tag> storage </tag>
             
-            <tag> 硬件维护 </tag>
+            <tag> hardware maintenance </tag>
             
         </tags>
       

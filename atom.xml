@@ -6,7 +6,7 @@
   <link href="http://www.itxusir.com/atom.xml" rel="self"/>
   
   <link href="http://www.itxusir.com/"/>
-  <updated>2025-10-18T03:11:46.827Z</updated>
+  <updated>2025-10-23T09:16:40.447Z</updated>
   <id>http://www.itxusir.com/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="http://www.itxusir.com/post/709b78ae.html"/>
     <id>http://www.itxusir.com/post/709b78ae.html</id>
     <published>2025-10-17T11:00:00.000Z</published>
-    <updated>2025-10-18T03:11:46.827Z</updated>
+    <updated>2025-10-23T09:16:40.447Z</updated>
     
     
       
@@ -34,14 +34,14 @@
     
     
     
-    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    <category term="linux os" scheme="http://www.itxusir.com/categories/linux-os/"/>
     
     
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
     
     <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
-    <category term="性能监控" scheme="http://www.itxusir.com/tags/%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/"/>
+    <category term="monitor" scheme="http://www.itxusir.com/tags/monitor/"/>
     
     <category term="oswatcher" scheme="http://www.itxusir.com/tags/oswatcher/"/>
     
@@ -52,7 +52,7 @@
     <link href="http://www.itxusir.com/post/2b862cbb.html"/>
     <id>http://www.itxusir.com/post/2b862cbb.html</id>
     <published>2025-10-17T00:00:00.000Z</published>
-    <updated>2025-10-18T03:11:46.828Z</updated>
+    <updated>2025-10-23T09:19:28.905Z</updated>
     
     
       
@@ -67,7 +67,7 @@
     
     
     
-    <category term="备份软件nbu" scheme="http://www.itxusir.com/categories/%E5%A4%87%E4%BB%BD%E8%BD%AF%E4%BB%B6nbu/"/>
+    <category term="backup_nbu" scheme="http://www.itxusir.com/categories/backup-nbu/"/>
     
     
     <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
@@ -150,7 +150,7 @@
     <link href="http://www.itxusir.com/post/d543d14a.html"/>
     <id>http://www.itxusir.com/post/d543d14a.html</id>
     <published>2025-10-14T01:00:00.000Z</published>
-    <updated>2025-10-18T03:11:46.824Z</updated>
+    <updated>2025-10-23T09:19:54.120Z</updated>
     
     
       
@@ -165,7 +165,7 @@
     
     
     
-    <category term="操作系统_aix" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-aix/"/>
+    <category term="aix os" scheme="http://www.itxusir.com/categories/aix-os/"/>
     
     
     <category term="aix" scheme="http://www.itxusir.com/tags/aix/"/>
@@ -179,7 +179,7 @@
     <link href="http://www.itxusir.com/post/e2e5d7ab.html"/>
     <id>http://www.itxusir.com/post/e2e5d7ab.html</id>
     <published>2025-10-13T14:22:00.000Z</published>
-    <updated>2025-10-18T03:11:46.823Z</updated>
+    <updated>2025-10-23T09:20:13.325Z</updated>
     
     
       
@@ -193,10 +193,12 @@
     
     
     
-    <category term="操作系统_aix" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-aix/"/>
+    <category term="aix os" scheme="http://www.itxusir.com/categories/aix-os/"/>
     
     
     <category term="aix" scheme="http://www.itxusir.com/tags/aix/"/>
+    
+    <category term="dump" scheme="http://www.itxusir.com/tags/dump/"/>
     
   </entry>
   
@@ -205,7 +207,7 @@
     <link href="http://www.itxusir.com/post/4358307c.html"/>
     <id>http://www.itxusir.com/post/4358307c.html</id>
     <published>2025-10-13T09:30:00.000Z</published>
-    <updated>2025-10-18T03:11:46.821Z</updated>
+    <updated>2025-10-23T09:19:08.748Z</updated>
     
     
       
@@ -218,7 +220,7 @@
     
     
     
-    <category term="oracle_rac_安装调试" scheme="http://www.itxusir.com/categories/oracle-rac-%E5%AE%89%E8%A3%85%E8%B0%83%E8%AF%95/"/>
+    <category term="oracle_rac" scheme="http://www.itxusir.com/categories/oracle-rac/"/>
     
     
     <category term="aix" scheme="http://www.itxusir.com/tags/aix/"/>
@@ -236,7 +238,7 @@
     <link href="http://www.itxusir.com/post/443887d3.html"/>
     <id>http://www.itxusir.com/post/443887d3.html</id>
     <published>2025-10-13T03:38:00.000Z</published>
-    <updated>2025-10-18T03:11:46.828Z</updated>
+    <updated>2025-10-23T09:21:51.175Z</updated>
     
     
       
@@ -251,7 +253,7 @@
     
     
     
-    <category term="学习推荐" scheme="http://www.itxusir.com/categories/%E5%AD%A6%E4%B9%A0%E6%8E%A8%E8%8D%90/"/>
+    <category term="Recommended Articles" scheme="http://www.itxusir.com/categories/Recommended-Articles/"/>
     
     
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
@@ -260,6 +262,8 @@
     
     <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
+    <category term="recommended" scheme="http://www.itxusir.com/tags/recommended/"/>
+    
   </entry>
   
   <entry>
@@ -267,7 +271,7 @@
     <link href="http://www.itxusir.com/post/d1734970.html"/>
     <id>http://www.itxusir.com/post/d1734970.html</id>
     <published>2025-10-13T03:32:00.000Z</published>
-    <updated>2025-10-18T03:11:46.828Z</updated>
+    <updated>2025-10-23T09:23:16.081Z</updated>
     
     
       
@@ -290,7 +294,9 @@
     
     <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
-    <category term="逻辑备份" scheme="http://www.itxusir.com/tags/%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/"/>
+    <category term="backup" scheme="http://www.itxusir.com/tags/backup/"/>
+    
+    <category term="logical" scheme="http://www.itxusir.com/tags/logical/"/>
     
   </entry>
   
@@ -299,7 +305,7 @@
     <link href="http://www.itxusir.com/post/dca58675.html"/>
     <id>http://www.itxusir.com/post/dca58675.html</id>
     <published>2025-10-13T01:30:00.000Z</published>
-    <updated>2025-10-18T03:11:46.829Z</updated>
+    <updated>2025-10-23T09:17:10.997Z</updated>
     
     
       
@@ -321,7 +327,9 @@
     
     <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
-    <category term="rman备份" scheme="http://www.itxusir.com/tags/rman%E5%A4%87%E4%BB%BD/"/>
+    <category term="backup" scheme="http://www.itxusir.com/tags/backup/"/>
+    
+    <category term="rman" scheme="http://www.itxusir.com/tags/rman/"/>
     
   </entry>
   
@@ -388,7 +396,7 @@
     <link href="http://www.itxusir.com/post/baf45ed4.html"/>
     <id>http://www.itxusir.com/post/baf45ed4.html</id>
     <published>2025-10-11T09:00:00.000Z</published>
-    <updated>2025-10-18T03:11:46.829Z</updated>
+    <updated>2025-10-23T09:18:05.368Z</updated>
     
     
       
@@ -401,14 +409,14 @@
     
     
     
-    <category term="IT基础设施-存储" scheme="http://www.itxusir.com/categories/IT%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD-%E5%AD%98%E5%82%A8/"/>
+    <category term="IT Hardware Maintenance" scheme="http://www.itxusir.com/categories/IT-Hardware-Maintenance/"/>
     
     
     <category term="netapp" scheme="http://www.itxusir.com/tags/netapp/"/>
     
-    <category term="存储" scheme="http://www.itxusir.com/tags/%E5%AD%98%E5%82%A8/"/>
+    <category term="storage" scheme="http://www.itxusir.com/tags/storage/"/>
     
-    <category term="硬件维护" scheme="http://www.itxusir.com/tags/%E7%A1%AC%E4%BB%B6%E7%BB%B4%E6%8A%A4/"/>
+    <category term="hardware maintenance" scheme="http://www.itxusir.com/tags/hardware-maintenance/"/>
     
   </entry>
   
