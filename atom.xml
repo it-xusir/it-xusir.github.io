@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>徐sir的it小栈</title>
+  <icon>http://www.itxusir.com/icon.png</icon>
+  <subtitle>一起来学习</subtitle>
+  <link href="http://www.itxusir.com/atom.xml" rel="self"/>
+  
+  <link href="http://www.itxusir.com/"/>
+  <updated>2025-10-18T03:11:46.827Z</updated>
+  <id>http://www.itxusir.com/</id>
+  
+  <author>
+    <name>徐sir</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用Oracle oswatcher工具监控服务器性能并生成图形报告</title>
+    <link href="http://www.itxusir.com/post/709b78ae.html"/>
+    <id>http://www.itxusir.com/post/709b78ae.html</id>
+    <published>2025-10-17T11:00:00.000Z</published>
+    <updated>2025-10-18T03:11:46.827Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;关于-OSW&quot;&gt;&lt;a href=&quot;#关于-OSW&quot; class=&quot;headerlink&quot; title=&quot;关于  OSW&quot;&gt;&lt;/a&gt;关于  OSW&lt;/h2&gt;&lt;p&gt;OSWatcher 的使用符合 Oracle</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="性能监控" scheme="http://www.itxusir.com/tags/%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/"/>
+    
+    <category term="oswatcher" scheme="http://www.itxusir.com/tags/oswatcher/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>在Centos7.9上安装netbackup 9.1服务器端</title>
+    <link href="http://www.itxusir.com/post/2b862cbb.html"/>
+    <id>http://www.itxusir.com/post/2b862cbb.html</id>
+    <published>2025-10-17T00:00:00.000Z</published>
+    <updated>2025-10-18T03:11:46.828Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;安装环境&quot;&gt;&lt;a href=&quot;#安装环境&quot; class=&quot;headerlink&quot; title=&quot;安装环境&quot;&gt;&lt;/a&gt;安装环境&lt;/h2&gt;&lt;p&gt;Centos 7.6 x86_64&lt;/p&gt;
+&lt;p&gt;netbackup 9.1 服务端&lt;/p&gt;
+&lt;h2</summary>
+        
+      
+    
+    
+    
+    <category term="备份软件nbu" scheme="http://www.itxusir.com/categories/%E5%A4%87%E4%BB%BD%E8%BD%AF%E4%BB%B6nbu/"/>
+    
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="netbackup" scheme="http://www.itxusir.com/tags/netbackup/"/>
+    
+    <category term="veritas" scheme="http://www.itxusir.com/tags/veritas/"/>
+    
+    <category term="centos" scheme="http://www.itxusir.com/tags/centos/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>OracleLinux快速配置多路径multipath</title>
+    <link href="http://www.itxusir.com/post/b6540e26.html"/>
+    <id>http://www.itxusir.com/post/b6540e26.html</id>
+    <published>2025-10-16T12:00:00.000Z</published>
+    <updated>2025-10-18T03:11:46.827Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;多路径multipath作用&quot;&gt;&lt;a href=&quot;#多路径multipath作用&quot; class=&quot;headerlink&quot; title=&quot;多路径multipath作用&quot;&gt;&lt;/a&gt;多路径multipath作用&lt;/h2&gt;&lt;p&gt;使用设备映射器多路径（DM</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="multipath" scheme="http://www.itxusir.com/tags/multipath/"/>
+    
+    <category term="huawei" scheme="http://www.itxusir.com/tags/huawei/"/>
+    
+    <category term="Dorado2000" scheme="http://www.itxusir.com/tags/Dorado2000/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>OEL7挂载ISCSI存储配置示例</title>
+    <link href="http://www.itxusir.com/post/d477c414.html"/>
+    <id>http://www.itxusir.com/post/d477c414.html</id>
+    <published>2025-10-14T09:00:00.000Z</published>
+    <updated>2025-10-19T13:51:07.571Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;客户让帮忙挂载个ISCSI存储，大概结构如下图所示：&lt;/p&gt;
+&lt;img alt=&quot;1.png&quot; src=&quot;https://i-blog.csdnimg.cn/img_convert/887a5b3d496dbdef664ab1a3373e9048.png&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="iscsi" scheme="http://www.itxusir.com/tags/iscsi/"/>
+    
+    <category term="parted" scheme="http://www.itxusir.com/tags/parted/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>IBM_AIX平台搭建GPFS集群演示</title>
+    <link href="http://www.itxusir.com/post/d543d14a.html"/>
+    <id>http://www.itxusir.com/post/d543d14a.html</id>
+    <published>2025-10-14T01:00:00.000Z</published>
+    <updated>2025-10-18T03:11:46.824Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;早年间的实施记录，重新排版了一下：&lt;/p&gt;
+&lt;h2 id=&quot;基础环境&quot;&gt;&lt;a href=&quot;#基础环境&quot; class=&quot;headerlink&quot; title=&quot;基础环境&quot;&gt;&lt;/a&gt;基础环境&lt;/h2&gt;&lt;p&gt;当年是计划做一套10G的rac：&lt;/p&gt;
+&lt;p&gt;1、用的主机是两台IBM</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_aix" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-aix/"/>
+    
+    
+    <category term="aix" scheme="http://www.itxusir.com/tags/aix/"/>
+    
+    <category term="gpfs" scheme="http://www.itxusir.com/tags/gpfs/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>AIX系统The largest dump device is too small问题</title>
+    <link href="http://www.itxusir.com/post/e2e5d7ab.html"/>
+    <id>http://www.itxusir.com/post/e2e5d7ab.html</id>
+    <published>2025-10-13T14:22:00.000Z</published>
+    <updated>2025-10-18T03:11:46.823Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;问题报错&quot;&gt;&lt;a href=&quot;#问题报错&quot; class=&quot;headerlink&quot; title=&quot;问题报错&quot;&gt;&lt;/a&gt;问题报错&lt;/h2&gt;&lt;p&gt;今天巡检HIS的数据库服务器，发现小机AIX系统有大量的报错：&lt;/p&gt;
+&lt;figure class=&quot;highlight</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_aix" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-aix/"/>
+    
+    
+    <category term="aix" scheme="http://www.itxusir.com/tags/aix/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>AIX平台下Oracle 11g RAC修改PUBLIC/VIP/SCAN</title>
+    <link href="http://www.itxusir.com/post/4358307c.html"/>
+    <id>http://www.itxusir.com/post/4358307c.html</id>
+    <published>2025-10-13T09:30:00.000Z</published>
+    <updated>2025-10-18T03:11:46.821Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;当前环境&quot;&gt;&lt;a href=&quot;#当前环境&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="oracle_rac_安装调试" scheme="http://www.itxusir.com/categories/oracle-rac-%E5%AE%89%E8%A3%85%E8%B0%83%E8%AF%95/"/>
+    
+    
+    <category term="aix" scheme="http://www.itxusir.com/tags/aix/"/>
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="rac" scheme="http://www.itxusir.com/tags/rac/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>推荐一些学习数据库的BLOG</title>
+    <link href="http://www.itxusir.com/post/443887d3.html"/>
+    <id>http://www.itxusir.com/post/443887d3.html</id>
+    <published>2025-10-13T03:38:00.000Z</published>
+    <updated>2025-10-18T03:11:46.828Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;这里我推荐一些学习中遇到的非常好的国内外BLOG给大家，仅供参考。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Oracle top 100-blog排名&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="学习推荐" scheme="http://www.itxusir.com/categories/%E5%AD%A6%E4%B9%A0%E6%8E%A8%E8%8D%90/"/>
+    
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>使用expdp按条件导出oracle逻辑备份</title>
+    <link href="http://www.itxusir.com/post/d1734970.html"/>
+    <id>http://www.itxusir.com/post/d1734970.html</id>
+    <published>2025-10-13T03:32:00.000Z</published>
+    <updated>2025-10-18T03:11:46.828Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;今天遇到一个客户找我处理一个小问题，主要是按条件导出数据表报错，这里记录一下如何处理的。&lt;/p&gt;
+&lt;h2 id=&quot;expdp-直接带查询条件语句可能出现的情况&quot;&gt;&lt;a href=&quot;#expdp-直接带查询条件语句可能出现的情况&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="oracle_backup" scheme="http://www.itxusir.com/categories/oracle-backup/"/>
+    
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="逻辑备份" scheme="http://www.itxusir.com/tags/%E9%80%BB%E8%BE%91%E5%A4%87%E4%BB%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>简易异地保留RMAN备份的方案</title>
+    <link href="http://www.itxusir.com/post/dca58675.html"/>
+    <id>http://www.itxusir.com/post/dca58675.html</id>
+    <published>2025-10-13T01:30:00.000Z</published>
+    <updated>2025-10-18T03:11:46.829Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;需求&quot;&gt;&lt;a href=&quot;#需求&quot; class=&quot;headerlink&quot; title=&quot;需求&quot;&gt;&lt;/a&gt;需求&lt;/h2&gt;&lt;p&gt;客户原有个中心机房A，里面有台windows 服务器运行oracle</summary>
+        
+      
+    
+    
+    
+    <category term="oracle_backup" scheme="http://www.itxusir.com/categories/oracle-backup/"/>
+    
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="rman备份" scheme="http://www.itxusir.com/tags/rman%E5%A4%87%E4%BB%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>DBA必掌握的小技巧-分区满了如何处理2-迁移到新存储</title>
+    <link href="http://www.itxusir.com/post/b6b44e86.html"/>
+    <id>http://www.itxusir.com/post/b6b44e86.html</id>
+    <published>2025-10-11T13:00:10.000Z</published>
+    <updated>2025-10-18T03:11:46.826Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;前情提要&quot;&gt;&lt;a href=&quot;#前情提要&quot; class=&quot;headerlink&quot; title=&quot;前情提要&quot;&gt;&lt;/a&gt;前情提要&lt;/h2&gt;&lt;p&gt;话说上次DBA小倩通过删除home</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="dba" scheme="http://www.itxusir.com/tags/dba/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>DBA必掌握的小技巧-分区满了如何处理1-删除home扩容根分区</title>
+    <link href="http://www.itxusir.com/post/b6e27480.html"/>
+    <id>http://www.itxusir.com/post/b6e27480.html</id>
+    <published>2025-10-11T13:00:00.000Z</published>
+    <updated>2025-10-18T03:11:46.824Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;故障发生了！&quot;&gt;&lt;a href=&quot;#故障发生了！&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="dba" scheme="http://www.itxusir.com/tags/dba/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>记一次NetApp FAS2554更换故障硬盘</title>
+    <link href="http://www.itxusir.com/post/baf45ed4.html"/>
+    <id>http://www.itxusir.com/post/baf45ed4.html</id>
+    <published>2025-10-11T09:00:00.000Z</published>
+    <updated>2025-10-18T03:11:46.829Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;案例背景&quot;&gt;&lt;a href=&quot;#案例背景&quot; class=&quot;headerlink&quot; title=&quot;案例背景&quot;&gt;&lt;/a&gt;案例背景&lt;/h2&gt;&lt;p&gt;记一次某医院PACS存储NetApp</summary>
+        
+      
+    
+    
+    
+    <category term="IT基础设施-存储" scheme="http://www.itxusir.com/categories/IT%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD-%E5%AD%98%E5%82%A8/"/>
+    
+    
+    <category term="netapp" scheme="http://www.itxusir.com/tags/netapp/"/>
+    
+    <category term="存储" scheme="http://www.itxusir.com/tags/%E5%AD%98%E5%82%A8/"/>
+    
+    <category term="硬件维护" scheme="http://www.itxusir.com/tags/%E7%A1%AC%E4%BB%B6%E7%BB%B4%E6%8A%A4/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>银河麒麟V10_x86一键更新openssh10.2p1</title>
+    <link href="http://www.itxusir.com/post/b04c611b.html"/>
+    <id>http://www.itxusir.com/post/b04c611b.html</id>
+    <published>2025-10-11T05:50:00.000Z</published>
+    <updated>2025-10-18T05:38:02.574Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;昨天刚做出来opessh10.1p1的安装包，今天登录openssh网站就发现又更新了，事出反常，肯定是出来不小的问题才更新这么快。&lt;/p&gt;
+&lt;div</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="openssh" scheme="http://www.itxusir.com/tags/openssh/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Centos7_x86一键更新openssh10.1p1</title>
+    <link href="http://www.itxusir.com/post/a7c8ab66.html"/>
+    <id>http://www.itxusir.com/post/a7c8ab66.html</id>
+    <published>2025-10-10T12:00:08.000Z</published>
+    <updated>2025-10-18T03:11:46.823Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;如何完成一键更新OPENSSH&quot;&gt;&lt;a href=&quot;#如何完成一键更新OPENSSH&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="openssh" scheme="http://www.itxusir.com/tags/openssh/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>处理一则Oracle未能完全引用大页问题</title>
+    <link href="http://www.itxusir.com/post/b2a8ff3d.html"/>
+    <id>http://www.itxusir.com/post/b2a8ff3d.html</id>
+    <published>2025-10-09T06:30:58.000Z</published>
+    <updated>2025-10-18T03:11:46.828Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;关于配置大页&quot;&gt;&lt;a href=&quot;#关于配置大页&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="oracle_tuning" scheme="http://www.itxusir.com/categories/oracle-tuning/"/>
+    
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+  </entry>
+  
+</feed>

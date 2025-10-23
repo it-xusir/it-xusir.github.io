@@ -1,0 +1,19 @@
+#nav .menus_items {
+    position: absolute;
+    width: fit-content;
+    left: 50%;
+    transform: translateX(-50%);
+}
+/*顶栏美化*/
+#nav .site-page {
+  font-size: 1.0em; /*字体大小*/
+  letter-spacing: 2px; /*字体间距*/
+  font-weight: 600; /*字体粗细*/
+}
+
+#nav {
+  height: 100px; /*顶栏高度调整*/
+}
+#page-header.nav-fixed #nav {
+  top: -70px; /*顶栏调整空缺补齐*/
+}
