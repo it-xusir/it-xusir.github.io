@@ -20,9 +20,9 @@
       
         <tags>
             
-            <tag> oracle </tag>
-            
             <tag> linux </tag>
+            
+            <tag> oracle </tag>
             
             <tag> monitor </tag>
             
@@ -82,9 +82,9 @@
       
         <tags>
             
-            <tag> oracle </tag>
-            
             <tag> linux </tag>
+            
+            <tag> oracle </tag>
             
             <tag> multipath </tag>
             
@@ -115,9 +115,9 @@
       
         <tags>
             
-            <tag> oracle </tag>
-            
             <tag> linux </tag>
+            
+            <tag> oracle </tag>
             
             <tag> iscsi </tag>
             
@@ -231,11 +231,11 @@
       
         <tags>
             
+            <tag> linux </tag>
+            
             <tag> oracle </tag>
             
             <tag> database </tag>
-            
-            <tag> linux </tag>
             
             <tag> recommended </tag>
             
@@ -262,11 +262,11 @@
       
         <tags>
             
+            <tag> linux </tag>
+            
             <tag> oracle </tag>
             
             <tag> database </tag>
-            
-            <tag> linux </tag>
             
             <tag> backup </tag>
             
@@ -295,11 +295,11 @@
       
         <tags>
             
+            <tag> linux </tag>
+            
             <tag> oracle </tag>
             
             <tag> database </tag>
-            
-            <tag> linux </tag>
             
             <tag> backup </tag>
             
@@ -328,9 +328,9 @@
       
         <tags>
             
-            <tag> oracle </tag>
-            
             <tag> linux </tag>
+            
+            <tag> oracle </tag>
             
             <tag> dba </tag>
             
@@ -357,9 +357,9 @@
       
         <tags>
             
-            <tag> oracle </tag>
-            
             <tag> linux </tag>
+            
+            <tag> oracle </tag>
             
             <tag> dba </tag>
             
@@ -469,11 +469,11 @@
       
         <tags>
             
+            <tag> linux </tag>
+            
             <tag> oracle </tag>
             
             <tag> database </tag>
-            
-            <tag> linux </tag>
             
         </tags>
       
