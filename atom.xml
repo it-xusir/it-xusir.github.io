@@ -6,7 +6,7 @@
   <link href="http://www.itxusir.com/atom.xml" rel="self"/>
   
   <link href="http://www.itxusir.com/"/>
-  <updated>2025-10-23T09:16:40.447Z</updated>
+  <updated>2025-10-24T08:01:54.160Z</updated>
   <id>http://www.itxusir.com/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="http://www.itxusir.com/post/709b78ae.html"/>
     <id>http://www.itxusir.com/post/709b78ae.html</id>
     <published>2025-10-17T11:00:00.000Z</published>
-    <updated>2025-10-23T09:16:40.447Z</updated>
+    <updated>2025-10-24T08:01:54.160Z</updated>
     
     
       
@@ -34,12 +34,12 @@
     
     
     
-    <category term="linux os" scheme="http://www.itxusir.com/categories/linux-os/"/>
+    <category term="oracle_tuning" scheme="http://www.itxusir.com/categories/oracle-tuning/"/>
     
-    
-    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="monitor" scheme="http://www.itxusir.com/tags/monitor/"/>
     
@@ -85,7 +85,7 @@
     <link href="http://www.itxusir.com/post/b6540e26.html"/>
     <id>http://www.itxusir.com/post/b6540e26.html</id>
     <published>2025-10-16T12:00:00.000Z</published>
-    <updated>2025-10-18T03:11:46.827Z</updated>
+    <updated>2025-10-24T08:04:23.262Z</updated>
     
     
       
@@ -98,12 +98,12 @@
     
     
     
-    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    <category term="Linux" scheme="http://www.itxusir.com/categories/Linux/"/>
     
-    
-    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="multipath" scheme="http://www.itxusir.com/tags/multipath/"/>
     
@@ -118,7 +118,7 @@
     <link href="http://www.itxusir.com/post/d477c414.html"/>
     <id>http://www.itxusir.com/post/d477c414.html</id>
     <published>2025-10-14T09:00:00.000Z</published>
-    <updated>2025-10-19T13:51:07.571Z</updated>
+    <updated>2025-10-24T08:03:51.346Z</updated>
     
     
       
@@ -132,12 +132,12 @@
     
     
     
-    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    <category term="Linux" scheme="http://www.itxusir.com/categories/Linux/"/>
     
-    
-    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="iscsi" scheme="http://www.itxusir.com/tags/iscsi/"/>
     
@@ -150,7 +150,7 @@
     <link href="http://www.itxusir.com/post/d543d14a.html"/>
     <id>http://www.itxusir.com/post/d543d14a.html</id>
     <published>2025-10-14T01:00:00.000Z</published>
-    <updated>2025-10-23T09:19:54.120Z</updated>
+    <updated>2025-10-24T08:04:50.869Z</updated>
     
     
       
@@ -165,7 +165,7 @@
     
     
     
-    <category term="aix os" scheme="http://www.itxusir.com/categories/aix-os/"/>
+    <category term="AIX" scheme="http://www.itxusir.com/categories/AIX/"/>
     
     
     <category term="aix" scheme="http://www.itxusir.com/tags/aix/"/>
@@ -179,7 +179,7 @@
     <link href="http://www.itxusir.com/post/e2e5d7ab.html"/>
     <id>http://www.itxusir.com/post/e2e5d7ab.html</id>
     <published>2025-10-13T14:22:00.000Z</published>
-    <updated>2025-10-23T09:20:13.325Z</updated>
+    <updated>2025-10-24T08:05:35.089Z</updated>
     
     
       
@@ -193,7 +193,7 @@
     
     
     
-    <category term="aix os" scheme="http://www.itxusir.com/categories/aix-os/"/>
+    <category term="AIX" scheme="http://www.itxusir.com/categories/AIX/"/>
     
     
     <category term="aix" scheme="http://www.itxusir.com/tags/aix/"/>
@@ -256,11 +256,11 @@
     <category term="Recommended Articles" scheme="http://www.itxusir.com/categories/Recommended-Articles/"/>
     
     
-    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
-    
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
     
     <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="recommended" scheme="http://www.itxusir.com/tags/recommended/"/>
     
@@ -288,11 +288,11 @@
     <category term="oracle_backup" scheme="http://www.itxusir.com/categories/oracle-backup/"/>
     
     
-    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
-    
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
     
     <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="backup" scheme="http://www.itxusir.com/tags/backup/"/>
     
@@ -321,11 +321,11 @@
     <category term="oracle_backup" scheme="http://www.itxusir.com/categories/oracle-backup/"/>
     
     
-    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
-    
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
     
     <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="backup" scheme="http://www.itxusir.com/tags/backup/"/>
     
@@ -338,7 +338,7 @@
     <link href="http://www.itxusir.com/post/b6b44e86.html"/>
     <id>http://www.itxusir.com/post/b6b44e86.html</id>
     <published>2025-10-11T13:00:10.000Z</published>
-    <updated>2025-10-18T03:11:46.826Z</updated>
+    <updated>2025-10-24T08:05:03.694Z</updated>
     
     
       
@@ -351,12 +351,12 @@
     
     
     
-    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    <category term="Linux" scheme="http://www.itxusir.com/categories/Linux/"/>
     
-    
-    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="dba" scheme="http://www.itxusir.com/tags/dba/"/>
     
@@ -367,7 +367,7 @@
     <link href="http://www.itxusir.com/post/b6e27480.html"/>
     <id>http://www.itxusir.com/post/b6e27480.html</id>
     <published>2025-10-11T13:00:00.000Z</published>
-    <updated>2025-10-18T03:11:46.824Z</updated>
+    <updated>2025-10-24T08:05:13.258Z</updated>
     
     
       
@@ -380,12 +380,12 @@
     
     
     
-    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    <category term="Linux" scheme="http://www.itxusir.com/categories/Linux/"/>
     
-    
-    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
     <category term="dba" scheme="http://www.itxusir.com/tags/dba/"/>
     
@@ -396,7 +396,7 @@
     <link href="http://www.itxusir.com/post/baf45ed4.html"/>
     <id>http://www.itxusir.com/post/baf45ed4.html</id>
     <published>2025-10-11T09:00:00.000Z</published>
-    <updated>2025-10-23T09:18:05.368Z</updated>
+    <updated>2025-10-24T08:09:45.040Z</updated>
     
     
       
@@ -409,7 +409,7 @@
     
     
     
-    <category term="IT Hardware Maintenance" scheme="http://www.itxusir.com/categories/IT-Hardware-Maintenance/"/>
+    <category term="storage_netapp" scheme="http://www.itxusir.com/categories/storage-netapp/"/>
     
     
     <category term="netapp" scheme="http://www.itxusir.com/tags/netapp/"/>
@@ -425,7 +425,7 @@
     <link href="http://www.itxusir.com/post/b04c611b.html"/>
     <id>http://www.itxusir.com/post/b04c611b.html</id>
     <published>2025-10-11T05:50:00.000Z</published>
-    <updated>2025-10-18T05:38:02.574Z</updated>
+    <updated>2025-10-24T08:04:08.562Z</updated>
     
     
       
@@ -439,7 +439,7 @@
     
     
     
-    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    <category term="Linux" scheme="http://www.itxusir.com/categories/Linux/"/>
     
     
     <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
@@ -453,7 +453,7 @@
     <link href="http://www.itxusir.com/post/a7c8ab66.html"/>
     <id>http://www.itxusir.com/post/a7c8ab66.html</id>
     <published>2025-10-10T12:00:08.000Z</published>
-    <updated>2025-10-18T03:11:46.823Z</updated>
+    <updated>2025-10-24T08:05:24.529Z</updated>
     
     
       
@@ -466,7 +466,7 @@
     
     
     
-    <category term="操作系统_linux" scheme="http://www.itxusir.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-linux/"/>
+    <category term="Linux" scheme="http://www.itxusir.com/categories/Linux/"/>
     
     
     <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
@@ -496,11 +496,11 @@
     <category term="oracle_tuning" scheme="http://www.itxusir.com/categories/oracle-tuning/"/>
     
     
-    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
-    
     <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
     
     <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
     
   </entry>
   

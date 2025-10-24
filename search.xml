@@ -13,16 +13,16 @@
       
       <categories>
           
-          <category> linux os </category>
+          <category> oracle_tuning </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> linux </tag>
-            
             <tag> oracle </tag>
+            
+            <tag> linux </tag>
             
             <tag> monitor </tag>
             
@@ -75,16 +75,16 @@
       
       <categories>
           
-          <category> 操作系统_linux </category>
+          <category> Linux </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> linux </tag>
-            
             <tag> oracle </tag>
+            
+            <tag> linux </tag>
             
             <tag> multipath </tag>
             
@@ -108,16 +108,16 @@
       
       <categories>
           
-          <category> 操作系统_linux </category>
+          <category> Linux </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> linux </tag>
-            
             <tag> oracle </tag>
+            
+            <tag> linux </tag>
             
             <tag> iscsi </tag>
             
@@ -139,7 +139,7 @@
       
       <categories>
           
-          <category> aix os </category>
+          <category> AIX </category>
           
       </categories>
       
@@ -166,7 +166,7 @@
       
       <categories>
           
-          <category> aix os </category>
+          <category> AIX </category>
           
       </categories>
       
@@ -231,11 +231,11 @@
       
         <tags>
             
-            <tag> linux </tag>
-            
             <tag> oracle </tag>
             
             <tag> database </tag>
+            
+            <tag> linux </tag>
             
             <tag> recommended </tag>
             
@@ -262,11 +262,11 @@
       
         <tags>
             
-            <tag> linux </tag>
-            
             <tag> oracle </tag>
             
             <tag> database </tag>
+            
+            <tag> linux </tag>
             
             <tag> backup </tag>
             
@@ -295,11 +295,11 @@
       
         <tags>
             
-            <tag> linux </tag>
-            
             <tag> oracle </tag>
             
             <tag> database </tag>
+            
+            <tag> linux </tag>
             
             <tag> backup </tag>
             
@@ -321,16 +321,16 @@
       
       <categories>
           
-          <category> 操作系统_linux </category>
+          <category> Linux </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> linux </tag>
-            
             <tag> oracle </tag>
+            
+            <tag> linux </tag>
             
             <tag> dba </tag>
             
@@ -350,16 +350,16 @@
       
       <categories>
           
-          <category> 操作系统_linux </category>
+          <category> Linux </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> linux </tag>
-            
             <tag> oracle </tag>
+            
+            <tag> linux </tag>
             
             <tag> dba </tag>
             
@@ -379,7 +379,7 @@
       
       <categories>
           
-          <category> IT Hardware Maintenance </category>
+          <category> storage_netapp </category>
           
       </categories>
       
@@ -408,7 +408,7 @@
       
       <categories>
           
-          <category> 操作系统_linux </category>
+          <category> Linux </category>
           
       </categories>
       
@@ -435,7 +435,7 @@
       
       <categories>
           
-          <category> 操作系统_linux </category>
+          <category> Linux </category>
           
       </categories>
       
@@ -469,11 +469,11 @@
       
         <tags>
             
-            <tag> linux </tag>
-            
             <tag> oracle </tag>
             
             <tag> database </tag>
+            
+            <tag> linux </tag>
             
         </tags>
       
