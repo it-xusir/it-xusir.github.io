@@ -6,7 +6,7 @@
   <link href="http://www.itxusir.com/atom.xml" rel="self"/>
   
   <link href="http://www.itxusir.com/"/>
-  <updated>2025-10-24T08:01:54.160Z</updated>
+  <updated>2025-10-27T11:48:14.676Z</updated>
   <id>http://www.itxusir.com/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用HEXO搭建本站全过程</title>
+    <link href="http://www.itxusir.com/post/7e286d44.html"/>
+    <id>http://www.itxusir.com/post/7e286d44.html</id>
+    <published>2025-10-27T06:30:58.000Z</published>
+    <updated>2025-10-27T11:48:14.676Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;方案介绍&quot;&gt;&lt;a href=&quot;#方案介绍&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="hexo_blogs" scheme="http://www.itxusir.com/categories/hexo-blogs/"/>
+    
+    
+    <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="hexo" scheme="http://www.itxusir.com/tags/hexo/"/>
+    
+    <category term="github" scheme="http://www.itxusir.com/tags/github/"/>
+    
+  </entry>
   
   <entry>
     <title>使用Oracle oswatcher工具监控服务器性能并生成图形报告</title>
