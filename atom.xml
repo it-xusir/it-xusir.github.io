@@ -6,7 +6,7 @@
   <link href="http://www.itxusir.com/atom.xml" rel="self"/>
   
   <link href="http://www.itxusir.com/"/>
-  <updated>2025-11-01T01:29:03.893Z</updated>
+  <updated>2025-11-08T10:48:03.146Z</updated>
   <id>http://www.itxusir.com/</id>
   
   <author>
@@ -15,6 +15,40 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>openEuler操作系统su-root报错</title>
+    <link href="http://www.itxusir.com/post/405e7221.html"/>
+    <id>http://www.itxusir.com/post/405e7221.html</id>
+    <published>2025-11-08T00:00:00.000Z</published>
+    <updated>2025-11-08T10:48:03.146Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;今天客户找到我，说是他从普通用户su - root报错。这个问题挺经典记录一下处理的过程&lt;/p&gt;
+&lt;p&gt;客户的操作系统是openEuler操作系统。&lt;/p&gt;
+&lt;p&gt;报错如下：所示&lt;/p&gt;
+&lt;figure class=&quot;highlight</summary>
+        
+      
+    
+    
+    
+    <category term="Linux" scheme="http://www.itxusir.com/categories/Linux/"/>
+    
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+    <category term="openEuler" scheme="http://www.itxusir.com/tags/openEuler/"/>
+    
+    <category term="root" scheme="http://www.itxusir.com/tags/root/"/>
+    
+    <category term="su" scheme="http://www.itxusir.com/tags/su/"/>
+    
+  </entry>
   
   <entry>
     <title>使用HEXO搭建本站全过程</title>

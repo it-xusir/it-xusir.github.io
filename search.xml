@@ -4,6 +4,37 @@
   
     
     <entry>
+      <title>openEuler操作系统su-root报错</title>
+      <link href="/post/405e7221.html"/>
+      <url>/post/405e7221.html</url>
+      
+        <content type="html"><![CDATA[<p>今天客户找到我，说是他从普通用户su - root报错。这个问题挺经典记录一下处理的过程</p><p>客户的操作系统是openEuler操作系统。</p><p>报错如下：所示</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[omm@Zxyyqzserver ~]$ su - </span><br><span class="line">Password: </span><br><span class="line">su: Permission denied</span><br></pre></td></tr></table></figure><p>在客户尝试了几次之后，直接是把root给锁定了，还好之前己经打开过一个root连接窗口，这里直接使用命令解锁一下。</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@Zxyyqzserver ~]# faillock </span><br><span class="line">root:</span><br><span class="line">When                Type  Source                                           Valid</span><br><span class="line">2025-01-02 08:30:19 TTY   /dev/pts/0                                           V</span><br><span class="line">2025-01-02 08:32:53 TTY   /dev/pts/0                                           V</span><br><span class="line">2025-01-02 08:34:57 TTY   /dev/pts/0                                           V</span><br><span class="line">[root@Zxyyqzserver ~]# faillock --user root --reset</span><br></pre></td></tr></table></figure><p>既然是报权限错误，那么一定是缺少了相应的权限。</p><p>检查&#x2F;etc&#x2F;pam.d&#x2F;su中是否配置了非wheel组用户账号禁止使用su：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># grep pam_wheel.so /etc/pam.d/su | grep required</span><br><span class="line">auth required pam_wheel.so use_uid</span><br></pre></td></tr></table></figure><p>确认了一下，是欧拉系统做了加固<a href="https://gitee.com/openeuler/security-committee/blob/master/secure-configuration-benchmark/release/openEuler%E5%AE%89%E5%85%A8%E9%85%8D%E7%BD%AE%E5%9F%BA%E7%BA%BF.md#244-%E7%A1%AE%E4%BF%9Dsu%E5%8F%97%E9%99%90%E4%BD%BF%E7%94%A8">secure-configuration-benchmark&#x2F;release&#x2F;openEuler安全配置基线.md · openEuler&#x2F;security-committee - Gitee.com</a></p><p><strong>欧拉系统安全基线说明</strong></p><p>su命令可以使一个普通用户拥有超级用户或其他用户的权限，它经常被用于从普通用户账号切换到系统root账号。su命令为用户变更身份提供了便捷的途径，但如果不加约束的使用su命令，会给系统带来潜在的风险。通过对用户使用su访问root账号的权限进行限制，仅对部分账号进行su使用授权，可以提高系统账号使用的安全性。</p><p>openEuler默认仅允许wheel组中的普通用户具有su的使用权限。</p><p><strong>修复方法1：</strong></p><p>全局修改，以后普通用户都能su - root</p><p>修改&#x2F;etc&#x2F;pam.d&#x2F;su配置文件，配置非wheel组用户账号禁止使用su(就是加#号注释掉这行)</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># vim /etc/pam.d/su</span><br><span class="line">auth required pam_wheel.so use_uid</span><br></pre></td></tr></table></figure><p><strong>修复方法2：</strong></p><p>只针对当前omm用户，把该用户加到wheel组即可</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@Zxyyqzserver ~]# usermod -G wheel omm</span><br><span class="line">[root@Zxyyqzserver ~]# id omm</span><br><span class="line">uid=1000(omm) gid=1000(dbgrp) groups=1000(dbgrp),10(wheel)</span><br></pre></td></tr></table></figure><p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p><p>也欢迎关注我的公众号：</p><img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
+      
+      
+      <categories>
+          
+          <category> Linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> linux </tag>
+            
+            <tag> openEuler </tag>
+            
+            <tag> root </tag>
+            
+            <tag> su </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>使用HEXO搭建本站全过程</title>
       <link href="/post/7e286d44.html"/>
       <url>/post/7e286d44.html</url>
