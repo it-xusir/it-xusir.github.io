@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>Oracle 11g 处理AUD$空间过大问题</title>
+      <link href="/post/b2a8ff3d.html"/>
+      <url>/post/b2a8ff3d.html</url>
+      
+        <content type="html"><![CDATA[<p>查看SYSTEM表空间占用空间排名前10的段是否有AUD$以及FGA_LOG$</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SELECT *</span><br><span class="line">FROM (SELECT BYTES, segment_name, segment_type, owner</span><br><span class="line">FROM dba_segments</span><br><span class="line">WHERE tablespace_name = ‘SYSTEM’</span><br><span class="line">ORDER BY BYTES DESC)</span><br><span class="line">WHERE ROWNUM &lt; 10;</span><br></pre></td></tr></table></figure><p>aud$表及FGA_LOG$数据量</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select segment_name,bytes/1024/1024 size_in_megabytes from dba_segments where segment_name in (‘AUD$’,‘FGA_LOG$’);</span><br></pre></td></tr></table></figure><p>查询表，truncate该表释放</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select count(*) from aud$;</span><br><span class="line">truncate table aud$;</span><br><span class="line">select count(*) from aud$;</span><br></pre></td></tr></table></figure><p>aud$表及FGA_LOG$移动到新tablespace，&amp;AUD_TBS_NAME表示新的表空间名</p><p>迁移AUD$表</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">BEGIN</span><br><span class="line">DBMS_AUDIT_MGMT.set_audit_trail_location(</span><br><span class="line">audit_trail_type =&gt; DBMS_AUDIT_MGMT.AUDIT_TRAIL_AUD_STD,</span><br><span class="line">audit_trail_location_value =&gt; ‘&amp;AUD_TBS_NAME’);</span><br><span class="line">END;</span><br><span class="line">/</span><br></pre></td></tr></table></figure><p>迁移FGA_LOG$表</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SQL&gt; BEGIN</span><br><span class="line">DBMS_AUDIT_MGMT.set_audit_trail_location(</span><br><span class="line">audit_trail_type =&gt; DBMS_AUDIT_MGMT.AUDIT_TRAIL_FGA_STD,</span><br><span class="line">audit_trail_location_value =&gt; ‘&amp;AUD_TBS_NAME’);</span><br><span class="line">END;</span><br><span class="line">/</span><br></pre></td></tr></table></figure><p>查询AUD$及FGA_LOG$所在的表空间</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT table_name, tablespace_name FROM dba_tables WHERE table_name IN (‘AUD$’, ‘FGA_LOG$’) ORDER BY table_name;</span><br></pre></td></tr></table></figure><p>创建定时任务，定期清理AUD$表</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">--sys用户procedure </span><br><span class="line">create or replace procedure</span><br><span class="line">sp_trunc_audit_log is</span><br><span class="line">begin</span><br><span class="line">execute immediate</span><br><span class="line">‘truncate table aud$’;</span><br><span class="line">end;</span><br><span class="line">11授权 </span><br><span class="line">grant execute on sp_trunc_audit_log to system;</span><br><span class="line"></span><br><span class="line">11system用户procedure </span><br><span class="line">create or replace procedure</span><br><span class="line">sp_job_trunc_audit_log is</span><br><span class="line">begin</span><br><span class="line">sys.sp_trunc_audit_log;</span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">--自动调度job</span><br><span class="line">BEGIN</span><br><span class="line">DBMS_SCHEDULER.CREATE_JOB</span><br><span class="line">(</span><br><span class="line">job_name =&gt; ‘day_trunc_audit_log’,</span><br><span class="line">job_type =&gt; ‘STORED_PROCEDURE’,</span><br><span class="line">job_action =&gt; ‘SP_JOB_TRUNC_AUDIT_LOG’,</span><br><span class="line">start_date =&gt; sysdate,</span><br><span class="line">repeat_interval =&gt; ‘FREQ=DAILY; BYHOUR=04; BYMINUTE=05;INTERVAL=1’,</span><br><span class="line">enabled =&gt; true,</span><br><span class="line">comments =&gt; ‘every day truncate table audit log’</span><br><span class="line">);</span><br><span class="line">END;</span><br></pre></td></tr></table></figure><p>欢迎联系我一起讨论。我的微信号：Eric_xu_2023</p><p>也欢迎关注我的公众号：</p><img alt="1.png" src="https://oss-emcsprod-public.modb.pro/image/editor/20251010-1976625582993584128_3605.png" referrerpolicy="no-referrer"/>]]></content>
+      
+      
+      <categories>
+          
+          <category> oracle_tuning </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> oracle </tag>
+            
+            <tag> database </tag>
+            
+            <tag> linux </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>openEuler操作系统su-root报错</title>
       <link href="/post/405e7221.html"/>
       <url>/post/405e7221.html</url>

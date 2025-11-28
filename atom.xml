@@ -6,7 +6,7 @@
   <link href="http://www.itxusir.com/atom.xml" rel="self"/>
   
   <link href="http://www.itxusir.com/"/>
-  <updated>2025-11-08T10:48:03.146Z</updated>
+  <updated>2025-11-28T02:33:39.857Z</updated>
   <id>http://www.itxusir.com/</id>
   
   <author>
@@ -15,6 +15,36 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Oracle 11g 处理AUD$空间过大问题</title>
+    <link href="http://www.itxusir.com/post/b2a8ff3d.html"/>
+    <id>http://www.itxusir.com/post/b2a8ff3d.html</id>
+    <published>2025-11-28T02:30:58.000Z</published>
+    <updated>2025-11-28T02:33:39.857Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;查看SYSTEM表空间占用空间排名前10的段是否有AUD$以及FGA_LOG$&lt;/p&gt;
+&lt;figure class=&quot;highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span</summary>
+        
+      
+    
+    
+    
+    <category term="oracle_tuning" scheme="http://www.itxusir.com/categories/oracle-tuning/"/>
+    
+    
+    <category term="oracle" scheme="http://www.itxusir.com/tags/oracle/"/>
+    
+    <category term="database" scheme="http://www.itxusir.com/tags/database/"/>
+    
+    <category term="linux" scheme="http://www.itxusir.com/tags/linux/"/>
+    
+  </entry>
   
   <entry>
     <title>openEuler操作系统su-root报错</title>
